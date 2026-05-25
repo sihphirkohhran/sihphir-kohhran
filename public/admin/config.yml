@@ -1,0 +1,299 @@
+# Local: run `npm run cms` in a second terminal, then open http://localhost:4321/admin
+# Production (Netlify): enable Netlify Identity + Git Gateway on your site
+local_backend: true
+
+backend:
+  name: git-gateway
+  branch: main
+
+# Used when publishing to Netlify (set in Netlify site settings if different)
+# site_url: https://your-site.netlify.app
+# display_url: https://your-site.netlify.app
+
+media_folder: "public/images"
+public_folder: "/images"
+
+# ── SITE SETTINGS ──────────────────────────────────────────
+collections:
+
+  - name: "site_settings"
+    label: "Site Settings"
+    files:
+
+      - name: "general"
+        label: "General Settings"
+        file: "src/content/settings/general.json"
+        fields:
+          - { label: "Church Name", name: "church_name", widget: "string", default: "Sihphir Presbyterian Kohhran" }
+          - { label: "Founded Year", name: "founded_year", widget: "string", default: "19XX" }
+          - { label: "Facebook URL", name: "facebook_url", widget: "string", required: false }
+          - { label: "YouTube URL", name: "youtube_url", widget: "string", required: false }
+          - { label: "Church Secretary Name", name: "secretary_name", widget: "string" }
+          - { label: "Secretary Phone", name: "secretary_phone", widget: "string" }
+          - { label: "Secretary Email", name: "secretary_email", widget: "string", required: false }
+          - { label: "Address", name: "address", widget: "string", default: "Sihphir, Aizawl District, Mizoram" }
+          - { label: "Looker Studio Dashboard URL", name: "looker_url", widget: "string", required: false }
+
+  - name: "homepage"
+    label: "Homepage"
+    files:
+
+      - name: "hero_slides"
+        label: "Hero Slideshow"
+        file: "src/content/settings/hero.json"
+        fields:
+          - label: "Slides"
+            name: "slides"
+            widget: "list"
+            fields:
+              - { label: "Image", name: "src", widget: "image" }
+              - { label: "Caption (Mizo)", name: "caption", widget: "string" }
+
+      - name: "statistics"
+        label: "Statistics at a Glance"
+        file: "src/content/settings/statistics.json"
+        fields:
+          - label: "Stats"
+            name: "stats"
+            widget: "list"
+            fields:
+              - { label: "Label", name: "label", widget: "string" }
+              - { label: "Value", name: "value", widget: "string" }
+
+      - name: "pastor_message"
+        label: "Pastor's Message"
+        file: "src/content/settings/pastor.json"
+        fields:
+          - { label: "Pastor Name", name: "name", widget: "string" }
+          - { label: "Pastor Title", name: "title", widget: "string", default: "Head Pastor · Sihphir Kohhran" }
+          - { label: "Pastor Photo", name: "photo", widget: "image", required: false }
+          - { label: "Message", name: "message", widget: "text" }
+
+      - name: "church_history"
+        label: "Church History"
+        file: "src/content/settings/history.json"
+        fields:
+          - { label: "Church Building Photo", name: "building_photo", widget: "image", required: false }
+          - { label: "Short History (shown by default)", name: "short", widget: "text" }
+          - { label: "Full History (shown after Read More)", name: "full", widget: "markdown" }
+
+      - name: "prayer_topics"
+        label: "Tawngtai Thupui (Prayer Topics)"
+        file: "src/content/settings/prayer.json"
+        fields:
+          - label: "Prayer Topics"
+            name: "topics"
+            widget: "list"
+            field: { label: "Topic", name: "topic", widget: "string" }
+
+# ── NOTICE BOARD ──────────────────────────────────────────
+  - name: "weekly_schedule"
+    label: "Weekly Schedule (Notice Board)"
+    label_singular: "Weekly Schedule Entry"
+    folder: "src/content/notices/weekly"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}"
+    fields:
+      - { label: "Week Of (Start Date)", name: "week_start", widget: "datetime", format: "DD.MM.YYYY", date_format: "DD.MM.YYYY", time_format: false }
+      - { label: "Week Of (End Date)", name: "week_end", widget: "string" }
+      - label: "Service Days"
+        name: "days"
+        widget: "list"
+        fields:
+          - { label: "Day Name (e.g. Nilaini 20.05.2026)", name: "day", widget: "string" }
+          - label: "Duties"
+            name: "duties"
+            widget: "list"
+            fields:
+              - { label: "Role", name: "role", widget: "string" }
+              - { label: "Name", name: "name", widget: "string" }
+
+  - name: "monthly_duties"
+    label: "Monthly Duties (Notice Board)"
+    label_singular: "Monthly Duties Entry"
+    folder: "src/content/notices/monthly"
+    create: true
+    slug: "{{year}}-{{month}}"
+    fields:
+      - { label: "Month", name: "month", widget: "string", hint: "e.g. May 2026" }
+      - label: "Duty Sections"
+        name: "sections"
+        widget: "list"
+        fields:
+          - { label: "Section Title", name: "title", widget: "string", hint: "e.g. Inkhawm Hruaitu" }
+          - label: "Duties"
+            name: "duties"
+            widget: "list"
+            fields:
+              - { label: "Role (optional)", name: "role", widget: "string", required: false }
+              - { label: "Name", name: "name", widget: "string" }
+
+  - name: "notices"
+    label: "Notices & Announcements"
+    label_singular: "Notice"
+    folder: "src/content/notices/announcements"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Date", name: "date", widget: "datetime", format: "DD.MM.YYYY", date_format: "DD.MM.YYYY", time_format: false }
+      - { label: "Content", name: "body", widget: "markdown" }
+      - { label: "PDF Attachment (optional)", name: "pdf_url", widget: "file", required: false, media_folder: "public/documents", public_folder: "/documents" }
+
+# ── DOCUMENTS ──────────────────────────────────────────
+  - name: "ktp_inleng"
+    label: "KTP Inleng (Weekly Bulletins)"
+    label_singular: "KTP Inleng Issue"
+    folder: "src/content/documents/ktp-inleng"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}"
+    media_folder: "public/documents"
+    public_folder: "/documents"
+    fields:
+      - { label: "Issue Date", name: "date", widget: "datetime", format: "DD.MM.YYYY", date_format: "DD.MM.YYYY", time_format: false }
+      - { label: "Display Name", name: "name", widget: "string", hint: "e.g. KTP Inleng — 18.05.2026" }
+      - { label: "PDF File", name: "pdf_url", widget: "file", media_folder: "public/documents", public_folder: "/documents" }
+
+  - name: "documents_other"
+    label: "Other Documents"
+    label_singular: "Document"
+    folder: "src/content/documents/other"
+    create: true
+    slug: "{{slug}}"
+    media_folder: "public/documents"
+    public_folder: "/documents"
+    fields:
+      - { label: "Name", name: "name", widget: "string" }
+      - { label: "Category", name: "category", widget: "select", options: ["Church Year Book", "Finance Report", "Others"] }
+      - { label: "Year / Date", name: "date", widget: "string" }
+      - { label: "PDF File", name: "pdf_url", widget: "file", media_folder: "public/documents", public_folder: "/documents" }
+
+# ── GALLERY ──────────────────────────────────────────
+  - name: "gallery"
+    label: "Gallery Photos"
+    label_singular: "Photo"
+    folder: "src/content/gallery"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Caption", name: "caption", widget: "string" }
+      - { label: "Photo", name: "photo", widget: "image" }
+      - { label: "Category", name: "category", widget: "select", options: ["Sunday Service", "KTP Events", "Kohhran Hmeichhia", "Special Events", "Building", "Others"] }
+      - { label: "Date", name: "date", widget: "datetime", format: "DD.MM.YYYY", date_format: "DD.MM.YYYY", time_format: false, required: false }
+
+# ── COMMITTEE MEMBERS ──────────────────────────────────────────
+  - name: "committee_members"
+    label: "Committee Members"
+    label_singular: "Committee"
+    folder: "src/content/committee"
+    create: true
+    slug: "{{committee_id}}-{{year}}"
+    fields:
+      - { label: "Committee", name: "committee_id", widget: "select", options: ["kohhran","hmeichhia","ktp","kpp","masihi","ramthar","kristian-chhungkaw","sunday-school","social-front","finance","light-sound","music","building","sanitation","property","pes","bsi","archive"] }
+      - { label: "Committee Name", name: "committee_name", widget: "string" }
+      - { label: "Year", name: "year", widget: "number", value_type: "int", min: 2000, max: 2099 }
+      - { label: "Chairman", name: "chairman", widget: "string" }
+      - { label: "Secretary", name: "secretary", widget: "string" }
+      - label: "Committee Members"
+        name: "members"
+        widget: "list"
+        fields:
+          - { label: "Name", name: "name", widget: "string" }
+          - { label: "Role", name: "role", widget: "string", default: "Member", required: false }
+
+# ── FELLOWSHIP INFO ──────────────────────────────────────────
+  - name: "fellowship_info"
+    label: "Fellowship Information"
+    files:
+
+      - name: "kohhran_hmeichhia"
+        label: "Kohhran Hmeichhia"
+        file: "src/content/fellowship/kohhran-hmeichhia.json"
+        fields:
+          - { label: "History (Short)", name: "history_short", widget: "text" }
+          - { label: "History (Full)", name: "history_full", widget: "markdown" }
+          - label: "Office Bearers"
+            name: "office_bearers"
+            widget: "list"
+            fields:
+              - { label: "Role", name: "role", widget: "string" }
+              - { label: "Name", name: "name", widget: "string" }
+          - label: "Committee Members"
+            name: "members"
+            widget: "list"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string", default: "Member", required: false }
+
+      - name: "ktp"
+        label: "Kristian Thalai Pawl (KTP)"
+        file: "src/content/fellowship/ktp.json"
+        fields:
+          - { label: "History (Short)", name: "history_short", widget: "text" }
+          - { label: "History (Full)", name: "history_full", widget: "markdown" }
+          - label: "Office Bearers"
+            name: "office_bearers"
+            widget: "list"
+            fields:
+              - { label: "Role", name: "role", widget: "string" }
+              - { label: "Name", name: "name", widget: "string" }
+          - label: "Committee Members"
+            name: "members"
+            widget: "list"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string", default: "Member", required: false }
+
+      - name: "kpp"
+        label: "Kohhran Pavalai Pawl (KPP)"
+        file: "src/content/fellowship/kpp.json"
+        fields:
+          - { label: "History (Short)", name: "history_short", widget: "text" }
+          - { label: "History (Full)", name: "history_full", widget: "markdown" }
+          - label: "Office Bearers"
+            name: "office_bearers"
+            widget: "list"
+            fields:
+              - { label: "Role", name: "role", widget: "string" }
+              - { label: "Name", name: "name", widget: "string" }
+          - label: "Committee Members"
+            name: "members"
+            widget: "list"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string", default: "Member", required: false }
+
+      - name: "masihi_sangai"
+        label: "Masihi Sangai"
+        file: "src/content/fellowship/masihi-sangai.json"
+        fields:
+          - { label: "History (Short)", name: "history_short", widget: "text" }
+          - { label: "History (Full)", name: "history_full", widget: "markdown" }
+          - label: "Office Bearers"
+            name: "office_bearers"
+            widget: "list"
+            fields:
+              - { label: "Role", name: "role", widget: "string" }
+              - { label: "Name", name: "name", widget: "string" }
+          - label: "Committee Members"
+            name: "members"
+            widget: "list"
+            fields:
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role", name: "role", widget: "string", default: "Member", required: false }
+
+# ── NAV MENU ──────────────────────────────────────────
+  - name: "navigation"
+    label: "Navigation Menu"
+    files:
+      - name: "nav_items"
+        label: "Menu Items"
+        file: "src/content/settings/navigation.json"
+        fields:
+          - label: "Menu Items"
+            name: "items"
+            widget: "list"
+            fields:
+              - { label: "Label", name: "label", widget: "string" }
+              - { label: "URL Path", name: "href", widget: "string" }
+              - { label: "Show in Menu", name: "visible", widget: "boolean", default: true }

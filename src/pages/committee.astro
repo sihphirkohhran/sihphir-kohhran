@@ -1,0 +1,248 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const committeeEntries = await getCollection('committee');
+const committeeByKey = Object.fromEntries(
+  committeeEntries.map((entry) => [
+    `${entry.data.committee_id}-${entry.data.year}`,
+    entry.data,
+  ]),
+);
+
+const committees = [
+  {
+    id: 'kohhran',
+    name: 'Kohhran Committee',
+    isMain: true,
+  },
+  { id: 'hmeichhia', name: 'Kohhran Hmeichhia' },
+  { id: 'ktp', name: 'Kristian Thalai Pawl (KTP)' },
+  { id: 'kpp', name: 'Kohhran Pavalai Pawl (KPP)' },
+  { id: 'masihi', name: 'Masihi Sangati' },
+  { id: 'ramthar', name: 'Ramthar Committee' },
+  { id: 'kristian-chhungkaw', name: 'Kristian Chhungkaw Committee' },
+  { id: 'sunday-school', name: 'Sunday School Committee' },
+  { id: 'social-front', name: 'Social Front Committee' },
+  { id: 'finance', name: 'Finance Committee' },
+  { id: 'light-sound', name: 'Light & Sound Committee' },
+  { id: 'music', name: 'Music Committee' },
+  { id: 'building', name: 'Building Committee' },
+  { id: 'sanitation', name: 'Sanitation Committee' },
+  { id: 'property', name: 'Property Committee' },
+  { id: 'pes', name: 'PES Management Board' },
+  { id: 'bsi', name: 'BSI Local Committee' },
+  { id: 'archive', name: 'Archive & Documentation' },
+];
+
+const defaultCommittee = committeeEntries.find((e) => e.data.committee_id === 'kohhran')?.data
+  ?? committeeEntries[0]?.data;
+
+const sampleMembers = defaultCommittee
+  ? [
+      { role: 'Chairman', name: defaultCommittee.chairman },
+      { role: 'Secretary', name: defaultCommittee.secretary },
+      ...defaultCommittee.members.map((m) => ({
+        role: m.role ?? 'Member',
+        name: m.name,
+      })),
+    ]
+  : [];
+
+const yearsFromCms = [...new Set(committeeEntries.map((e) => e.data.year))].sort((a, b) => b - a);
+const yearsList = yearsFromCms.length > 0 ? yearsFromCms : [2025, 2024, 2023, 2022, 2021, 2020];
+---
+
+<BaseLayout title="Committee — Sihphir Presbyterian Kohhran" activePage="committee">
+
+  <!-- Header -->
+  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]"
+      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
+    </div>
+    <div class="relative z-10">
+      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Committee Members</h1>
+      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-4 py-8">
+
+    <!-- Committee selector + Year picker -->
+    <div class="flex flex-col sm:flex-row gap-3 mb-6 reveal">
+      <div class="flex-1">
+        <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5">Select Committee</label>
+        <select id="committee-select"
+          class="w-full border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors">
+          {committees.map(c => (
+            <option value={c.id} selected={c.isMain}>{c.name}</option>
+          ))}
+        </select>
+      </div>
+      <div class="sm:w-36">
+        <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5">Year</label>
+        <select id="year-select"
+          class="w-full border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors">
+          {yearsList.map(y => (
+            <option value={y} selected={y === (yearsList[0] ?? 2025)}>{y}</option>
+          ))}
+        </select>
+      </div>
+    </div>
+
+    <!-- Committee display card -->
+    <div id="committee-card" class="reveal">
+      <div class="bg-navy border border-gold/20 rounded overflow-hidden">
+        <!-- Card header -->
+        <div class="px-5 py-4 border-b border-gold/15">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 id="committee-title" class="font-display text-gold-light text-lg font-semibold">Kohhran Committee</h2>
+              <p class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase mt-0.5" id="committee-year-label">Year: 2025</p>
+            </div>
+            <div class="flex-shrink-0">
+              <span class="font-body text-[0.6rem] tracking-widest uppercase bg-gold/10 border border-gold/20 text-gold-pale/60 px-2 py-1 rounded">
+                <span id="member-count">{sampleMembers.length}</span> members
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chairman & Secretary highlight -->
+        <div class="px-5 py-4 border-b border-gold/10 grid grid-cols-2 gap-3" id="leaders-section">
+          <div class="bg-navy-light rounded p-3 border border-gold/15">
+            <div class="font-body text-[0.6rem] tracking-widest uppercase text-gold/60 mb-1">Chairman</div>
+            <div class="font-display text-gold-pale text-sm font-semibold" id="chairman-name">{defaultCommittee?.chairman ?? 'Pu Chairman Hming'}</div>
+          </div>
+          <div class="bg-navy-light rounded p-3 border border-gold/15">
+            <div class="font-body text-[0.6rem] tracking-widest uppercase text-gold/60 mb-1">Secretary</div>
+            <div class="font-display text-gold-pale text-sm font-semibold" id="secretary-name">{defaultCommittee?.secretary ?? 'Pi Secretary Hming'}</div>
+          </div>
+        </div>
+
+        <!-- Members table -->
+        <div class="px-5 py-3">
+          <div class="font-body text-[0.6rem] tracking-widest uppercase text-gold/40 mb-2">Committee Members</div>
+          <table class="committee-table w-full" id="members-table">
+            <thead>
+              <tr>
+                <th class="text-left py-2 px-3 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/50 bg-navy-light border-b border-gold/10 w-8">#</th>
+                <th class="text-left py-2 px-3 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/50 bg-navy-light border-b border-gold/10">Hming (Name)</th>
+                <th class="text-left py-2 px-3 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/50 bg-navy-light border-b border-gold/10">Role</th>
+              </tr>
+            </thead>
+            <tbody id="members-tbody">
+              {sampleMembers.map((m, i) => (
+                <tr>
+                  <td class="py-2 px-3 font-body text-xs text-gold-pale/30 border-b border-gold/[0.06]">{i + 1}</td>
+                  <td class="py-2 px-3 font-body text-sm text-gold-pale/80 border-b border-gold/[0.06]">{m.name}</td>
+                  <td class="py-2 px-3 border-b border-gold/[0.06]">
+                    <span class={`font-body text-[0.6rem] tracking-wide px-2 py-0.5 rounded ${
+                      m.role === 'Chairman' ? 'bg-gold/20 text-gold-light' :
+                      m.role === 'Secretary' ? 'bg-gold/10 text-gold-pale/70' :
+                      'text-gold-pale/40'
+                    }`}>{m.role}</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- All committees quick list -->
+    <div class="mt-8 reveal">
+      <div class="gold-divider mb-4">
+        <h3 style="font-size:1rem">All Committees</h3>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {committees.map(c => (
+          <button
+            class={`committee-quick-btn text-left px-4 py-3 rounded border transition-all font-body text-sm ${
+              c.isMain
+                ? 'bg-navy border-gold/40 text-gold-light'
+                : 'bg-ivory border-navy/10 text-navy hover:bg-navy hover:text-gold-pale hover:border-navy'
+            }`}
+            data-committee={c.id}
+            data-name={c.name}
+          >
+            <span class={c.isMain ? 'text-[0.6rem] tracking-widest uppercase text-gold/60 block mb-0.5' : 'hidden'}>Main</span>
+            {c.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+  </div>
+
+</BaseLayout>
+
+<script define:vars={{ committeeByKey }}>
+  const select = document.getElementById('committee-select');
+  const yearSelect = document.getElementById('year-select');
+  const titleEl = document.getElementById('committee-title');
+  const yearLabel = document.getElementById('committee-year-label');
+  const chairmanEl = document.getElementById('chairman-name');
+  const secretaryEl = document.getElementById('secretary-name');
+  const memberCountEl = document.getElementById('member-count');
+  const tbody = document.getElementById('members-tbody');
+
+  function renderMembers(data) {
+    if (!data || !tbody) return;
+    const members = [
+      { role: 'Chairman', name: data.chairman },
+      { role: 'Secretary', name: data.secretary },
+      ...data.members.map((m) => ({ role: m.role || 'Member', name: m.name })),
+    ];
+    if (chairmanEl) chairmanEl.textContent = data.chairman;
+    if (secretaryEl) secretaryEl.textContent = data.secretary;
+    if (memberCountEl) memberCountEl.textContent = String(members.length);
+    tbody.innerHTML = members
+      .map(
+        (m, i) => `
+        <tr>
+          <td class="py-2 px-3 font-body text-xs text-gold-pale/30 border-b border-gold/[0.06]">${i + 1}</td>
+          <td class="py-2 px-3 font-body text-sm text-gold-pale/80 border-b border-gold/[0.06]">${m.name}</td>
+          <td class="py-2 px-3 border-b border-gold/[0.06]">
+            <span class="font-body text-[0.6rem] tracking-wide px-2 py-0.5 rounded ${
+              m.role === 'Chairman'
+                ? 'bg-gold/20 text-gold-light'
+                : m.role === 'Secretary'
+                  ? 'bg-gold/10 text-gold-pale/70'
+                  : 'text-gold-pale/40'
+            }">${m.role}</span>
+          </td>
+        </tr>`,
+      )
+      .join('');
+  }
+
+  function updateDisplay() {
+    const id = select?.value;
+    const year = yearSelect?.value;
+    const name = select?.options[select.selectedIndex]?.text;
+    const data = committeeByKey[`${id}-${year}`];
+    if (titleEl) titleEl.textContent = data?.committee_name ?? name ?? '';
+    if (yearLabel) yearLabel.textContent = `Year: ${year}`;
+    renderMembers(data);
+  }
+
+  select?.addEventListener('change', updateDisplay);
+  yearSelect?.addEventListener('change', updateDisplay);
+
+  document.querySelectorAll('.committee-quick-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.committee;
+      const name = btn.dataset.name;
+      if (select) select.value = id || '';
+      if (titleEl) titleEl.textContent = name || '';
+      updateDisplay();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+
+  updateDisplay();
+</script>

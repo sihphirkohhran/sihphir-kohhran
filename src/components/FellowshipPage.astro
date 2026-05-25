@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+interface Props {
+  name: string;
+  abbr: string;
+  subtitle: string;
+  history: string;
+  historyFull?: string;
+  officeBearers: { role: string; name: string }[];
+  committeeMembers: { name: string; role?: string }[];
+  accentColor?: string;
+}
+
+const {
+  name,
+  abbr,
+  subtitle,
+  history,
+  historyFull = '',
+  officeBearers,
+  committeeMembers,
+  accentColor = 'from-navy to-navy-light',
+} = Astro.props;
+---
+
+<BaseLayout title={`${name} — Sihphir Presbyterian Kohhran`} activePage="fellowship">
+
+  <!-- Hero -->
+  <div class="bg-navy border-b-2 border-gold px-4 pt-8 pb-6 relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]"
+      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
+    </div>
+    <div class="relative z-10 max-w-2xl mx-auto">
+      <a href="/fellowship" class="inline-flex items-center gap-1 font-body text-[0.65rem] tracking-widest uppercase text-gold/50 hover:text-gold transition-colors mb-4">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        All Fellowships
+      </a>
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-full border-2 border-gold/60 flex items-center justify-center bg-gold/[0.07] flex-shrink-0">
+          <span class="font-display text-gold-light font-bold text-xl">{abbr}</span>
+        </div>
+        <div>
+          <h1 class="font-display text-white text-xl sm:text-2xl font-semibold">{name}</h1>
+          <p class="font-body text-gold-pale/50 text-xs tracking-widest uppercase mt-0.5">{subtitle}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto px-4 py-8 space-y-8">
+
+    <!-- History -->
+    <div class="reveal">
+      <div class="gold-divider mb-4"><h2>History</h2></div>
+      <div class="border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
+        <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>
+        {historyFull && (
+          <>
+            <div id="history-full" class="font-body text-sm text-gray-700 leading-relaxed mb-3 hidden">
+              <Fragment set:html={historyFull} />
+            </div>
+            <button id="history-btn" class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/40 hover:border-navy transition-colors pb-0.5">
+              Read More →
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+
+    <!-- Office Bearers -->
+    <div class="reveal">
+      <div class="gold-divider mb-4"><h2>Office Bearers</h2></div>
+      <div class="bg-navy border border-gold/20 rounded overflow-hidden">
+        {officeBearers.map((ob, i) => (
+          <div class={`flex items-center justify-between px-5 py-3 ${i < officeBearers.length - 1 ? 'border-b border-gold/[0.08]' : ''}`}>
+            <span class="font-body text-[0.65rem] tracking-widest uppercase text-gold/55">{ob.role}</span>
+            <span class="font-display text-gold-pale font-semibold text-sm">{ob.name}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Committee Members -->
+    <div class="reveal">
+      <div class="gold-divider mb-4"><h2>Committee Members</h2></div>
+      <div class="bg-navy border border-gold/20 rounded overflow-hidden">
+        <table class="w-full">
+          <thead>
+            <tr>
+              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10 w-8">#</th>
+              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10">Hming</th>
+              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            {committeeMembers.map((m, i) => (
+              <tr>
+                <td class="px-4 py-2.5 font-body text-xs text-gold-pale/25 border-b border-gold/[0.06]">{i + 1}</td>
+                <td class="px-4 py-2.5 font-body text-sm text-gold-pale/80 border-b border-gold/[0.06]">{m.name}</td>
+                <td class="px-4 py-2.5 border-b border-gold/[0.06]">
+                  <span class="font-body text-[0.6rem] tracking-wide text-gold-pale/40">{m.role || 'Member'}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</BaseLayout>
+
+<script>
+  const btn = document.getElementById('history-btn');
+  const full = document.getElementById('history-full');
+  let open = false;
+  btn?.addEventListener('click', () => {
+    open = !open;
+    full?.classList.toggle('hidden', !open);
+    if (btn) btn.textContent = open ? '← Read Less' : 'Read More →';
+  });
+</script>

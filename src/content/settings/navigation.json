@@ -1,0 +1,9 @@
+{
+  "items": [
+    { "label": "Home", "href": "/", "visible": true },
+    { "label": "Committee", "href": "/committee", "visible": true },
+    { "label": "Fellowship", "href": "/fellowship", "visible": true },
+    { "label": "Gallery", "href": "/gallery", "visible": true },
+    { "label": "Document", "href": "/document", "visible": true }
+  ]
+}

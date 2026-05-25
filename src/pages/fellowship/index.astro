@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const fellowships = [
+  {
+    id: 'kohhran-hmeichhia',
+    name: 'Kohhran Hmeichhia',
+    abbr: 'KH',
+    mizo: 'Women\'s Fellowship',
+    color: 'from-rose-900 to-navy',
+    description: 'Kohhran Hmeichhia chu kohhran hmeichhia member zawng zawng an tel a, Pathian biak dan leh nungchang tha zir dan an buatsaih a nih.',
+  },
+  {
+    id: 'ktp',
+    name: 'Kristian Thalai Pawl',
+    abbr: 'KTP',
+    mizo: 'Christian Youth Fellowship',
+    color: 'from-blue-900 to-navy',
+    description: 'KTP chu kohhran thalai te tan buatsaih a ni a, thalai te nungchang leh Pathian biak dan hmasawn dan an zir a nih.',
+  },
+  {
+    id: 'kpp',
+    name: 'Kohhran Pavalai Pawl',
+    abbr: 'KPP',
+    mizo: 'Senior Citizens\' Fellowship',
+    color: 'from-emerald-900 to-navy',
+    description: 'KPP chu kohhran member mipa te tan buatsaih a ni a, hmasawnna leh biak dan an zir thla ruala an hma phur a nih.',
+  },
+  {
+    id: 'masihi-sangai',
+    name: 'Masihi Sangai',
+    abbr: 'MS',
+    mizo: 'Christian Fellowship',
+    color: 'from-amber-900 to-navy',
+    description: 'Masihi Sangai chu kohhran member zawng zawng pawh tel thei a, Pathian biak dan leh hmasawnna an zir a nih.',
+  },
+];
+---
+
+<BaseLayout title="Fellowship — Sihphir Presbyterian Kohhran" activePage="fellowship">
+
+  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden fellowship-hero">
+    <div class="relative z-10">
+      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Fellowship</h1>
+      <p class="font-body text-gold-pale/60 text-sm mt-2 italic">Thalai, hmeichhia, mipa leh member zawng zawng tan</p>
+      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {fellowships.map((f, i) => (
+        <a
+          href={`/fellowship/${f.id}`}
+          class={`reveal reveal-delay-${i + 1} group block bg-navy border border-gold/20 rounded overflow-hidden hover:border-gold/50 transition-all hover:-translate-y-0.5`}
+        >
+          <!-- Card top accent -->
+          <div class={`h-1.5 bg-gradient-to-r ${f.color}`}></div>
+          <div class="p-5">
+            <!-- Abbr circle -->
+            <div class="w-12 h-12 rounded-full border-2 border-gold/40 flex items-center justify-center mb-4 group-hover:border-gold/70 transition-colors">
+              <span class="font-display text-gold-light font-bold text-lg">{f.abbr}</span>
+            </div>
+            <h2 class="font-display text-white text-lg font-semibold leading-tight mb-1">{f.name}</h2>
+            <p class="font-body text-[0.65rem] tracking-widest uppercase text-gold/60 mb-3">{f.mizo}</p>
+            <p class="font-body text-gold-pale/60 text-xs leading-relaxed mb-4">{f.description}</p>
+            <div class="flex items-center gap-1 font-body text-[0.65rem] tracking-wider uppercase text-gold/70 group-hover:text-gold transition-colors">
+              View Details
+              <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  </div>
+
+</BaseLayout>

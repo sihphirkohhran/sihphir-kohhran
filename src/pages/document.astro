@@ -1,0 +1,189 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getKtpInlengDocs, getOtherDocuments } from '../lib/cms';
+
+const ktpItems = getKtpInlengDocs().map((d) => ({
+  name: String(d.name),
+  url: String(d.pdf_url),
+  date: String(d.date ?? ''),
+}));
+
+const otherDocs = getOtherDocuments();
+
+const docCategories = [
+  {
+    id: 'ktp-inleng',
+    name: 'KTP Inleng',
+    badge: 'Weekly · Archived',
+    description: 'Weekly church bulletin / newsletter',
+    icon: 'newsletter',
+    items: ktpItems,
+    perPage: 8,
+  },
+  {
+    id: 'yearbook',
+    name: 'Church Year Book',
+    badge: 'Annual',
+    description: 'Annual church publication',
+    icon: 'book',
+    items: otherDocs
+      .filter((d) => d.category === 'Church Year Book')
+      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
+    perPage: 10,
+  },
+  {
+    id: 'finance',
+    name: 'Finance Report',
+    badge: 'Annual',
+    description: 'Annual financial report',
+    icon: 'finance',
+    items: otherDocs
+      .filter((d) => d.category === 'Finance Report')
+      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
+    perPage: 10,
+  },
+  {
+    id: 'others',
+    name: 'Others',
+    badge: 'Handbooks, Souvenirs & Misc.',
+    description: 'Handbooks, souvenirs, and miscellaneous documents',
+    icon: 'folder',
+    items: otherDocs
+      .filter((d) => d.category === 'Others')
+      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
+    perPage: 10,
+  },
+].filter((cat) => cat.items.length > 0 || cat.id === 'ktp-inleng');
+---
+
+<BaseLayout title="Documents — Sihphir Presbyterian Kohhran" activePage="document">
+
+  <!-- Header -->
+  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]"
+      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
+    </div>
+    <div class="relative z-10">
+      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Documents</h1>
+      <p class="font-body text-gold-pale/50 text-sm mt-2 italic">Archive · All records preserved</p>
+      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto px-4 py-8 space-y-6">
+
+    {docCategories.map((cat, di) => (
+      <div class={`reveal reveal-delay-${(di % 3) + 1}`} id={`cat-${cat.id}`}>
+        <div class="bg-navy border border-gold/20 rounded overflow-hidden">
+
+          <!-- Category header -->
+          <div class="flex items-center justify-between px-5 py-4 border-b border-gold/10">
+            <div>
+              <h2 class="font-display text-gold-light font-semibold text-base">{cat.name}</h2>
+              <p class="font-body text-[0.6rem] text-gold-pale/40 tracking-widest uppercase mt-0.5">{cat.badge}</p>
+            </div>
+            <span class="font-body text-[0.6rem] tracking-widest uppercase text-gold/40">
+              {cat.items.length} files
+            </span>
+          </div>
+
+          <!-- Items -->
+          <div class="px-5 py-3" id={`items-${cat.id}`}>
+            {cat.items.slice(0, cat.perPage).map((item, i) => (
+              <div class="doc-item group" data-cat={cat.id} data-page="1">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <svg class="w-4 h-4 text-gold/40 flex-shrink-0 group-hover:text-gold/70 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <div class="min-w-0">
+                    <span class="font-body text-gold-pale/80 text-sm block truncate">{item.name}</span>
+                    <span class="font-body text-[0.6rem] text-gold-pale/30 tracking-wide">{item.date}</span>
+                  </div>
+                </div>
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener"
+                  class="flex-shrink-0 flex items-center gap-1 font-body text-xs text-gold hover:text-gold-light transition-colors tracking-wide ml-3"
+                >
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                  PDF
+                </a>
+              </div>
+            ))}
+          </div>
+
+          <!-- Pagination (for KTP Inleng) -->
+          {cat.items.length > cat.perPage && (
+            <div class="px-5 pb-4">
+              <div class="flex items-center justify-between">
+                <span class="font-body text-[0.65rem] text-gold-pale/30 tracking-wide">
+                  Page <span class="current-page" data-cat={cat.id}>1</span> of {Math.ceil(cat.items.length / cat.perPage)}
+                </span>
+                <div class="flex gap-1.5" data-pagination={cat.id}>
+                  {Array.from({ length: Math.ceil(cat.items.length / cat.perPage) }, (_, p) => (
+                    <button
+                      class={`page-btn ${p === 0 ? 'active' : ''}`}
+                      data-page={p + 1}
+                      data-cat={cat.id}
+                    >
+                      {p + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+        </div>
+      </div>
+    ))}
+
+  </div>
+
+</BaseLayout>
+
+<script define:vars={{ ktpItemsJson: ktpItems, perPage: 8 }}>
+  const allItems = { 'ktp-inleng': ktpItemsJson };
+
+  document.querySelectorAll('[data-pagination]').forEach(container => {
+    const catId = (container as HTMLElement).dataset.pagination!;
+    container.querySelectorAll('.page-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const page = parseInt((btn as HTMLElement).dataset.page!);
+        container.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        // Update page label
+        const label = document.querySelector(`.current-page[data-cat="${catId}"]`);
+        if (label) label.textContent = String(page);
+
+        // Re-render items
+        const items = allItems[catId];
+        if (!items) return;
+        const start = (page - 1) * perPage;
+        const slice = items.slice(start, start + perPage);
+        const tbody = document.getElementById(`items-${catId}`);
+        if (!tbody) return;
+        tbody.innerHTML = slice.map(item => `
+          <div class="doc-item group">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <svg class="w-4 h-4 text-gold/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              <div class="min-w-0">
+                <span class="font-body text-gold-pale/80 text-sm block truncate">${item.name}</span>
+                <span class="font-body text-xs text-gold-pale/30">${item.date}</span>
+              </div>
+            </div>
+            <a href="${item.url}" target="_blank" rel="noopener" class="flex-shrink-0 flex items-center gap-1 font-body text-xs text-gold hover:text-gold-light ml-3">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              PDF
+            </a>
+          </div>
+        `).join('');
+      });
+    });
+  });
+</script>

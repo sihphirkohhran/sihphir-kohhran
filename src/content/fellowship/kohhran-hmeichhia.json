@@ -1,0 +1,18 @@
+{
+  "history_short": "Kohhran Hmeichhia chu Sihphir Presbyterian Kohhran hnuaiah a awm a, kohhran hmeichhia member zawng zawng an tel thei a nih. Pathian biak dan, nungchang tha zir dan leh kohhran hmasawnna tan an thawhlawm a nih.",
+  "history_full": "Kohhran Hmeichhia chu Presbyterian Church of India hnuaia hmeichhia fellowship chu a ni. Sihphir Kohhranah chuan hmeichhia te pawh kohhran hmasawnna tan an inpe hle a nih.\n\nFellowship hi a neih chuan hmeichhia te inkhawm dan, Bible zir dan, leh nungchang tha nei dan an zir a nih.\n\nTun dinhmun ah chuan member zat pawh a chungtla a, kohhran tan thawhlawm dan zawng zawng ah an inpek hle a nih.",
+  "office_bearers": [
+    { "role": "President", "name": "Pi President Hming" },
+    { "role": "Vice President", "name": "Pi Vice President Hming" },
+    { "role": "Secretary", "name": "Pi Secretary Hming" },
+    { "role": "Treasurer", "name": "Pi Treasurer Hming" },
+    { "role": "Asst. Secretary", "name": "Pi Asst Secretary Hming" }
+  ],
+  "members": [
+    { "name": "Pi Member 1", "role": "Member" },
+    { "name": "Pi Member 2", "role": "Member" },
+    { "name": "Pi Member 3", "role": "Member" },
+    { "name": "Pi Member 4", "role": "Member" },
+    { "name": "Pi Member 5", "role": "Member" }
+  ]
+}

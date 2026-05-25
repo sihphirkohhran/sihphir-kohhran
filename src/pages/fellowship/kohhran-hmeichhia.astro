@@ -1,0 +1,24 @@
+---
+import FellowshipPage from '../../components/FellowshipPage.astro';
+import { getEntry } from 'astro:content';
+import { fellowshipMeta } from '../../lib/fellowship-meta';
+import { fellowshipHistoryToHtml } from '../../lib/cms';
+
+const meta = fellowshipMeta['kohhran-hmeichhia'];
+const data = await getEntry('fellowship', 'kohhran-hmeichhia');
+if (!data) throw new Error('Fellowship content not found: kohhran-hmeichhia');
+---
+
+<FellowshipPage
+  name={meta.name}
+  abbr={meta.abbr}
+  subtitle={meta.subtitle}
+  accentColor={meta.accentColor}
+  history={data.data.history_short}
+  historyFull={fellowshipHistoryToHtml(data.data.history_full)}
+  officeBearers={data.data.office_bearers}
+  committeeMembers={data.data.members.map((m) => ({
+    name: m.name,
+    role: m.role ?? 'Member',
+  }))}
+/>
