@@ -1,5 +1,4 @@
 ---
-// Decap CMS — requires authentication via /admin/login
 ---
 <!doctype html>
 <html lang="en">
@@ -8,66 +7,64 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
     <title>Admin Panel — Sihphir Presbyterian Kohhran</title>
+
     <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
+
     <style>
-      body { margin: 0; font-family: system-ui, sans-serif; }
-      #auth-check {
+      html, body {
+        margin: 0;
+        padding: 0;
+        min-height: 100%;
+        background: #fafafa;
+      }
+
+      #loading {
         display: flex;
-        align-items: center;
         justify-content: center;
-        min-height: 100vh;
-        background: #0f1f3d;
-        color: #f0e0a8;
+        align-items: center;
+        height: 100vh;
+        font-family: system-ui, sans-serif;
+        color: #666;
+        font-size: 18px;
       }
     </style>
   </head>
+
   <body>
-    <div id="auth-check">
-      <p>Verifying access…</p>
-    </div>
-    <div id="cms-root" style="display:none">
-      <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
-      <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
-      <script is:inline src="/admin/document-cms.js"></script>
+
+    <div id="loading">
+      Loading Admin Panel...
     </div>
 
     <script is:inline>
-      const SESSION_KEY = 'sihphir_admin_session';
+      const SESSION_KEY = "sihphir_admin_session";
 
       function hasValidSession() {
         try {
           const raw = sessionStorage.getItem(SESSION_KEY);
+
           if (!raw) return false;
+
           const data = JSON.parse(raw);
+
           return data.ok && data.expires > Date.now();
         } catch {
           return false;
         }
       }
 
-      function redirectToLogin() {
-        const redirect = encodeURIComponent(location.pathname + location.search);
-        location.replace('/admin/login?redirect=' + redirect);
-      }
+      if (!hasValidSession()) {
+        const redirect = encodeURIComponent(
+          location.pathname + location.search
+        );
 
-      function showCms() {
-        document.getElementById('auth-check').style.display = 'none';
-        document.getElementById('cms-root').style.display = 'block';
-      }
-
-      if (window.netlifyIdentity) {
-        netlifyIdentity.on('init', (user) => {
-          if (user || hasValidSession()) {
-            showCms();
-          } else {
-            redirectToLogin();
-          }
-        });
-      } else if (hasValidSession()) {
-        showCms();
-      } else {
-        redirectToLogin();
+        location.replace("/admin/login?redirect=" + redirect);
       }
     </script>
+
+    <script src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
+
+    <script src="/admin/document-cms.js"></script>
+
   </body>
 </html>
