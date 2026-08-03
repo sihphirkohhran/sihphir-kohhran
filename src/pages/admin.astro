@@ -62,9 +62,13 @@
       }
     </script>
 
-    <script src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
+    <script is:inline>window.CMS_MANUAL_INIT = true;</script>
+
+    <script is:inline src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
 
     <script is:inline src="/admin/document-cms.js"></script>
+
+    <script is:inline>window.CMS.init();</script>
 
   </body>
 </html>

@@ -57,13 +57,15 @@
   }
 
   function register() {
-    if (!window.CMS) return;
+    if (!window.CMS || window.__sihphirDocumentCmsRegistered) return;
+
+    window.__sihphirDocumentCmsRegistered = true;
 
     window.CMS.registerEventListener({
       name: "preSave",
       handler: function ({ entry }) {
         var data = entry.get("data");
-        if (!data) return entry;
+        if (!data) return;
 
         var next = Object.assign({}, data);
 
@@ -72,7 +74,9 @@
           next.pdf_external
         );
 
-        return entry.set("data", next);
+        // Decap CMS 3.x preSave handlers must return the updated entry data,
+        // not the Immutable entry itself. Decap applies that data to the entry.
+        return next;
       }
     });
 
@@ -84,9 +88,5 @@
     });
   }
 
-  if (window.CMS) {
-    register();
-  } else {
-    window.addEventListener("load", register);
-  }
+  register();
 })();
