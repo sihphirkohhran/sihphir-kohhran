@@ -1,6 +1,6 @@
 ---
 title: "Archive Pages"
-description: "Dynamic pages are managed in Decap CMS under Pages."
+description: "Dynamic pages are managed in the custom site admin under Pages."
 show_in_nav: false
 ---
 

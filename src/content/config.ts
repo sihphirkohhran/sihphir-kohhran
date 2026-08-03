@@ -92,10 +92,6 @@ const settings = defineCollection({
           }),
         )
         .optional(),
-      login_title: z.string().optional(),
-      login_subtitle: z.string().optional(),
-      local_password: z.string().optional(),
-      session_hours: z.number().optional(),
     })
     .passthrough(),
 });

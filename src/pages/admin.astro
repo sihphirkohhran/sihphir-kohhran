@@ -6,46 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>Admin Panel</title>
-
-    <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
+    <title>Site administration</title>
+    <meta name="description" content="Sihphir Presbyterian Kohhran content administration" />
   </head>
 
   <body>
-    <div id="nc-root"></div>
-
-    <script is:inline>
-      const SESSION_KEY = "sihphir_admin_session";
-
-      function hasValidSession() {
-        try {
-          const raw = sessionStorage.getItem(SESSION_KEY);
-          if (!raw) return false;
-          const data = JSON.parse(raw);
-          return data.ok && data.expires > Date.now();
-        } catch {
-          return false;
-        }
-      }
-
-      if (!hasValidSession()) {
-        location.replace(
-          "/admin/login?redirect=" +
-            encodeURIComponent(location.pathname + location.search)
-        );
-      }
-    </script>
-
-    <script is:inline>
-      window.CMS_MANUAL_INIT = true;
-    </script>
-
-    <script
-      is:inline
-      src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
-
-    <script is:inline src="/admin/document-cms.js"></script>
-
-    <script is:inline>window.CMS.init();</script>
+    <main id="admin-app" aria-live="polite"></main>
+    <script is:inline src="/admin/app.js"></script>
   </body>
 </html>
