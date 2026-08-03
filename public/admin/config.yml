@@ -5,7 +5,8 @@ local_backend:
   allowed_hosts: ['localhost:4321', '127.0.0.1:4321']
 
 backend:
-  name: git-gateway
+  name: github
+  repo: sihphirkohhran/sihphir-kohhran
   branch: main
 
 # Used when publishing to Netlify (set in Netlify site settings if different)
