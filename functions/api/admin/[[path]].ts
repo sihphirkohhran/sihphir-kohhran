@@ -1,3 +1,4 @@
+// Cloudflare Pages optional catch-all route: /api/admin and /api/admin/*.
 type R2Bucket = { put(key: string, value: ArrayBufferView, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown> };
 
 type Env = {
