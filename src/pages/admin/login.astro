@@ -1,0 +1,29 @@
+---
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Admin sign in</title>
+    <style>
+      :root { font-family: Inter, system-ui, sans-serif; color:#14213d; background:#f7f8fc; }
+      body { min-height:100vh; margin:0; display:grid; place-items:center; padding:24px; box-sizing:border-box; }
+      main { width:min(100%, 400px); background:#fff; border:1px solid #e4e9f2; border-radius:16px; padding:34px; box-shadow:0 18px 45px rgba(16,33,62,.10); }
+      .eyebrow { color:#9a6c1a; font-weight:800; font-size:11px; letter-spacing:.15em; margin:0 0 8px; } h1 { margin:0 0 8px; font-size:28px; } p { color:#64748b; line-height:1.5; }
+      form { display:grid; gap:15px; margin-top:24px; } label { display:grid; gap:7px; font-size:13px; font-weight:700; } input { border:1px solid #ccd6e4; border-radius:8px; padding:12px; font:inherit; } button { border:0; border-radius:8px; background:#bc8a2f; color:#fff; padding:12px; font:inherit; font-weight:800; cursor:pointer; } #error { color:#b42318; min-height:1.4em; font-size:14px; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">SIHPHIR ADMIN</p><h1>Sign in</h1><p>Use the administrator credentials configured in Cloudflare Pages secrets.</p>
+      <form id="login-form"><label>Username<input name="username" autocomplete="username" required /></label><label>Password<input name="password" type="password" autocomplete="current-password" required /></label><p id="error" role="alert"></p><button>Sign in</button></form>
+    </main>
+    <script is:inline>
+      const form = document.querySelector('#login-form'); const error = document.querySelector('#error');
+      const requested = new URLSearchParams(location.search).get('redirect'); const redirect = requested?.startsWith('/admin') ? requested : '/admin';
+      form.addEventListener('submit', async event => { event.preventDefault(); error.textContent = ''; const values = Object.fromEntries(new FormData(form)); const response = await fetch('/api/auth/login', { method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(values) }); const data = await response.json(); if (!response.ok) { error.textContent = data.error || 'Unable to sign in.'; return; } location.replace(redirect); });
+    </script>
+  </body>
+</html>

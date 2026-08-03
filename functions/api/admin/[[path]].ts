@@ -1,7 +1,9 @@
 // Cloudflare Pages optional catch-all route: /api/admin and /api/admin/*.
+import { getSession, type SessionEnv } from '../../_lib/session';
+
 type R2Bucket = { put(key: string, value: ArrayBufferView, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown> };
 
-type Env = {
+type Env = SessionEnv & {
   GITHUB_TOKEN?: string;
   GITHUB_REPOSITORY?: string;
   GITHUB_BRANCH?: string;
@@ -22,10 +24,6 @@ const areas: Record<string, string[]> = {
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), {
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
 });
-
-function hasCloudflareAccess(request: Request) {
-  return Boolean(request.headers.get('Cf-Access-Jwt-Assertion'));
-}
 
 function configuration(env: Env) {
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPOSITORY) throw new Error('Admin API is not configured. Set GITHUB_TOKEN and GITHUB_REPOSITORY.');
@@ -70,7 +68,7 @@ function filename(value: string) { return value.toLowerCase().replace(/[^a-z0-9.
 
 export const onRequestGet = async ({ request, env }: Context) => {
   try {
-    if (!hasCloudflareAccess(request)) return json({ error: 'Cloudflare Access authentication is required.' }, 401);
+    if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
     const url = new URL(request.url); const area = url.searchParams.get('area'); const path = url.searchParams.get('path');
     if (path) {
       if (!allowedPath(path)) return json({ error: 'Invalid content path.' }, 400);
@@ -88,7 +86,7 @@ export const onRequestGet = async ({ request, env }: Context) => {
 
 export const onRequestPut = async ({ request, env }: Context) => {
   try {
-    if (!hasCloudflareAccess(request)) return json({ error: 'Cloudflare Access authentication is required.' }, 401);
+    if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
     const { path, content, message } = await request.json() as { path?: string; content?: string; message?: string };
     if (!path || typeof content !== 'string' || !allowedPath(path)) return json({ error: 'Invalid content update.' }, 400);
     await writeFile(env, path, content, message || `admin: update ${path}`);
@@ -98,7 +96,7 @@ export const onRequestPut = async ({ request, env }: Context) => {
 
 export const onRequestPost = async ({ request, env }: Context) => {
   try {
-    if (!hasCloudflareAccess(request)) return json({ error: 'Cloudflare Access authentication is required.' }, 401);
+    if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
     const { filename: original, data, kind } = await request.json() as { filename?: string; data?: string; kind?: 'image' | 'document' };
     if (!original || !data || !['image', 'document'].includes(kind || '')) return json({ error: 'Invalid upload.' }, 400);
     const safe = filename(original); const key = `${kind === 'image' ? 'images' : 'documents'}/${Date.now()}-${safe}`;
