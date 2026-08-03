@@ -2,6 +2,7 @@
 committee_id: "kohhran"
 committee_name: "Kohhran Committee"
 year: 2025
+group_photo: "/images/committee/kohhran-2025.jpg"
 chairman: "Pu Chairman Hming"
 secretary: "Pi Secretary Hming"
 members:

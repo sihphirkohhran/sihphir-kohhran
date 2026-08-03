@@ -1,0 +1,73 @@
+---
+interface HighlightItem {
+  enabled?: boolean;
+  type?: string;
+  title: string;
+  description?: string;
+  link: string;
+  image?: string;
+  style?: string;
+}
+
+interface Props {
+  items: HighlightItem[];
+}
+
+const { items } = Astro.props;
+const active = items.filter((i) => i.enabled !== false);
+---
+
+{active.length > 0 && (
+  <section class="bg-ivory py-6 px-4 border-b border-gold/10" id="highlights">
+    <div class="max-w-2xl mx-auto">
+      <div class="gold-divider reveal mb-4">
+          <h2>Quick Access</h2>
+      </div>
+      <div class="space-y-3">
+        {active.map((item, i) => {
+          const style = item.style || 'card';
+          const isBanner = style === 'banner';
+          const isButton = style === 'button';
+          return (
+            <a
+              href={item.link}
+              class={`highlight-item reveal reveal-delay-${(i % 3) + 1} block transition-all hover:-translate-y-0.5 ${
+                isBanner
+                  ? 'bg-navy border-2 border-gold/40 rounded overflow-hidden'
+                  : isButton
+                    ? 'text-center'
+                    : 'bg-navy border border-gold/20 rounded overflow-hidden hover:border-gold/45'
+              }`}
+              target={item.link.startsWith('http') ? '_blank' : undefined}
+              rel={item.link.startsWith('http') ? 'noopener' : undefined}
+            >
+              {isBanner && item.image && (
+                <div class="aspect-[3/1] bg-navy-light overflow-hidden">
+                  <img src={item.image} alt="" class="w-full h-full object-cover opacity-90" loading="lazy" />
+                </div>
+              )}
+              <div class={isButton ? 'inline-block bg-navy border border-gold/40 text-gold-pale px-8 py-3 rounded font-body text-sm tracking-widest uppercase hover:bg-navy-light hover:border-gold/60 transition-colors shadow-sm hover:shadow-md transition-shadow' : 'p-4 sm:p-5'}>
+                {!isBanner && item.image && !isButton && (
+                  <div class="float-right ml-4 mb-2 w-20 h-20 rounded border border-gold/25 overflow-hidden flex-shrink-0 hidden sm:block">
+                    <img src={item.image} alt="" class="w-full h-full object-cover" loading="lazy" />
+                  </div>
+                )}
+                <h3 class={`font-body font-bold text-gold-light mb-1 ${isBanner ? 'text-xl' : 'text-lg'}`}>
+                  {item.title}
+                </h3>
+                {item.description && (
+                  <p class="font-body text-gold-pale/65 text-sm leading-relaxed">{item.description}</p>
+                )}
+                {!isButton && (
+                  <span class="inline-block mt-2 font-body text-[0.65rem] tracking-widest uppercase text-gold/60">
+                    View →
+                  </span>
+                )}
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}

@@ -1,7 +1,16 @@
 {
   "stats": [
-    { "label": "Chhungkaw zat", "value": "342" },
-    { "label": "Members", "value": "1,248" },
-    { "label": "Dan zawh kim", "value": "89" }
+    {
+      "label": "Chhungkaw zat",
+      "value": "342"
+    },
+    {
+      "label": "Member zat",
+      "value": "1,248"
+    },
+    {
+      "label": "Dan zawh kim",
+      "value": "89"
+    }
   ]
 }

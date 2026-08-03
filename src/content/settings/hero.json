@@ -1,7 +1,20 @@
 {
   "slides": [
-    { "src": "/images/hero-1.jpg", "caption": "Lak Tur Ula — Welcome" },
-    { "src": "/images/hero-2.jpg", "caption": "Kohhranin lawm a ngai" },
-    { "src": "/images/hero-3.jpg", "caption": "Pathian hnena in kal rawh" }
+    {
+      "src": "/images/biak-in-1.jpg",
+      "caption": "Welcome"
+    },
+    {
+      "src": "/images/biak-in-2.jpg",
+      "caption": "Sihphir Kohhran Biak In"
+    },
+    {
+      "src": "/images/biak-in-chhung.jpg",
+      "caption": "Biak in chhung"
+    },
+    {
+      "src": "/images/kohhran-hall.jpg",
+      "caption": "Kohhran Centenary Hall"
+    }
   ]
 }

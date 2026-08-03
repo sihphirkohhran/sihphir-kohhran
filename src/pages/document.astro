@@ -1,64 +1,115 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ArchiveFilterBar from '../components/ArchiveFilterBar.astro';
+import DocumentCategoryCard from '../components/DocumentCategoryCard.astro';
+import { getEntry } from 'astro:content';
 import { getKtpInlengDocs, getOtherDocuments } from '../lib/cms';
+import { getUniqueYears, getUniqueMonthsForYear, MONTH_NAMES } from '../lib/archive';
+import {
+  toDocumentItem,
+  sortDocumentItems,
+  markLatestInCategory,
+  normalizeCategoryMatch,
+  categoryHasMonthData,
+  categoryHasYearData,
+  type DocumentCategory,
+} from '../lib/documents';
 
-const ktpItems = getKtpInlengDocs().map((d) => ({
-  name: String(d.name),
-  url: String(d.pdf_url),
-  date: String(d.date ?? ''),
-}));
+const docCategoryRegistry = await getEntry('settings', 'document-categories');
+const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
 
-const otherDocs = getOtherDocuments();
+const ktpRaw = await getKtpInlengDocs();
+const otherRaw = await getOtherDocuments();
 
-const docCategories = [
+const ktpItems = sortDocumentItems(
+  ktpRaw.map((d) =>
+    toDocumentItem({
+      id: d.id,
+      name: d.name,
+      pdf_url: d.pdf_url,
+      date: d.date,
+      year: d.year,
+      month: d.month,
+      pinned: d.pinned,
+    }),
+  ),
+  'newest',
+);
+
+const ktpYears = getUniqueYears(ktpItems.map((d) => d.year));
+const defaultKtpYear = ktpYears[0] ?? new Date().getFullYear();
+const ktpMonthsForYear = getUniqueMonthsForYear(ktpItems, defaultKtpYear);
+
+const docCategories: DocumentCategory[] = [
   {
     id: 'ktp-inleng',
     name: 'KTP Inleng',
     badge: 'Weekly · Archived',
-    description: 'Weekly church bulletin / newsletter',
-    icon: 'newsletter',
     items: ktpItems,
-    perPage: 8,
+    hasYearFilter: true,
+    hasMonthFilter: true,
   },
-  {
-    id: 'yearbook',
-    name: 'Church Year Book',
-    badge: 'Annual',
-    description: 'Annual church publication',
-    icon: 'book',
-    items: otherDocs
-      .filter((d) => d.category === 'Church Year Book')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
-    perPage: 10,
-  },
-  {
-    id: 'finance',
-    name: 'Finance Report',
-    badge: 'Annual',
-    description: 'Annual financial report',
-    icon: 'finance',
-    items: otherDocs
-      .filter((d) => d.category === 'Finance Report')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
-    perPage: 10,
-  },
-  {
-    id: 'others',
-    name: 'Others',
-    badge: 'Handbooks, Souvenirs & Misc.',
-    description: 'Handbooks, souvenirs, and miscellaneous documents',
-    icon: 'folder',
-    items: otherDocs
-      .filter((d) => d.category === 'Others')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url), date: String(d.date ?? '') })),
-    perPage: 10,
-  },
-].filter((cat) => cat.items.length > 0 || cat.id === 'ktp-inleng');
+  ...docCategoriesList.map((cat) => {
+    const items = sortDocumentItems(
+      otherRaw
+        .filter((d) => normalizeCategoryMatch(d.category, cat))
+        .map((d) =>
+          toDocumentItem({
+            id: d.id,
+            name: d.name,
+            pdf_url: d.pdf_url,
+            date: d.date,
+            year: d.year,
+            month: d.month,
+            pinned: d.pinned,
+          }),
+        ),
+      'newest',
+    );
+    return {
+      id: cat.id,
+      name: cat.name,
+      badge: cat.badge ?? 'Archive',
+      items,
+      hasYearFilter: categoryHasYearData(items),
+      hasMonthFilter: categoryHasMonthData(items),
+    };
+  }),
+];
+
+const allYears = getUniqueYears(
+  docCategories.flatMap((c) => c.items.map((i) => i.year)),
+);
+
+const categoryMeta = docCategories.map((cat, di) => ({
+  ...cat,
+  latestIds: [...markLatestInCategory(cat.items)],
+  defaultOpen: di === 0,
+  revealClass: `reveal-delay-${(di % 3) + 1}`,
+  perPage: cat.id === 'ktp-inleng' ? 8 : 10,
+  yearOptions: getUniqueYears(cat.items.map((i) => i.year)).map((y) => ({
+    value: String(y),
+    label: String(y),
+  })),
+  monthOptions: cat.hasMonthFilter && cat.items.length
+    ? getUniqueMonthsForYear(
+        cat.items,
+        getUniqueYears(cat.items.map((i) => i.year))[0] ?? new Date().getFullYear(),
+      ).map((m) => ({ value: String(m), label: MONTH_NAMES[m] ?? String(m) }))
+    : [],
+}));
+
+const archiveJson = categoryMeta.map((c) => ({
+  id: c.id,
+  items: c.items,
+  perPage: c.perPage,
+  hasYearFilter: c.hasYearFilter,
+  hasMonthFilter: c.hasMonthFilter,
+}));
 ---
 
 <BaseLayout title="Documents — Sihphir Presbyterian Kohhran" activePage="document">
 
-  <!-- Header -->
   <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
     <div class="absolute inset-0 opacity-[0.04]"
       style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
@@ -73,117 +124,295 @@ const docCategories = [
 
   <div class="max-w-2xl mx-auto px-4 py-8 space-y-6">
 
-    {docCategories.map((cat, di) => (
-      <div class={`reveal reveal-delay-${(di % 3) + 1}`} id={`cat-${cat.id}`}>
-        <div class="bg-navy border border-gold/20 rounded overflow-hidden">
-
-          <!-- Category header -->
-          <div class="flex items-center justify-between px-5 py-4 border-b border-gold/10">
-            <div>
-              <h2 class="font-display text-gold-light font-semibold text-base">{cat.name}</h2>
-              <p class="font-body text-[0.6rem] text-gold-pale/40 tracking-widest uppercase mt-0.5">{cat.badge}</p>
-            </div>
-            <span class="font-body text-[0.6rem] tracking-widest uppercase text-gold/40">
-              {cat.items.length} files
-            </span>
-          </div>
-
-          <!-- Items -->
-          <div class="px-5 py-3" id={`items-${cat.id}`}>
-            {cat.items.slice(0, cat.perPage).map((item, i) => (
-              <div class="doc-item group" data-cat={cat.id} data-page="1">
-                <div class="flex items-center gap-2.5 min-w-0">
-                  <svg class="w-4 h-4 text-gold/40 flex-shrink-0 group-hover:text-gold/70 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                  </svg>
-                  <div class="min-w-0">
-                    <span class="font-body text-gold-pale/80 text-sm block truncate">{item.name}</span>
-                    <span class="font-body text-[0.6rem] text-gold-pale/30 tracking-wide">{item.date}</span>
-                  </div>
-                </div>
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener"
-                  class="flex-shrink-0 flex items-center gap-1 font-body text-xs text-gold hover:text-gold-light transition-colors tracking-wide ml-3"
-                >
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                  PDF
-                </a>
-              </div>
-            ))}
-          </div>
-
-          <!-- Pagination (for KTP Inleng) -->
-          {cat.items.length > cat.perPage && (
-            <div class="px-5 pb-4">
-              <div class="flex items-center justify-between">
-                <span class="font-body text-[0.65rem] text-gold-pale/30 tracking-wide">
-                  Page <span class="current-page" data-cat={cat.id}>1</span> of {Math.ceil(cat.items.length / cat.perPage)}
-                </span>
-                <div class="flex gap-1.5" data-pagination={cat.id}>
-                  {Array.from({ length: Math.ceil(cat.items.length / cat.perPage) }, (_, p) => (
-                    <button
-                      class={`page-btn ${p === 0 ? 'active' : ''}`}
-                      data-page={p + 1}
-                      data-cat={cat.id}
-                    >
-                      {p + 1}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
+    <div class="reveal bg-ivory border border-navy/10 rounded px-5 py-4 space-y-3">
+      <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block" for="doc-search">
+        Search documents
+      </label>
+      <input
+        type="search"
+        id="doc-search"
+        placeholder="Search by name…"
+        class="doc-search-input w-full border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-white focus:outline-none focus:border-navy/60 transition-colors"
+        autocomplete="off"
+      />
+      <div class="archive-filters-row !mb-0">
+        {allYears.length > 0 && (
+          <ArchiveFilterBar
+            id="doc-global-year"
+            label="Year"
+            options={allYears.map((y) => ({ value: String(y), label: String(y) }))}
+          />
+        )}
+        <ArchiveFilterBar
+          id="doc-global-month"
+          label="Month"
+          allLabel="All months"
+          options={MONTH_NAMES.slice(1).map((name, i) => ({
+            value: String(i + 1),
+            label: name,
+          }))}
+        />
+        <div class="archive-filter reveal">
+          <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5" for="doc-sort">
+            Sort
+          </label>
+          <select
+            id="doc-sort"
+            class="archive-filter-select w-full sm:w-auto min-w-[140px] border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors"
+          >
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
         </div>
       </div>
-    ))}
+    </div>
+
+    <div class="space-y-6" id="doc-categories">
+      {categoryMeta.map((cat) => (
+        <DocumentCategoryCard
+          id={cat.id}
+          name={cat.name}
+          badge={cat.badge}
+          items={cat.items}
+          latestIds={cat.latestIds}
+          defaultOpen={cat.defaultOpen}
+          revealClass={cat.revealClass}
+          hasYearFilter={cat.hasYearFilter}
+          hasMonthFilter={cat.hasMonthFilter}
+          yearOptions={cat.yearOptions}
+          monthOptions={cat.monthOptions}
+          perPage={cat.perPage}
+        />
+      ))}
+    </div>
+
+    <p id="doc-no-results" class="hidden font-body text-sm text-gray-500 text-center py-4 reveal">
+      No documents match your search.
+    </p>
 
   </div>
 
 </BaseLayout>
 
-<script define:vars={{ ktpItemsJson: ktpItems, perPage: 8 }}>
-  const allItems = { 'ktp-inleng': ktpItemsJson };
+<script define:vars={{ archiveJson, monthNames: MONTH_NAMES }}>
+  const searchInput = document.getElementById('doc-search');
+  const globalYear = document.getElementById('doc-global-year');
+  const globalMonth = document.getElementById('doc-global-month');
+  const sortSelect = document.getElementById('doc-sort');
+  const noResults = document.getElementById('doc-no-results');
 
-  document.querySelectorAll('[data-pagination]').forEach(container => {
-    const catId = (container as HTMLElement).dataset.pagination!;
-    container.querySelectorAll('.page-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const page = parseInt((btn as HTMLElement).dataset.page!);
-        container.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+  const archiveById = Object.fromEntries(archiveJson.map((c) => [c.id, c]));
 
-        // Update page label
-        const label = document.querySelector(`.current-page[data-cat="${catId}"]`);
-        if (label) label.textContent = String(page);
+  function sortItems(items, order) {
+    const pinned = items.filter((i) => i.pinned);
+    const rest = items.filter((i) => !i.pinned);
+    const cmp = (a, b) => {
+      const diff = b.sortKey.localeCompare(a.sortKey);
+      return order === 'newest' ? diff : -diff;
+    };
+    return [...pinned.sort(cmp), ...rest.sort(cmp)];
+  }
 
-        // Re-render items
-        const items = allItems[catId];
-        if (!items) return;
-        const start = (page - 1) * perPage;
-        const slice = items.slice(start, start + perPage);
-        const tbody = document.getElementById(`items-${catId}`);
-        if (!tbody) return;
-        tbody.innerHTML = slice.map(item => `
-          <div class="doc-item group">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <svg class="w-4 h-4 text-gold/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              <div class="min-w-0">
-                <span class="font-body text-gold-pale/80 text-sm block truncate">${item.name}</span>
-                <span class="font-body text-xs text-gold-pale/30">${item.date}</span>
-              </div>
+  function renderDocRow(item, latestId) {
+    const pinnedBadge = item.pinned
+      ? '<span class="doc-badge doc-badge-pinned">Pinned</span>'
+      : '';
+    const newBadge =
+      item.id === latestId && !item.pinned
+        ? '<span class="doc-badge doc-badge-new">New</span>'
+        : '';
+    return `
+      <div class="doc-item group doc-row"
+        data-doc-id="${item.id}"
+        data-year="${item.year ?? ''}"
+        data-month="${item.month ?? ''}"
+        data-pinned="${item.pinned ? '1' : '0'}"
+        data-name="${item.name.toLowerCase()}"
+        data-date="${item.date}">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+          <svg class="w-4 h-4 text-gold/40 flex-shrink-0 group-hover:text-gold/70 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <div class="min-w-0">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="font-body text-gold-pale/80 text-sm truncate max-w-full">${item.name}</span>
+              ${pinnedBadge}${newBadge}
             </div>
-            <a href="${item.url}" target="_blank" rel="noopener" class="flex-shrink-0 flex items-center gap-1 font-body text-xs text-gold hover:text-gold-light ml-3">
-              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-              PDF
-            </a>
+            <span class="font-body text-[0.6rem] text-gold-pale/30 tracking-wide">${item.date}</span>
           </div>
-        `).join('');
-      });
+        </div>
+        <div class="flex items-center gap-2 flex-shrink-0 ml-2">
+          <a href="${item.url}" target="_blank" rel="noopener" class="doc-action-btn" title="Preview PDF">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <span class="hidden sm:inline">Preview</span>
+          </a>
+          <a href="${item.url}" download class="doc-action-btn" title="Download PDF">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span class="hidden sm:inline">Download</span>
+          </a>
+        </div>
+      </div>`;
+  }
+
+  const catState = {};
+
+  function getCatFilters(catId) {
+    const yearEl = document.getElementById(`${catId}-year-filter`);
+    const monthEl = document.getElementById(`${catId}-month-filter`);
+    return {
+      year: yearEl?.value ?? 'all',
+      month: monthEl?.value ?? 'all',
+    };
+  }
+
+  function filterCatItems(catId, items) {
+    const q = (searchInput?.value ?? '').trim().toLowerCase();
+    const gYear = globalYear?.value ?? 'all';
+    const gMonth = globalMonth?.value ?? 'all';
+    const { year: cYear, month: cMonth } = getCatFilters(catId);
+    const meta = archiveById[catId];
+
+    return items.filter((item) => {
+      const matchSearch = !q || item.name.toLowerCase().includes(q);
+      const yearVal = String(item.year ?? '');
+      const monthVal = String(item.month ?? '');
+      const matchGlobalYear = gYear === 'all' || yearVal === gYear;
+      const matchGlobalMonth = gMonth === 'all' || monthVal === gMonth;
+      const matchCatYear = !meta?.hasYearFilter || cYear === 'all' || yearVal === cYear;
+      const matchCatMonth =
+        !meta?.hasMonthFilter || cMonth === 'all' || monthVal === cMonth;
+      return matchSearch && matchGlobalYear && matchGlobalMonth && matchCatYear && matchCatMonth;
+    });
+  }
+
+  function renderCategory(catId) {
+    const meta = archiveById[catId];
+    if (!meta) return;
+    const order = sortSelect?.value === 'oldest' ? 'oldest' : 'newest';
+    if (!catState[catId]) catState[catId] = { page: 1 };
+    const filtered = filterCatItems(catId, sortItems(meta.items, order));
+    const sorted = sortItems(filtered, order);
+    const latestId = sorted.find((i) => !i.pinned)?.id ?? sorted[0]?.id;
+    const perPage = meta.perPage;
+    const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
+    if (catState[catId].page > totalPages) catState[catId].page = 1;
+
+    const countEl = document.querySelector(`[data-count-for="${catId}"]`);
+    if (countEl) countEl.textContent = `${sorted.length} files`;
+
+    const emptyEl = document.querySelector(`[data-empty-for="${catId}"]`);
+    if (emptyEl) emptyEl.classList.toggle('hidden', sorted.length > 0);
+
+    const start = (catState[catId].page - 1) * perPage;
+    const slice = sorted.slice(start, start + perPage);
+    const container = document.getElementById(`items-${catId}`);
+    if (container) container.innerHTML = slice.map((i) => renderDocRow(i, latestId)).join('');
+
+    const pagination = document.querySelector(`[data-pagination="${catId}"]`);
+    const wrap = document.querySelector(`[data-pagination-wrap="${catId}"]`);
+    if (wrap) wrap.style.display = sorted.length > perPage ? '' : 'none';
+    if (pagination) {
+      pagination.innerHTML = '';
+      for (let p = 1; p <= totalPages; p++) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `page-btn ${p === catState[catId].page ? 'active' : ''}`;
+        btn.textContent = String(p);
+        btn.addEventListener('click', () => {
+          catState[catId].page = p;
+          renderCategory(catId);
+        });
+        pagination.appendChild(btn);
+      }
+    }
+    const cur = document.querySelector(`.doc-current-page[data-cat="${catId}"]`);
+    const tot = document.querySelector(`.doc-total-pages[data-cat="${catId}"]`);
+    if (cur) cur.textContent = String(catState[catId].page);
+    if (tot) tot.textContent = String(totalPages);
+
+    return sorted.length;
+  }
+
+  function renderAll() {
+    let totalVisible = 0;
+    archiveJson.forEach((c) => {
+      totalVisible += renderCategory(c.id);
+    });
+    if (noResults) noResults.classList.toggle('hidden', totalVisible > 0);
+  }
+
+  function updateMonthOptionsForCat(catId) {
+    const meta = archiveById[catId];
+    if (!meta?.hasMonthFilter) return;
+    const yearEl = document.getElementById(`${catId}-year-filter`);
+    const monthEl = document.getElementById(`${catId}-month-filter`);
+    if (!yearEl || !monthEl) return;
+    const year = yearEl.value;
+    const months = [
+      ...new Set(
+        meta.items
+          .filter((i) => year === 'all' || String(i.year) === year)
+          .map((i) => i.month)
+          .filter(Boolean),
+      ),
+    ].sort((a, b) => b - a);
+    const current = monthEl.value;
+    monthEl.innerHTML =
+      '<option value="all">All months</option>' +
+      months
+        .map((m) => `<option value="${m}">${monthNames[m] ?? m}</option>`)
+        .join('');
+    if ([...monthEl.options].some((o) => o.value === current)) {
+      monthEl.value = current;
+    }
+  }
+
+  document.querySelectorAll('[data-doc-cat-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const catId = btn.getAttribute('data-doc-cat-toggle');
+      const card = document.getElementById(`cat-${catId}`);
+      const body = document.getElementById(`body-${catId}`);
+      if (!card || !body) return;
+      const open = !card.classList.contains('is-open');
+      card.classList.toggle('is-open', open);
+      body.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
     });
   });
+
+  searchInput?.addEventListener('input', () => {
+    archiveJson.forEach((c) => {
+      catState[c.id] = { page: 1 };
+    });
+    renderAll();
+  });
+  globalYear?.addEventListener('change', () => {
+    archiveJson.forEach((c) => {
+      catState[c.id] = { page: 1 };
+      updateMonthOptionsForCat(c.id);
+    });
+    renderAll();
+  });
+  globalMonth?.addEventListener('change', renderAll);
+  sortSelect?.addEventListener('change', renderAll);
+
+  archiveJson.forEach((c) => {
+    const yearEl = document.getElementById(`${c.id}-year-filter`);
+    const monthEl = document.getElementById(`${c.id}-month-filter`);
+    yearEl?.addEventListener('change', () => {
+      updateMonthOptionsForCat(c.id);
+      catState[c.id] = { page: 1 };
+      renderCategory(c.id);
+    });
+    monthEl?.addEventListener('change', () => {
+      catState[c.id] = { page: 1 };
+      renderCategory(c.id);
+    });
+    if (yearEl && yearEl.value === 'all' && yearEl.options.length > 1) {
+      yearEl.selectedIndex = 1;
+    }
+    updateMonthOptionsForCat(c.id);
+  });
+
+  renderAll();
 </script>

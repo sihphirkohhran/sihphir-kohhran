@@ -1,40 +1,25 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { fellowshipMeta, type FellowshipSlug } from '../../lib/fellowship-meta';
 
-const fellowships = [
-  {
-    id: 'kohhran-hmeichhia',
-    name: 'Kohhran Hmeichhia',
-    abbr: 'KH',
-    mizo: 'Women\'s Fellowship',
-    color: 'from-rose-900 to-navy',
-    description: 'Kohhran Hmeichhia chu kohhran hmeichhia member zawng zawng an tel a, Pathian biak dan leh nungchang tha zir dan an buatsaih a nih.',
-  },
-  {
-    id: 'ktp',
-    name: 'Kristian Thalai Pawl',
-    abbr: 'KTP',
-    mizo: 'Christian Youth Fellowship',
-    color: 'from-blue-900 to-navy',
-    description: 'KTP chu kohhran thalai te tan buatsaih a ni a, thalai te nungchang leh Pathian biak dan hmasawn dan an zir a nih.',
-  },
-  {
-    id: 'kpp',
-    name: 'Kohhran Pavalai Pawl',
-    abbr: 'KPP',
-    mizo: 'Senior Citizens\' Fellowship',
-    color: 'from-emerald-900 to-navy',
-    description: 'KPP chu kohhran member mipa te tan buatsaih a ni a, hmasawnna leh biak dan an zir thla ruala an hma phur a nih.',
-  },
-  {
-    id: 'masihi-sangai',
-    name: 'Masihi Sangai',
-    abbr: 'MS',
-    mizo: 'Christian Fellowship',
-    color: 'from-amber-900 to-navy',
-    description: 'Masihi Sangai chu kohhran member zawng zawng pawh tel thei a, Pathian biak dan leh hmasawnna an zir a nih.',
-  },
-];
+const fellowshipEntries = await getCollection('fellowship');
+const fellowshipBySlug = Object.fromEntries(
+  fellowshipEntries.map((e) => [e.id as FellowshipSlug, e.data]),
+);
+
+const fellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
+  const meta = fellowshipMeta[id];
+  const data = fellowshipBySlug[id];
+  return {
+    id,
+    name: meta.name,
+    abbr: meta.abbr,
+    color: meta.accentColor,
+    description: data?.history_short ?? '',
+    logo: data?.logo,
+  };
+});
 ---
 
 <BaseLayout title="Fellowship — Sihphir Presbyterian Kohhran" activePage="fellowship">
@@ -55,15 +40,16 @@ const fellowships = [
           href={`/fellowship/${f.id}`}
           class={`reveal reveal-delay-${i + 1} group block bg-navy border border-gold/20 rounded overflow-hidden hover:border-gold/50 transition-all hover:-translate-y-0.5`}
         >
-          <!-- Card top accent -->
           <div class={`h-1.5 bg-gradient-to-r ${f.color}`}></div>
           <div class="p-5">
-            <!-- Abbr circle -->
-            <div class="w-12 h-12 rounded-full border-2 border-gold/40 flex items-center justify-center mb-4 group-hover:border-gold/70 transition-colors">
-              <span class="font-display text-gold-light font-bold text-lg">{f.abbr}</span>
+            <div class="w-12 h-12 rounded-full border-2 border-gold/40 flex items-center justify-center mb-4 group-hover:border-gold/70 transition-colors overflow-hidden bg-gold/[0.06]">
+              {f.logo ? (
+                <img src={f.logo} alt="" class="w-full h-full object-cover" loading="lazy" />
+              ) : (
+                <span class="font-display text-gold-light font-bold text-lg">{f.abbr}</span>
+              )}
             </div>
-            <h2 class="font-display text-white text-lg font-semibold leading-tight mb-1">{f.name}</h2>
-            <p class="font-body text-[0.65rem] tracking-widest uppercase text-gold/60 mb-3">{f.mizo}</p>
+            <h2 class="font-display text-white text-lg font-semibold leading-tight mb-3">{f.name}</h2>
             <p class="font-body text-gold-pale/60 text-xs leading-relaxed mb-4">{f.description}</p>
             <div class="flex items-center gap-1 font-body text-[0.65rem] tracking-wider uppercase text-gold/70 group-hover:text-gold transition-colors">
               View Details

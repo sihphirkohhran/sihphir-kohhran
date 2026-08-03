@@ -5,6 +5,11 @@
 [build.environment]
   NODE_VERSION = "20"
 
+[[redirects]]
+  from = "/fellowship/masihi-sangai"
+  to = "/fellowship/masihi-sangati"
+  status = 301
+
 # Decap CMS admin (also served via src/pages/admin.astro after build)
 [[redirects]]
   from = "/admin"
@@ -15,6 +20,17 @@
 [[redirects]]
   from = "/admin/"
   to = "/admin/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin/login"
+  to = "/admin/login/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/admin/login/"
+  to = "/admin/login/index.html"
   status = 200
 
 [[headers]]

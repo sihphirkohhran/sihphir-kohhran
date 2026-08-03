@@ -1,4 +1,4 @@
-/** @type {import('tailwindcss').Config} */
+﻿/** @type {import('tailwindcss').Config} */
 export default {
   content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
   theme: {
@@ -23,9 +23,10 @@ export default {
         cream: '#faf7f2',
       },
       fontFamily: {
-        display: ['"Cormorant Garamond"', 'serif'],
+        display: ['"EB Garamond"', 'serif'],
         body: ['"Crimson Pro"', 'serif'],
         sans: ['"Crimson Pro"', 'serif'],
+        numbers: ['"Inter"', 'sans-serif'],
       },
       animation: {
         'fade-up': 'fadeUp 0.7s ease forwards',
@@ -55,3 +56,4 @@ export default {
   },
   plugins: [],
 };
+

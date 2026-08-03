@@ -1,0 +1,42 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  activeKey?: string;
+  /** Ministry grids use full-width layout without the inner ivory box */
+  unboxed?: boolean;
+}
+
+const { title, description = '', activeKey, unboxed = false } = Astro.props;
+---
+
+<BaseLayout title={`${title} — Sihphir Presbyterian Kohhran`} description={description} activePage={activeKey}>
+
+  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]"
+      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
+    </div>
+    <div class="relative z-10">
+      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">{title}</h1>
+      {description && (
+        <p class="font-body text-gold-pale/60 text-sm mt-2 italic max-w-lg mx-auto">{description}</p>
+      )}
+      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+    </div>
+  </div>
+
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div
+      class:list={[
+        'reveal content-page-body',
+        unboxed ? 'ministry-page-content' : 'border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4',
+      ]}
+    >
+      <slot />
+    </div>
+  </div>
+
+</BaseLayout>

@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import type { FellowshipGroupPhoto } from '../lib/fellowship';
 
 interface Props {
   name: string;
@@ -7,6 +8,8 @@ interface Props {
   subtitle: string;
   history: string;
   historyFull?: string;
+  logo?: string;
+  groupPhotos?: FellowshipGroupPhoto[];
   officeBearers: { role: string; name: string }[];
   committeeMembers: { name: string; role?: string }[];
   accentColor?: string;
@@ -18,10 +21,14 @@ const {
   subtitle,
   history,
   historyFull = '',
+  logo,
+  groupPhotos = [],
   officeBearers,
   committeeMembers,
   accentColor = 'from-navy to-navy-light',
 } = Astro.props;
+
+const defaultGroupYear = groupPhotos[0]?.year;
 ---
 
 <BaseLayout title={`${name} — Sihphir Presbyterian Kohhran`} activePage="fellowship">
@@ -37,8 +44,12 @@ const {
         All Fellowships
       </a>
       <div class="flex items-center gap-4">
-        <div class="w-14 h-14 rounded-full border-2 border-gold/60 flex items-center justify-center bg-gold/[0.07] flex-shrink-0">
-          <span class="font-display text-gold-light font-bold text-xl">{abbr}</span>
+        <div class="w-14 h-14 rounded-full border-2 border-gold/60 flex items-center justify-center bg-gold/[0.07] flex-shrink-0 overflow-hidden">
+          {logo ? (
+            <img src={logo} alt={`${name} logo`} class="w-full h-full object-cover" loading="lazy" />
+          ) : (
+            <span class="font-display text-gold-light font-bold text-xl">{abbr}</span>
+          )}
         </div>
         <div>
           <h1 class="font-display text-white text-xl sm:text-2xl font-semibold">{name}</h1>
@@ -57,7 +68,7 @@ const {
         <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>
         {historyFull && (
           <>
-            <div id="history-full" class="font-body text-sm text-gray-700 leading-relaxed mb-3 hidden">
+            <div id="history-full" class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-3 hidden">
               <Fragment set:html={historyFull} />
             </div>
             <button id="history-btn" class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/40 hover:border-navy transition-colors pb-0.5">
@@ -106,8 +117,40 @@ const {
           </tbody>
         </table>
       </div>
-    </div>
-
+    {groupPhotos.length > 0 && (
+      <section class="reveal fellowship-group-section" data-fellowship-name={name}>
+        <div class="fellowship-group-panel">
+          {groupPhotos.length > 1 && (
+            <div class="fellowship-group-controls">
+              <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-500 block mb-1.5" for="fellowship-year-select">
+                Year
+              </label>
+              <select
+                id="fellowship-year-select"
+                class="archive-filter-select w-full sm:w-auto min-w-[140px] border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors"
+              >
+                {groupPhotos.map((g) => (
+                  <option value={String(g.year)} selected={g.year === defaultGroupYear}>{g.year}</option>
+                ))}
+              </select>
+            </div>
+          )}
+          <figure class="fellowship-group-figure">
+            {groupPhotos.map((g) => (
+              <img
+                src={g.photo}
+                alt={`${name} group photo ${g.year}`}
+                class={`fellowship-group-photo ${g.year === defaultGroupYear ? '' : 'hidden'}`}
+                data-fellowship-year={g.year}
+                loading="eager"
+                data-lightbox
+                data-lightbox-src={g.photo}
+              />
+            ))}
+          </figure>
+        </div>
+      </section>
+    )}
   </div>
 
 </BaseLayout>
@@ -120,5 +163,15 @@ const {
     open = !open;
     full?.classList.toggle('hidden', !open);
     if (btn) btn.textContent = open ? '← Read Less' : 'Read More →';
+  });
+
+  const yearSelect = document.getElementById('fellowship-year-select');
+
+  yearSelect?.addEventListener('change', () => {
+    const year = yearSelect.value;
+    document.querySelectorAll('[data-fellowship-year]').forEach((img) => {
+      const el = img as HTMLElement;
+      el.classList.toggle('hidden', el.dataset.fellowshipYear !== year);
+    });
   });
 </script>

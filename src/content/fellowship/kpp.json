@@ -2,15 +2,40 @@
   "history_short": "Kohhran Pavalai Pawl chu kohhran mipa member te tan buatsaih a ni a. Inkhawm dan, Pathian biak dan leh kohhran hmasawnna tan an thawhlawm a nih.",
   "history_full": "KPP chu kohhran mipa te fellowship a ni a, Bible zir dan leh inkhawm hmang hian member te Pathian biak dan an hmasawn thei a nih.\n\nTun dinhmun ah chuan member zat a chungtla a, kohhran tan thawhlawm zawng zawng ah an inpe hle a nih.",
   "office_bearers": [
-    { "role": "President", "name": "Pu President Hming" },
-    { "role": "Vice President", "name": "Pu VP Hming" },
-    { "role": "Secretary", "name": "Pu Secretary Hming" },
-    { "role": "Treasurer", "name": "Pu Treasurer Hming" }
+    {
+      "role": "President",
+      "name": "Pu President Hming"
+    },
+    {
+      "role": "Vice President",
+      "name": "Pu VP Hming"
+    },
+    {
+      "role": "Secretary",
+      "name": "Pu Secretary Hming"
+    },
+    {
+      "role": "Treasurer",
+      "name": "Pu Treasurer Hming"
+    }
   ],
   "members": [
-    { "name": "Pu Member 1", "role": "Member" },
-    { "name": "Pu Member 2", "role": "Member" },
-    { "name": "Pu Member 3", "role": "Member" },
-    { "name": "Pu Member 4", "role": "Member" }
-  ]
+    {
+      "name": "Pu Member 1",
+      "role": "Member"
+    },
+    {
+      "name": "Pu Member 2",
+      "role": "Member"
+    },
+    {
+      "name": "Pu Member 3",
+      "role": "Member"
+    },
+    {
+      "name": "Pu Member 4",
+      "role": "Member"
+    }
+  ],
+  "logo": "/images/fellowship/kpp-logo.png"
 }

@@ -2,17 +2,48 @@
   "history_short": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
   "history_full": "KTP chu thalai te tan a awm a, Fellowship hmang hian thalai te Bible zir dan, inkhawm dan leh kohhran tan thawhlawm dan an zir a nih.\n\nKTP Inleng chu weekly-in a chhuak a, kohhran thalai leh member te tan bulletin a ni a, KTP inkhawm program leh thupui te an tarlan a nih.\n\nThalai te nungchang tha nei thei nan leh Pathian tan thawhlawm dan zir nan, fellowship hi a pawimawh hle a nih.",
   "office_bearers": [
-    { "role": "President", "name": "Pu/Pi President Hming" },
-    { "role": "Vice President", "name": "Pu/Pi VP Hming" },
-    { "role": "Secretary", "name": "Pu/Pi Secretary Hming" },
-    { "role": "Treasurer", "name": "Pu/Pi Treasurer Hming" },
-    { "role": "Programme Secretary", "name": "Pu/Pi Prog Sec Hming" }
+    {
+      "role": "President",
+      "name": "Pu/Pi President Hming"
+    },
+    {
+      "role": "Vice President",
+      "name": "Pu/Pi VP Hming"
+    },
+    {
+      "role": "Secretary",
+      "name": "Pu/Pi Secretary Hming"
+    },
+    {
+      "role": "Treasurer",
+      "name": "Pu/Pi Treasurer Hming"
+    },
+    {
+      "role": "Programme Secretary",
+      "name": "Pu/Pi Prog Sec Hming"
+    }
   ],
   "members": [
-    { "name": "Pu/Pi Member 1", "role": "Member" },
-    { "name": "Pu/Pi Member 2", "role": "Member" },
-    { "name": "Pu/Pi Member 3", "role": "Member" },
-    { "name": "Pu/Pi Member 4", "role": "Member" },
-    { "name": "Pu/Pi Member 5", "role": "Member" }
-  ]
+    {
+      "name": "Pu/Pi Member 1",
+      "role": "Member"
+    },
+    {
+      "name": "Pu/Pi Member 2",
+      "role": "Member"
+    },
+    {
+      "name": "Pu/Pi Member 3",
+      "role": "Member"
+    },
+    {
+      "name": "Pu/Pi Member 4",
+      "role": "Member"
+    },
+    {
+      "name": "Pu/Pi Member 5",
+      "role": "Member"
+    }
+  ],
+  "logo": "/images/fellowship/ktp-logo.png"
 }

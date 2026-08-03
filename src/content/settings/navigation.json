@@ -1,9 +1,75 @@
 {
   "items": [
-    { "label": "Home", "href": "/", "visible": true },
-    { "label": "Committee", "href": "/committee", "visible": true },
-    { "label": "Fellowship", "href": "/fellowship", "visible": true },
-    { "label": "Gallery", "href": "/gallery", "visible": true },
-    { "label": "Document", "href": "/document", "visible": true }
+    {
+      "label": "Home",
+      "href": "/",
+      "key": "home",
+      "visible": true,
+      "order": 0,
+      "parent": ""
+    },
+    {
+      "label": "Committee",
+      "href": "/committee",
+      "key": "committee",
+      "visible": true,
+      "order": 10,
+      "parent": ""
+    },
+    {
+      "label": "Pastor lo ni tawh te",
+      "href": "/pastoral-history",
+      "key": "pastoral-history",
+      "visible": true,
+      "order": 1,
+      "parent": "Rawngbawltu"
+    },
+    {
+      "label": "Rawngbawla chhuakte",
+      "href": "/missionary-ministry",
+      "key": "missionary-ministry",
+      "visible": true,
+      "order": 2,
+      "parent": "Rawngbawltu"
+    },
+    {
+      "label": "Kohhran Upa",
+      "href": "/elders-history",
+      "key": "elders-history",
+      "visible": true,
+      "order": 3,
+      "parent": "Rawngbawltu"
+    },
+    {
+      "label": "Fellowship",
+      "href": "/fellowship",
+      "key": "fellowship",
+      "visible": true,
+      "order": 20,
+      "parent": ""
+    },
+    {
+      "label": "Gallery",
+      "href": "/gallery",
+      "key": "gallery",
+      "visible": true,
+      "order": 30,
+      "parent": ""
+    },
+    {
+      "label": "Document",
+      "href": "/document",
+      "key": "document",
+      "visible": true,
+      "order": 40,
+      "parent": ""
+    },
+    {
+      "order": 0,
+      "visible": true,
+      "label": "Rawngbawltute",
+      "key": "Rawngbawltu",
+      "href": "/"
+    }
   ]
 }

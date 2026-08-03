@@ -1,15 +1,22 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getEntry } from 'astro:content';
+import QuickLinks from '../components/QuickLinks.astro';
+import Highlights from '../components/Highlights.astro';
+import { getCollection, getEntry } from 'astro:content';
 import {
   getWeeklySchedules,
   getMonthlyDuties,
-  getAnnouncements,
   getKtpInlengDocs,
   getOtherDocuments,
 } from '../lib/cms';
+import { normalizeHighlights } from '../lib/highlights';
+import { renderMarkdown } from '../lib/markdown';
+import { loadGalleryPhotos, pickHomeGalleryPhotos } from '../lib/gallery';
+import { buildHomeDocumentSections } from '../lib/documents';
 
 const heroEntry = await getEntry('settings', 'hero');
+const quickLinksEntry = await getEntry('settings', 'quick-links');
+const highlightsEntry = await getEntry('settings', 'highlights');
 const statsEntry = await getEntry('settings', 'statistics');
 const pastorEntry = await getEntry('settings', 'pastor');
 const historyEntry = await getEntry('settings', 'history');
@@ -19,16 +26,10 @@ const generalEntry = await getEntry('settings', 'general');
 const stats = statsEntry?.data.stats ?? [];
 const heroSlides = heroEntry?.data.slides ?? [];
 
-const galleryPhotos = [
-  { src: '/images/gallery-1.jpg', alt: 'Church event 1' },
-  { src: '/images/gallery-2.jpg', alt: 'Church event 2' },
-  { src: '/images/gallery-3.jpg', alt: 'Church event 3' },
-  { src: '/images/gallery-4.jpg', alt: 'Church event 4' },
-  { src: '/images/gallery-5.jpg', alt: 'Church event 5' },
-  { src: '/images/gallery-6.jpg', alt: 'Church event 6' },
-];
+const allGalleryPhotos = await loadGalleryPhotos();
+const galleryPhotos = pickHomeGalleryPhotos(allGalleryPhotos, 6);
 
-const latestWeekly = getWeeklySchedules()[0];
+const latestWeekly = (await getWeeklySchedules())[0];
 const weeklySchedule = latestWeekly
   ? {
       date: `${latestWeekly.week_start} — ${latestWeekly.week_end}`,
@@ -36,7 +37,7 @@ const weeklySchedule = latestWeekly
     }
   : { date: '', days: [] };
 
-const latestMonthly = getMonthlyDuties()[0];
+const latestMonthly = (await getMonthlyDuties())[0];
 const monthlyDuties = latestMonthly
   ? {
       month: String(latestMonthly.month ?? ''),
@@ -47,49 +48,41 @@ const monthlyDuties = latestMonthly
     }
   : { month: '', sections: [] };
 
-const prayerTopics = prayerEntry?.data.topics ?? [];
+const prayerTopics = (prayerEntry?.data.topics ?? []).map((t) =>
+  typeof t === 'string' ? t : t.topic,
+);
 
-const ktpDocs = getKtpInlengDocs();
-const otherDocs = getOtherDocuments();
+const docCategoryRegistry = await getEntry('settings', 'document-categories');
+const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
 
-const documents = [
-  {
-    category: 'KTP Inleng',
-    badge: 'Weekly · Archived',
-    items: ktpDocs.map((d) => ({
-      name: String(d.name),
-      url: String(d.pdf_url),
-    })),
-    showPagination: ktpDocs.length > 3,
-  },
-  {
-    category: 'Church Year Book',
-    badge: 'Annual',
-    items: otherDocs
-      .filter((d) => d.category === 'Church Year Book')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url) })),
-    showPagination: false,
-  },
-  {
-    category: 'Finance Report',
-    badge: 'Annual',
-    items: otherDocs
-      .filter((d) => d.category === 'Finance Report')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url) })),
-    showPagination: false,
-  },
-  {
-    category: 'Others',
-    badge: 'Handbooks & Miscellaneous',
-    items: otherDocs
-      .filter((d) => d.category === 'Others')
-      .map((d) => ({ name: String(d.name), url: String(d.pdf_url) })),
-    showPagination: false,
-  },
-].filter((doc) => doc.items.length > 0 || doc.category === 'KTP Inleng');
+const ktpDocs = await getKtpInlengDocs();
+const otherDocs = await getOtherDocuments();
 
-const announcements = getAnnouncements();
+const homeDocuments = buildHomeDocumentSections(ktpDocs, otherDocs, docCategoriesList);
+
+const announcementEntries = (await getCollection('notices'))
+  .filter((e) => e.id.startsWith('announcements/'))
+  .sort((a, b) => String(b.data.date ?? b.id).localeCompare(String(a.data.date ?? a.id)));
+
+const announcements = await Promise.all(
+  announcementEntries.map(async (entry) => {
+    const { Content } = await entry.render();
+    return {
+      id: entry.id.replace(/^announcements\//, ''),
+      title: entry.data.title ?? '',
+      date: entry.data.date ?? '',
+      Content,
+    };
+  }),
+);
+
+const historyFullHtml = renderMarkdown(historyEntry?.data.full ?? '');
 const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
+
+const quickLinks = quickLinksEntry?.data.links ?? [];
+const highlightItems = normalizeHighlights(
+  highlightsEntry?.data.items as Record<string, unknown>[] | undefined,
+);
 ---
 
 <BaseLayout activePage="home">
@@ -108,13 +101,22 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
 
     <!-- Hero overlay content -->
     <div class="absolute inset-0 flex flex-col justify-end px-5 pb-7 z-10">
-      <div class="inline-block bg-gold/20 border border-gold/35 text-gold-pale/90 text-[0.6rem] tracking-[0.15em] uppercase font-body px-3 py-1 mb-3 w-fit">
-        Lak Tur Ula — Welcome
+      <div class="flex flex-wrap gap-3 mb-3">
+        <a href="#contact"
+          class="inline-flex items-center gap-2 rounded border border-gold/20 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold-pale/90 hover:bg-gold/20 hover:text-white transition-all">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M22 16.92v3a2 2 0 01-2.18 2 19.78 19.78 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.78 19.78 0 014.18 4.18 2 2 0 016.2 2h3a2 2 0 012 1.72 12.24 12.24 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.24 12.24 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+          Contact
+        </a>
+        <a href={generalEntry?.data.youtube_url ?? 'https://youtube.com'} target="_blank" rel="noopener"
+          class="inline-flex items-center gap-2 rounded border border-gold/20 bg-gold/10 px-4 py-2 text-sm font-semibold text-gold-pale/90 hover:bg-gold/20 hover:text-white transition-all">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="var(--navy)" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
+          YouTube
+        </a>
       </div>
       <h2 class="font-display text-white text-2xl sm:text-3xl font-semibold leading-tight mb-2" id="hero-caption">
         {heroSlides[0].caption}
       </h2>
-      <p class="font-body text-gold-pale/70 text-sm mb-4">Sihphir, Aizawl District, Mizoram</p>
+      <p class="font-body text-gold-pale/70 text-sm mb-4">Sihphir Presbyterian Kohhran</p>
 
       <!-- Slide indicators -->
       <div class="flex gap-2 items-center" id="slide-dots">
@@ -134,11 +136,15 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
     </div>
   </section>
 
+  <Highlights items={highlightItems} />
+
+  <QuickLinks links={quickLinks} />
+
   <!-- ══════════════════════════════ STATISTICS ══════════════════════════════ -->
   <section class="bg-cream py-8 px-4" id="statistics">
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Statistics at a Glance</h2>
+        <h2>Kohhran inchhiarna</h2>
       </div>
       <div class="grid grid-cols-3 gap-3 mb-4">
         {stats.map((stat, i) => (
@@ -193,7 +199,7 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
   <section class="bg-cream py-8 px-4" id="history">
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Kohhran History</h2>
+        <h2>Sihphir Kohhran Chanchin</h2>
       </div>
       <div class="reveal border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
         <!-- Church building photo -->
@@ -207,10 +213,8 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
         <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
           {historyEntry?.data.short}
         </div>
-        <div class="font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
-          {(historyEntry?.data.full ?? '').split('\n\n').map((paragraph) => (
-            <p class="mb-2">{paragraph}</p>
-          ))}
+        <div class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
+          <Fragment set:html={historyFullHtml} />
         </div>
         <button
           id="history-toggle"
@@ -228,19 +232,18 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
       <div class="gold-divider reveal">
         <h2>Gallery</h2>
       </div>
-      <div class="grid grid-cols-3 gap-2 mb-4">
+      <div class="home-gallery-masonry mb-4">
         {galleryPhotos.map((photo, i) => (
-          <div
-            class={`gallery-item reveal reveal-delay-${(i % 3) + 1} bg-ivory-dark ${i === 0 ? 'col-span-2 row-span-2' : ''}`}
-            style={i === 0 ? 'aspect-ratio:2/1' : 'aspect-ratio:1'}
-          >
+          <div class={`home-gallery-item gallery-item reveal reveal-delay-${(i % 3) + 1}`}>
             <img
               src={photo.src}
               alt={photo.alt}
-              class="w-full h-full object-cover cursor-pointer"
+              class="w-full h-auto object-cover cursor-pointer block"
               data-lightbox
+              data-lightbox-src={photo.src}
+              data-lightbox-caption={photo.caption}
               loading="lazy"
-              onerror="this.parentElement.innerHTML='<div class=\'w-full h-full flex items-center justify-center\'><svg class=\'w-6 h-6 text-gold/30\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'m21 15-5-5L5 21\'/></svg></div>'"
+              onerror="this.parentElement.innerHTML='<div class=\'w-full aspect-square flex items-center justify-center bg-ivory-dark\'><svg class=\'w-6 h-6 text-gold/30\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'m21 15-5-5L5 21\'/></svg></div>'"
             />
           </div>
         ))}
@@ -259,34 +262,47 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
         <h2>Documents</h2>
       </div>
       <div class="space-y-4">
-        {documents.map((doc, di) => (
-          <div class={`reveal reveal-delay-${(di % 3) + 1} bg-navy border border-gold/20 rounded`}>
+        {homeDocuments.map((doc, di) => (
+          <div class={`reveal reveal-delay-${(di % 3) + 1} bg-ivory border border-gold/10 rounded overflow-hidden shadow-sm shadow-navy/10 transition-shadow duration-200 hover:shadow-md`}>
             <div class="flex items-center justify-between px-4 py-3 border-b border-gold/10">
-              <h3 class="font-display text-gold-light font-semibold text-sm">{doc.category}</h3>
-              <span class="font-body text-[0.6rem] text-gold-pale/50 tracking-widest uppercase">{doc.badge}</span>
+              <h3 class="font-body font-bold text-navy text-sm">{doc.category}</h3>
+              <span class="font-body text-[0.6rem] text-navy/60 tracking-widest uppercase">{doc.badge}</span>
             </div>
             <div class="px-4 py-2">
-              {doc.items.map(item => (
-                <div class="doc-item">
-                  <div class="flex items-center gap-2">
-                    <svg class="w-3.5 h-3.5 text-gold/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                    <span class="font-body text-gold-pale/75 text-xs">{item.name}</span>
+              {doc.items.length > 0 ? (
+                doc.items.map((item) => (
+                  <div class="doc-item">
+                    <div class="flex items-center gap-2 min-w-0">
+                      <svg class="w-3.5 h-3.5 text-navy/50 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                      <div class="min-w-0">
+                        <span class="font-body text-navy text-xs block truncate">{item.name}</span>
+                        {item.date && (
+                          <span class="font-body text-[0.6rem] text-navy/55 tracking-wide">{item.date}</span>
+                        )}
+                      </div>
+                    </div>
+                    <a href={item.url} target="_blank" rel="noopener"
+                      class="font-body text-gold text-xs hover:text-gold-light tracking-wide flex items-center gap-1 transition-colors flex-shrink-0 ml-2">
+                      PDF ↗
+                    </a>
                   </div>
-                  <a href={item.url} target="_blank" rel="noopener"
-                    class="font-body text-gold text-xs hover:text-gold-light tracking-wide flex items-center gap-1 transition-colors">
-                    PDF ↗
-                  </a>
-                </div>
-              ))}
-              {doc.showPagination && (
-                <div class="pagination py-2">
-                  <button class="page-btn active">1</button>
-                  <button class="page-btn">2</button>
-                  <button class="page-btn">3</button>
-                  <button class="page-btn">···</button>
-                </div>
+                ))
+              ) : (
+                <p class="font-body text-xs text-navy/70 py-2 text-center">No documents in this category yet.</p>
               )}
             </div>
+            {doc.totalCount > 0 && (
+              <div class="px-4 pb-3 pt-1 border-t border-gold/[0.06] text-right">
+                <a
+                  href={doc.archiveLink}
+                  class="font-body text-[0.65rem] tracking-[0.1em] uppercase text-navy/70 hover:text-navy transition-colors"
+                >
+                  {doc.totalCount > doc.items.length
+                    ? `View all ${doc.totalCount} →`
+                    : 'View in archive →'}
+                </a>
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -306,9 +322,9 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
       </div>
 
       <!-- Tabs -->
-      <div class="flex border-b-2 border-navy mb-5 overflow-x-auto reveal">
-        <button class="notice-tab active" data-target="weekly">Weekly Schedule</button>
-        <button class="notice-tab" data-target="monthly">Monthly Duties</button>
+      <div class="flex border-b-2 border-navy mb-5 overflow-x-auto md:overflow-visible reveal">
+        <button class="notice-tab active" data-target="weekly">Hun ruatna</button>
+        <button class="notice-tab" data-target="monthly">Thlabi mawhphurtu</button>
         <button class="notice-tab" data-target="notices">Notices</button>
       </div>
 
@@ -320,7 +336,7 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
         <div class="space-y-3">
           {weeklySchedule.days.map((day, i) => (
             <div class={`reveal reveal-delay-${i + 1} border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
-              <div class="font-body text-[0.65rem] text-gray-400 tracking-widest uppercase mb-2">{day.day}</div>
+              <div class="font-body text-sm font-semibold text-gray-600 tracking-wide uppercase mb-2">{day.day}</div>
               <div class="space-y-1">
                 {day.duties.map(duty => (
                   <div class="flex justify-between font-body text-sm text-gray-700 border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
@@ -341,7 +357,7 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
 
       <!-- Monthly Duties Panel -->
       <div id="notice-monthly" class="notice-panel hidden" style="display:none">
-        <div class="font-body text-xs text-gray-400 tracking-wide mb-3">{monthlyDuties.month}</div>
+        <div class="font-body text-sm text-navy font-semibold tracking-wide mb-3">{monthlyDuties.month}</div>
         <div class="space-y-3">
           {monthlyDuties.sections.map((section, i) => (
             <div class="bg-navy border border-gold/15 rounded overflow-hidden">
@@ -367,7 +383,9 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
           <div class={`border-l-2 ${i === 0 ? 'border-gold' : 'border-gold/40'} bg-white rounded-r px-4 py-3 mb-3 ${i > 0 ? 'opacity-70' : ''}`}>
             <div class="font-body text-[0.6rem] text-gray-400 tracking-widest uppercase mb-1">{notice.date}</div>
             <div class="font-display text-navy font-semibold text-sm mb-1">{notice.title}</div>
-            <div class="font-body text-xs text-gray-600 whitespace-pre-line">{notice.body}</div>
+            <div class="content-page-body font-body text-xs text-gray-600">
+              <notice.Content />
+            </div>
           </div>
         ))}
       </div>
@@ -397,7 +415,7 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
   <section class="bg-cream py-8 px-4" id="contact">
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Church Secretary</h2>
+        <h2>Contact</h2>
       </div>
       <div class="reveal bg-navy border border-gold/20 rounded p-5">
         <div class="flex items-center gap-4 mb-4">
@@ -405,8 +423,8 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
             <svg class="w-5 h-5 text-gold/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
           </div>
           <div>
-            <div class="font-display text-gold-light font-semibold text-base">{generalEntry?.data.secretary_name ?? '[Secretary Hming]'}</div>
-            <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase">Church Secretary</div>
+            <div class="font-body font-bold text-gold-light text-base">{generalEntry?.data.secretary_name ?? '[Secretary Hming]'}</div>
+            <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase">Kohhran Secretary</div>
           </div>
         </div>
         <div class="space-y-2 border-t border-gold/10 pt-3">
@@ -480,4 +498,36 @@ const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.
 
   // ── NOTICE TAB FIX (ensure first panel shows) ──
   document.getElementById('notice-weekly')!.style.display = 'block';
+
+  // ── QUICK LINKS (deep link to notice board tabs) ──
+  function activateNoticeTab(target: string) {
+    document.querySelectorAll('.notice-tab').forEach((t) => {
+      t.classList.toggle('active', (t as HTMLElement).dataset.target === target);
+    });
+    document.querySelectorAll('.notice-panel').forEach((p) => {
+      (p as HTMLElement).style.display = 'none';
+    });
+    const panel = document.getElementById(`notice-${target}`);
+    if (panel) panel.style.display = 'block';
+  }
+
+  document.querySelectorAll('[data-quick-action]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      const action = (link as HTMLElement).dataset.quickAction;
+      if (action === 'tab-weekly' || action === 'tab-monthly') {
+        e.preventDefault();
+        const board = document.getElementById('notice-board');
+        board?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setTimeout(() => activateNoticeTab(action === 'tab-weekly' ? 'weekly' : 'monthly'), 400);
+      }
+    });
+  });
+
+  if (location.hash === '#notice-board') {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'weekly' || tab === 'monthly' || tab === 'notices') {
+      setTimeout(() => activateNoticeTab(tab), 300);
+    }
+  }
 </script>

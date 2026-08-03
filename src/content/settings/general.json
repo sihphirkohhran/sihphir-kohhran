@@ -1,11 +1,11 @@
 {
   "church_name": "Sihphir Presbyterian Kohhran",
-  "founded_year": "19XX",
+  "secretary_phone": "+91 873009871",
+  "secretary_name": "Upa G. Lalchhanhima",
+  "youtube_url": "https://www.youtube.com/@SihphirPresbyterianKohhran",
+  "address": "Sihphir, Mizoram",
+  "secretary_email": "sihphirkohhran@gmail.com",
   "facebook_url": "https://facebook.com",
-  "youtube_url": "https://youtube.com",
-  "secretary_name": "Rev. Secretary Hming",
-  "secretary_phone": "+91 XXXXX XXXXX",
-  "secretary_email": "kohhran@email.com",
-  "address": "Sihphir, Aizawl District, Mizoram",
-  "looker_url": "https://lookerstudio.google.com"
+  "founded_year": "1910",
+  "looker_url": "https://datastudio.google.com/reporting/0ba7652a-248a-4df6-93b2-3cf3c922b176"
 }

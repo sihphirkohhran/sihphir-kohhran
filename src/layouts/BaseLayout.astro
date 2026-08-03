@@ -1,8 +1,25 @@
 ---
 import '../styles/global.css';
 import { getEntry } from 'astro:content';
+import {
+  buildNavTree,
+  isNavActive,
+  isNavChildActive,
+  normalizeNavItems,
+  type NavItem,
+} from '../lib/navigation';
+import { getFellowshipNavItems } from '../lib/fellowship-nav';
+import { getPagesForNav, mergeNavWithPages } from '../lib/pages';
 
 const general = await getEntry('settings', 'general');
+const navEntry = await getEntry('settings', 'navigation');
+const pageNavItems = await getPagesForNav();
+const navTree = buildNavTree(
+  mergeNavWithPages(normalizeNavItems(navEntry?.data.items as NavItem[] | undefined), [
+    ...pageNavItems,
+    ...getFellowshipNavItems(),
+  ]),
+);
 
 interface Props {
   title?: string;
@@ -16,13 +33,7 @@ const {
   activePage = 'home',
 } = Astro.props;
 
-const navItems = [
-  { label: 'Home', href: '/', key: 'home' },
-  { label: 'Committee', href: '/committee', key: 'committee' },
-  { label: 'Fellowship', href: '/fellowship', key: 'fellowship' },
-  { label: 'Gallery', href: '/gallery', key: 'gallery' },
-  { label: 'Document', href: '/document', key: 'document' },
-];
+const currentPath = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -33,22 +44,23 @@ const navItems = [
   <meta name="description" content={description} />
   <title>{title}</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <!-- Preconnect to Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 </head>
-<body>
+<body id="top">
 
-  <!-- ── TOPBAR ── -->
   <div class="bg-navy border-b border-gold/20 px-4 py-1.5 flex items-center justify-between">
     <span class="font-body text-[0.65rem] text-gold-pale/70 tracking-widest uppercase">
       Sihphir, Aizawl District, Mizoram
     </span>
     <div class="flex items-center gap-2">
-      <a href={general?.data.facebook_url ?? 'https://facebook.com'} target="_blank" rel="noopener"
+      <a href={general?.data.instagram_url ?? 'https://instagram.com'} target="_blank" rel="noopener"
         class="w-6 h-6 rounded-full border border-gold/30 flex items-center justify-center text-gold-light hover:border-gold/60 transition-colors"
-        aria-label="Facebook">
-        <svg class="w-3 h-3 m-auto" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
+        aria-label="Instagram">
+        <svg class="w-3 h-3 m-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M7 2A5 5 0 002 7v10a5 5 0 005 5h10a5 5 0 005-5V7a5 5 0 00-5-5H7zm10 1.5a3.5 3.5 0 013.5 3.5v10a3.5 3.5 0 01-3.5 3.5H7A3.5 3.5 0 013.5 17V7A3.5 3.5 0 017 3.5h10z"/>
+          <path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm4.8-.7a1.2 1.2 0 11-2.4 0 1.2 1.2 0 012.4 0z"/>
+        </svg>
       </a>
       <a href={general?.data.youtube_url ?? 'https://youtube.com'} target="_blank" rel="noopener"
         class="w-6 h-6 rounded-full border border-gold/30 flex items-center justify-center text-gold-light hover:border-gold/60 transition-colors"
@@ -58,13 +70,10 @@ const navItems = [
     </div>
   </div>
 
-  <!-- ── HEADER ── -->
   <header class="bg-navy text-center px-4 pt-5 pb-4 relative overflow-hidden">
-    <!-- Diagonal pattern overlay -->
     <div class="absolute inset-0 opacity-[0.04]"
       style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
     </div>
-    <!-- Cross watermark -->
     <div class="absolute right-6 top-1/2 -translate-y-1/2 opacity-[0.05] pointer-events-none select-none">
       <div class="relative w-14 h-20">
         <div class="absolute left-1/2 top-0 -translate-x-1/2 w-3 h-full bg-gold"></div>
@@ -80,8 +89,7 @@ const navItems = [
         (Presbyterian Church of India)
       </p>
 
-      <!-- Logo + Church name -->
-      <div class="flex items-center justify-center gap-4 mt-3 mb-2">
+      <a href="/" class="flex items-center justify-center gap-4 mt-3 mb-2" aria-label="Home">
         <div class="w-14 h-14 rounded-full border-2 border-gold/60 flex items-center justify-center bg-gold/[0.06] flex-shrink-0">
           <img src="/pci-logo.png" alt="PCI Logo" class="w-10 h-10 object-contain"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
@@ -97,9 +105,8 @@ const navItems = [
             Sihphir <span class="text-gold-light">Presbyterian</span> Kohhran
           </h1>
         </div>
-      </div>
+      </a>
 
-      <!-- Gold rule -->
       <div class="flex items-center gap-3 mt-3">
         <div class="flex-1 h-px bg-gradient-to-r from-transparent to-gold/50"></div>
         <div class="w-1 h-1 rounded-full bg-gold"></div>
@@ -108,22 +115,46 @@ const navItems = [
     </div>
   </header>
 
-  <!-- ── STICKY NAV ── -->
   <nav class="nav-sticky bg-navy-mid border-b-2 border-gold sticky top-0 z-50" id="main-nav">
-    <div class="max-w-5xl mx-auto flex items-center justify-between px-4">
-      <!-- Desktop nav -->
-      <div class="nav-links flex overflow-x-auto">
-        {navItems.map(item => (
-          <a
-            href={item.href}
-            class={`nav-link ${activePage === item.key ? 'active' : ''}`}
-          >
-            {item.label}
-          </a>
-        ))}
+    <div class="nav-bar-inner max-w-5xl mx-auto flex items-center justify-between px-4 min-h-[2.75rem]">
+      <div class="nav-links flex flex-1 min-w-0" id="nav-links">
+        {navTree.map((item) => {
+          const isActive = isNavActive(item, activePage, currentPath, item.children);
+          const hasChildren = item.children.length > 0;
+          return (
+            <div
+              class={`nav-item-wrap ${hasChildren ? 'has-children' : ''}`}
+              data-has-children={hasChildren ? 'true' : undefined}
+            >
+              <a
+                href={item.href}
+                class={`nav-link ${isActive ? 'active' : ''}`}
+                aria-haspopup={hasChildren ? 'true' : undefined}
+                aria-expanded={hasChildren ? 'false' : undefined}
+              >
+                {item.label}
+                {hasChildren && (
+                  <svg class="nav-chevron w-2.5 h-2.5 inline-block ml-0.5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                )}
+              </a>
+              {hasChildren && (
+                <div class="nav-submenu" role="menu">
+                  {item.children.map((child) => (
+                    <a
+                      href={child.href}
+                      role="menuitem"
+                      class={`nav-sublink ${isNavChildActive(child, activePage, currentPath) ? 'active' : ''}`}
+                    >
+                      {child.label}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
-      <!-- Mobile hamburger -->
-      <button class="mobile-menu sm:hidden" id="nav-toggle" aria-label="Toggle navigation">
+      <button class="mobile-menu sm:hidden flex-shrink-0" id="nav-toggle" aria-label="Toggle navigation">
         <span></span>
         <span></span>
         <span></span>
@@ -131,12 +162,17 @@ const navItems = [
     </div>
   </nav>
 
-  <!-- ── PAGE CONTENT ── -->
   <main>
     <slot />
   </main>
 
-  <!-- ── FOOTER ── -->
+  <a id="back-to-top" href="#top" class="back-to-top" aria-label="Scroll to top">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M5 15l7-7 7 7"/>
+      <path d="M12 8v11"/>
+    </svg>
+  </a>
+
   <footer class="bg-navy-mid border-t border-gold/40 px-4 py-8 text-center">
     <div class="max-w-2xl mx-auto">
       <div class="font-display text-gold-light text-xl font-semibold mb-1">
@@ -152,10 +188,13 @@ const navItems = [
         <span id="footer-email">{general?.data.secretary_email}</span>
       </div>
       <div class="flex justify-center gap-3 mb-5">
-        <a href={general?.data.facebook_url ?? 'https://facebook.com'} target="_blank" rel="noopener"
+        <a href={general?.data.instagram_url ?? 'https://instagram.com'} target="_blank" rel="noopener"
           class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">
-          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-          Facebook
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M7 2A5 5 0 002 7v10a5 5 0 005 5h10a5 5 0 005-5V7a5 5 0 00-5-5H7zm10 1.5a3.5 3.5 0 013.5 3.5v10a3.5 3.5 0 01-3.5 3.5H7A3.5 3.5 0 013.5 17V7A3.5 3.5 0 017 3.5h10z"/>
+            <path d="M12 8.5a3.5 3.5 0 110 7 3.5 3.5 0 010-7zm4.8-.7a1.2 1.2 0 11-2.4 0 1.2 1.2 0 012.4 0z"/>
+          </svg>
+          Instagram
         </a>
         <a href={general?.data.youtube_url ?? 'https://youtube.com'} target="_blank" rel="noopener"
           class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">
@@ -169,23 +208,77 @@ const navItems = [
     </div>
   </footer>
 
-  <!-- Lightbox -->
   <div id="lightbox" role="dialog" aria-label="Image viewer" aria-modal="true">
-    <img id="lightbox-img" src="" alt="Gallery image" />
-    <button id="lightbox-close"
+    <button type="button" id="lightbox-prev" class="lightbox-nav lightbox-nav-prev" aria-label="Previous image">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    </button>
+    <div class="lightbox-content">
+      <img id="lightbox-img" src="" alt="Gallery image" />
+      <p id="lightbox-caption" class="lightbox-caption font-body text-gold-pale/70 text-sm text-center mt-3 tracking-wide"></p>
+    </div>
+    <button type="button" id="lightbox-next" class="lightbox-nav lightbox-nav-next" aria-label="Next image">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+    </button>
+    <button type="button" id="lightbox-close"
       class="absolute top-4 right-4 text-gold-pale/80 hover:text-gold text-3xl font-display"
       aria-label="Close">&times;</button>
   </div>
 
   <script>
-    // ── Mobile nav toggle ──
+    const MOBILE_NAV_MQ = window.matchMedia('(max-width: 640px)');
+
+    function isMobileNav() {
+      return MOBILE_NAV_MQ.matches;
+    }
+
     const toggle = document.getElementById('nav-toggle');
-    const navLinks = document.querySelector('.nav-links');
+    const navLinks = document.getElementById('nav-links');
+
+    function closeAllSubmenus(except) {
+      document.querySelectorAll('.nav-item-wrap.submenu-open').forEach((wrap) => {
+        if (wrap !== except) {
+          wrap.classList.remove('submenu-open');
+          wrap.querySelector('.nav-link')?.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    function setSubmenuOpen(wrap, open) {
+      if (!wrap) return;
+      wrap.classList.toggle('submenu-open', open);
+      wrap.querySelector('.nav-link')?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+
     toggle?.addEventListener('click', () => {
+      const opening = !navLinks?.classList.contains('open');
       navLinks?.classList.toggle('open');
+      if (!opening) closeAllSubmenus();
     });
 
-    // ── Scroll reveal ──
+    document.querySelectorAll('.nav-item-wrap.has-children > .nav-link').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        if (!isMobileNav()) return;
+        const wrap = link.closest('.nav-item-wrap');
+        const isOpen = wrap?.classList.contains('submenu-open');
+        if (!isOpen) {
+          e.preventDefault();
+          closeAllSubmenus(wrap);
+          setSubmenuOpen(wrap, true);
+        }
+      });
+    });
+
+    document.querySelectorAll('.nav-sublink').forEach((sublink) => {
+      sublink.addEventListener('click', () => {
+        navLinks?.classList.remove('open');
+        closeAllSubmenus();
+      });
+    });
+
+    MOBILE_NAV_MQ.addEventListener('change', () => {
+      if (!isMobileNav()) closeAllSubmenus();
+    });
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
@@ -197,29 +290,116 @@ const navItems = [
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    // ── Lightbox ──
-    document.querySelectorAll('[data-lightbox]').forEach(img => {
-      img.addEventListener('click', () => {
-        const lb = document.getElementById('lightbox');
-        const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
-        if (lb && lbImg) {
-          lbImg.src = (img as HTMLImageElement).src || img.getAttribute('data-src') || '';
-          lb.classList.add('open');
-          document.body.style.overflow = 'hidden';
-        }
+    type LightboxSlide = { src: string; caption: string };
+
+    function getLightboxTriggers(): HTMLElement[] {
+      return [...document.querySelectorAll<HTMLElement>('[data-lightbox-src]')].filter((el) => {
+        const hidden = el.closest('[style*="display: none"]') || el.closest('.hidden');
+        if (hidden && hidden !== el) return false;
+        return el.offsetParent !== null || el.getBoundingClientRect().width > 0;
       });
+    }
+
+    function buildSlides(): LightboxSlide[] {
+      return getLightboxTriggers().map((el) => ({
+        src: el.getAttribute('data-lightbox-src') || (el as HTMLImageElement).src || '',
+        caption: el.getAttribute('data-lightbox-caption') || el.getAttribute('alt') || '',
+      })).filter((s) => s.src);
+    }
+
+    let slides: LightboxSlide[] = [];
+    let currentIndex = 0;
+    let touchStartX = 0;
+
+    function showSlide(index: number) {
+      if (!slides.length) return;
+      currentIndex = (index + slides.length) % slides.length;
+      const lbImg = document.getElementById('lightbox-img') as HTMLImageElement | null;
+      const caption = document.getElementById('lightbox-caption');
+      const slide = slides[currentIndex];
+      if (lbImg) {
+        lbImg.src = slide.src;
+        lbImg.alt = slide.caption || 'Gallery image';
+      }
+      if (caption) {
+        caption.textContent = slide.caption;
+        caption.style.display = slide.caption ? 'block' : 'none';
+      }
+      const prevBtn = document.getElementById('lightbox-prev');
+      const nextBtn = document.getElementById('lightbox-next');
+      const hideNav = slides.length <= 1;
+      prevBtn?.toggleAttribute('disabled', hideNav);
+      nextBtn?.toggleAttribute('disabled', hideNav);
+      if (hideNav) {
+        prevBtn?.setAttribute('aria-hidden', 'true');
+        nextBtn?.setAttribute('aria-hidden', 'true');
+      } else {
+        prevBtn?.removeAttribute('aria-hidden');
+        nextBtn?.removeAttribute('aria-hidden');
+      }
+    }
+
+    function openLightbox(startIndex: number) {
+      slides = buildSlides();
+      if (!slides.length) return;
+      const lb = document.getElementById('lightbox');
+      showSlide(startIndex);
+      lb?.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox')?.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function stepLightbox(delta: number) {
+      if (slides.length <= 1) return;
+      showSlide(currentIndex + delta);
+    }
+
+    document.querySelectorAll('[data-lightbox], [data-lightbox-src]').forEach((el) => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const triggers = getLightboxTriggers();
+        const target = el.closest('[data-lightbox-src]') as HTMLElement | null ?? el as HTMLElement;
+        const index = triggers.indexOf(target);
+        openLightbox(index >= 0 ? index : 0);
+      });
+    });
+
+    document.getElementById('lightbox-prev')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepLightbox(-1);
+    });
+    document.getElementById('lightbox-next')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      stepLightbox(1);
     });
     document.getElementById('lightbox-close')?.addEventListener('click', closeLightbox);
     document.getElementById('lightbox')?.addEventListener('click', (e) => {
       if (e.target === document.getElementById('lightbox')) closeLightbox();
     });
-    function closeLightbox() {
-      document.getElementById('lightbox')?.classList.remove('open');
-      document.body.style.overflow = '';
-    }
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+    document.querySelector('.lightbox-content')?.addEventListener('click', (e) => e.stopPropagation());
 
-    // ── Notice tabs ──
+    document.addEventListener('keydown', (e) => {
+      const lb = document.getElementById('lightbox');
+      if (!lb?.classList.contains('open')) return;
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') stepLightbox(-1);
+      if (e.key === 'ArrowRight') stepLightbox(1);
+    });
+
+    const lbEl = document.getElementById('lightbox');
+    lbEl?.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0]?.clientX ?? 0;
+    }, { passive: true });
+    lbEl?.addEventListener('touchend', (e) => {
+      const dx = (e.changedTouches[0]?.clientX ?? 0) - touchStartX;
+      if (Math.abs(dx) < 40) return;
+      stepLightbox(dx > 0 ? -1 : 1);
+    }, { passive: true });
+
     document.querySelectorAll('.notice-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         const target = (tab as HTMLElement).dataset.target;
@@ -231,6 +411,20 @@ const navItems = [
         const panel = document.getElementById(`notice-${target}`);
         if (panel) panel.style.display = 'block';
       });
+    });
+
+    const backToTopButton = document.getElementById('back-to-top');
+    const updateBackToTop = () => {
+      if (!backToTopButton) return;
+      backToTopButton.classList.toggle('visible', window.scrollY > 280);
+    };
+
+    window.addEventListener('scroll', updateBackToTop, { passive: true });
+    updateBackToTop();
+
+    backToTopButton?.addEventListener('click', (event) => {
+      event.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 

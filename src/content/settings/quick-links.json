@@ -1,0 +1,22 @@
+{
+  "links": [
+    {
+      "label": "Hun Ruatna",
+      "description": "",
+      "href": "/#notice-board",
+      "action": "tab-weekly"
+    },
+    {
+      "label": "Thlabi Mawhphurtu",
+      "description": "",
+      "href": "/#notice-board",
+      "action": "tab-monthly"
+    },
+    {
+      "label": "Notice Board",
+      "description": "Announcements & notices",
+      "href": "/#notice-board",
+      "action": "section"
+    }
+  ]
+}

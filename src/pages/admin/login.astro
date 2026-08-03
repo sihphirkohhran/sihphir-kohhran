@@ -1,0 +1,187 @@
+﻿---
+// Admin login â€” standalone page (no site layout)
+import { getEntry } from 'astro:content';
+
+const authSettings = await getEntry('settings', 'admin-auth');
+const loginTitle = authSettings?.data.login_title ?? 'Sihphir Presbyterian Kohhran';
+const loginSubtitle = authSettings?.data.login_subtitle ?? 'Church Admin â€” Secure Login';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <title>Admin Login â€” Sihphir Presbyterian Kohhran</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;700&family=Crimson+Pro:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --navy: #0f1f3d;
+        --gold: #b8953f;
+        --gold-light: #d4af60;
+        --gold-pale: #f0e0a8;
+        --cream: #faf7f2;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--navy);
+        font-family: 'Crimson Pro', serif;
+        padding: 1.5rem;
+      }
+      .login-card {
+        width: 100%;
+        max-width: 400px;
+        background: var(--cream);
+        border: 1px solid rgba(184, 149, 63, 0.35);
+        border-radius: 6px;
+        padding: 2rem 1.75rem;
+        text-align: center;
+      }
+      .login-card h1 {
+        font-family: 'EB Garamond', serif;
+        color: var(--navy);
+        font-size: 1.5rem;
+        margin: 0 0 0.25rem;
+      }
+      .login-card .subtitle {
+        font-size: 0.75rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: #7a7a8c;
+        margin-bottom: 1.5rem;
+      }
+      .login-card label {
+        display: block;
+        text-align: left;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #7a7a8c;
+        margin-bottom: 0.35rem;
+      }
+      .login-card input {
+        width: 100%;
+        padding: 0.65rem 0.75rem;
+        border: 1px solid rgba(15, 31, 61, 0.2);
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+      .login-card button {
+        width: 100%;
+        padding: 0.75rem;
+        background: var(--navy);
+        color: var(--gold-pale);
+        border: 1px solid var(--gold);
+        border-radius: 4px;
+        font-family: inherit;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .login-card button:hover { background: #1a3057; }
+      .error { color: #b33; font-size: 0.85rem; margin-bottom: 1rem; display: none; }
+      .error.show { display: block; }
+      .hint {
+        font-size: 0.75rem;
+        color: #7a7a8c;
+        margin-top: 1.25rem;
+        line-height: 1.5;
+      }
+      #netlify-login { margin-top: 1rem; }
+      @media (min-width: 1024px) {
+        .login-card h1 { font-size: 1.75rem; }
+        .login-card .subtitle { font-size: 0.8rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-card">
+      <h1>{loginTitle}</h1>
+      <p class="subtitle">{loginSubtitle}</p>
+
+      <p id="login-error" class="error">Invalid password. Please try again.</p>
+
+      <form id="local-login-form" style="display:none">
+        <label for="admin-password">Admin Password</label>
+        <input type="password" id="admin-password" name="password" autocomplete="current-password" required />
+        <button type="submit">Sign In</button>
+      </form>
+
+      <div id="netlify-login"></div>
+
+      <p class="hint" id="login-hint">
+        Production: sign in with your invited Netlify account.<br />
+        Local: use the admin password from <code>src/content/settings/admin-auth.json</code>.
+      </p>
+    </div>
+
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script
+      is:inline
+      define:vars={{
+        localPassword: authSettings?.data.local_password ?? 'change-this-password',
+        sessionHours: authSettings?.data.session_hours ?? 8,
+      }}
+    >
+      const SESSION_KEY = 'sihphir_admin_session';
+      const redirect = new URLSearchParams(location.search).get('redirect') || '/admin';
+
+      function setSession() {
+        const expires = Date.now() + sessionHours * 60 * 60 * 1000;
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify({ ok: true, expires }));
+      }
+
+      function goToAdmin() {
+        setSession();
+        location.href = redirect;
+      }
+
+      if (window.netlifyIdentity) {
+        netlifyIdentity.on('init', (user) => {
+          if (user) {
+            goToAdmin();
+            return;
+          }
+          netlifyIdentity.on('login', () => goToAdmin());
+          if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+            document.getElementById('local-login-form').style.display = 'block';
+            document.getElementById('login-hint').innerHTML =
+              'Local development: enter the password from <code>admin-auth.json</code>, or use Netlify Identity if configured.';
+          } else {
+            netlifyIdentity.open('login');
+          }
+        });
+      } else {
+        document.getElementById('local-login-form').style.display = 'block';
+      }
+
+      document.getElementById('local-login-form')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const pwd = document.getElementById('admin-password').value;
+        const err = document.getElementById('login-error');
+        if (pwd === localPassword) {
+          err.classList.remove('show');
+          goToAdmin();
+        } else {
+          err.classList.add('show');
+        }
+      });
+    </script>
+  </body>
+</html>
+

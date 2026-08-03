@@ -1,0 +1,22 @@
+{
+  "committees": [
+    { "id": "kohhran", "name": "Kohhran Committee", "is_main": true },
+    { "id": "hmeichhia", "name": "Kohhran Hmeichhia" },
+    { "id": "ktp", "name": "Kristian Thalai Pawl (KTP)" },
+    { "id": "kpp", "name": "Kohhran Pavalai Pawl (KPP)" },
+    { "id": "masihi", "name": "Masihi Sangati" },
+    { "id": "ramthar", "name": "Ramthar Committee" },
+    { "id": "kristian-chhungkaw", "name": "Kristian Chhungkaw Committee" },
+    { "id": "sunday-school", "name": "Sunday School Committee" },
+    { "id": "social-front", "name": "Social Front Committee" },
+    { "id": "finance", "name": "Finance Committee" },
+    { "id": "light-sound", "name": "Light & Sound Committee" },
+    { "id": "music", "name": "Music Committee" },
+    { "id": "building", "name": "Building Committee" },
+    { "id": "sanitation", "name": "Sanitation Committee" },
+    { "id": "property", "name": "Property Committee" },
+    { "id": "pes", "name": "PES Management Board" },
+    { "id": "bsi", "name": "BSI Local Committee" },
+    { "id": "archive", "name": "Archive & Documentation" }
+  ]
+}

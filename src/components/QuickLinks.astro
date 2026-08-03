@@ -1,0 +1,47 @@
+---
+interface QuickLink {
+  label: string;
+  description?: string;
+  href: string;
+  action?: string;
+}
+
+interface Props {
+  links: QuickLink[];
+}
+
+const { links } = Astro.props;
+---
+
+{links.length > 0 && (
+  <section class="bg-cream py-6 px-4 border-b border-gold/15" id="quick-links">
+    <div class="max-w-2xl mx-auto reveal">
+      <div class="gold-divider mb-4">
+        <h2>Quick Links</h2>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {links.map((link, i) => (
+          <a
+            href={link.href}
+            class={`quick-link-card reveal reveal-delay-${(i % 3) + 1} group block bg-ivory border border-gold/20 rounded overflow-hidden hover:border-gold/40 transition-all hover:-translate-y-0.5`}
+            data-quick-action={link.action ?? ''}
+          >
+            <div class="h-1 bg-gradient-to-r from-gold/60 to-gold/20"></div>
+            <div class="p-4">
+              <h3 class="font-body font-bold text-navy text-base mb-1 group-hover:text-navy-light transition-colors">
+                {link.label}
+              </h3>
+              {link.description && (
+                <p class="font-body text-navy/70 text-xs leading-relaxed">{link.description}</p>
+              )}
+              <span class="inline-flex items-center gap-1 mt-3 font-body text-[0.65rem] tracking-widest uppercase text-gold/75 group-hover:text-gold transition-colors">
+                Open
+                <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

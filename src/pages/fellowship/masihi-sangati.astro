@@ -1,0 +1,27 @@
+---
+import FellowshipPage from '../../components/FellowshipPage.astro';
+import { getEntry } from 'astro:content';
+import { fellowshipMeta } from '../../lib/fellowship-meta';
+import { fellowshipHistoryToHtml } from '../../lib/cms';
+import { resolveGroupPhotos } from '../../lib/fellowship';
+
+const meta = fellowshipMeta['masihi-sangati'];
+const data = await getEntry('fellowship', 'masihi-sangati');
+if (!data) throw new Error('Fellowship content not found: masihi-sangati');
+---
+
+<FellowshipPage
+  name={meta.name}
+  abbr={meta.abbr}
+  subtitle={meta.subtitle}
+  accentColor={meta.accentColor}
+  logo={data.data.logo}
+  groupPhotos={resolveGroupPhotos(data.data)}
+  history={data.data.history_short}
+  historyFull={fellowshipHistoryToHtml(data.data.history_full)}
+  officeBearers={data.data.office_bearers}
+  committeeMembers={data.data.members.map((m) => ({
+    name: m.name,
+    role: m.role ?? 'Member',
+  }))}
+/>

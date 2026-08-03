@@ -94,14 +94,31 @@ Your site will be live at: `sihphir-kohhran.pages.dev`
 
 ## STEP 7 — Enable Admin Panel (Decap CMS)
 
-1. In Cloudflare Pages, go to your project settings
-2. Go to **Access** → Enable **Netlify Identity** (or use Cloudflare Access)
+### Local editing (on your computer)
 
-**Alternative (easier):** Use Decap CMS with GitHub backend:
-- Change `backend.name` in `public/admin/config.yml` from `git-gateway` to `github`
-- Add `repo: YOUR-USERNAME/sihphir-kohhran`
+Run **two terminals** in the project folder:
 
-Then visit: `https://sihphirpresbyteriankohhran.org/admin`
+```
+npm run dev
+```
+
+```
+npm run cms
+```
+
+Then open: **http://localhost:4321/admin**
+
+The CMS saves files into `src/content/` (settings, notices, documents, gallery, committee, fellowship).
+
+### Production (Netlify)
+
+1. Deploy the site to **Netlify** (connect your GitHub repo)
+2. In Netlify site settings → **Identity** → Enable Identity
+3. Under Identity → **Services** → Enable **Git Gateway**
+4. Under Identity → **Registration** → set to Invite only (recommended)
+5. Visit `https://YOUR-SITE.netlify.app/admin` and log in
+
+`public/admin/config.yml` is already set for `git-gateway` + `local_backend`.
 
 ---
 
@@ -149,7 +166,7 @@ sihphir-kohhran/
 │   │       ├── kohhran-hmeichhia.astro
 │   │       ├── ktp.astro
 │   │       ├── kpp.astro
-│   │       └── masihi-sangai.astro
+│   │       └── masihi-sangati.astro
 │   ├── layouts/
 │   │   └── BaseLayout.astro     ← Header, nav, footer (shared)
 │   ├── components/

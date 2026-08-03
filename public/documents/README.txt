@@ -1,10 +1,14 @@
-Place PDF documents here.
+Place uploaded PDF and document files here.
 
-Naming convention:
-  inleng-DD-MM-YYYY.pdf     — KTP Inleng weekly bulletins
-  yearbook-YYYY.pdf         — Annual year books
-  finance-YYYY.pdf          — Finance reports
-  handbook.pdf              — Church handbook
-  souvenir-YYYY.pdf         — Souvenir publications
+CMS uploads (Admin → Documents) save files to this folder automatically.
+URLs on the site use the form: /documents/your-file-name.pdf
 
-All PDFs will open in a new browser tab when clicked on the website.
+Tips:
+- Use simple filenames (letters, numbers, hyphens). Spaces are converted automatically on save.
+- For local editing: run `npm run dev` and `npm run cms` in two terminals.
+- Google Drive links: use "Or external link" in admin instead of uploading.
+
+Naming examples:
+  yearbook-2025.pdf
+  inleng-18-05-2026.pdf
+  minutes-2025-03.pdf

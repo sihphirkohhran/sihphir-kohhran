@@ -1,0 +1,34 @@
+{
+  "categories": [
+    {
+      "id": "yearbook",
+      "name": "Year Book",
+      "badge": "Annual"
+    },
+    {
+      "id": "minutes",
+      "name": "Minutes",
+      "badge": "Meeting Records"
+    },
+    {
+      "id": "reports",
+      "name": "Reports",
+      "badge": "Annual & Special"
+    },
+    {
+      "id": "notices",
+      "name": "Notice & Circulars",
+      "badge": "Official Notices"
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "badge": "Handbooks & Miscellaneous"
+    },
+    {
+      "id": "rawngbawltu",
+      "name": "Rawngbawltu list",
+      "badge": "Kohhrana hming hmerh rawngbawltute"
+    }
+  ]
+}

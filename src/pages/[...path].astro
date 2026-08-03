@@ -1,0 +1,30 @@
+---
+import ContentPageLayout from '../layouts/ContentPageLayout.astro';
+import { getCollection } from 'astro:content';
+import { isPublishedPageSlug, pageUrlPath } from '../lib/pages';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  return pages
+    .filter((p) => isPublishedPageSlug(p.slug))
+    .map((page) => {
+      const urlPath = pageUrlPath(page.slug, page.data.path).replace(/^\//, '').replace(/\/$/, '');
+      return {
+        params: { path: urlPath },
+        props: { page },
+      };
+    });
+}
+
+const { page } = Astro.props;
+const { Content } = await page.render();
+const activeKey = page.data.nav_key || page.slug;
+---
+
+<ContentPageLayout
+  title={page.data.title}
+  description={page.data.description}
+  activeKey={activeKey}
+>
+  <Content />
+</ContentPageLayout>

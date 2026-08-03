@@ -1,0 +1,37 @@
+---
+interface FilterOption {
+  value: string;
+  label: string;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  options: FilterOption[];
+  allLabel?: string;
+  showAll?: boolean;
+  class?: string;
+}
+
+const {
+  id,
+  label,
+  options,
+  allLabel = 'All',
+  showAll = true,
+  class: className = '',
+} = Astro.props;
+---
+
+<div class={`archive-filter reveal ${className}`} data-archive-filter={id}>
+  <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5">{label}</label>
+  <select
+    id={id}
+    class="archive-filter-select w-full sm:w-auto min-w-[140px] border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors"
+  >
+    {showAll && <option value="all">{allLabel}</option>}
+    {options.map((opt) => (
+      <option value={opt.value}>{opt.label}</option>
+    ))}
+  </select>
+</div>
