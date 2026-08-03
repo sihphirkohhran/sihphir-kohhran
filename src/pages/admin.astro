@@ -6,35 +6,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>Admin Panel — Sihphir Presbyterian Kohhran</title>
+    <title>Admin Panel</title>
 
     <link rel="cms-config-url" type="text/yaml" href="/admin/config.yml" />
-
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        min-height: 100%;
-        background: #fafafa;
-      }
-
-      #loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        font-family: system-ui, sans-serif;
-        color: #666;
-        font-size: 18px;
-      }
-    </style>
   </head>
 
   <body>
-
-    <div id="loading">
-      Loading Admin Panel...
-    </div>
+    <div id="nc-root"></div>
 
     <script is:inline>
       const SESSION_KEY = "sihphir_admin_session";
@@ -42,11 +20,8 @@
       function hasValidSession() {
         try {
           const raw = sessionStorage.getItem(SESSION_KEY);
-
           if (!raw) return false;
-
           const data = JSON.parse(raw);
-
           return data.ok && data.expires > Date.now();
         } catch {
           return false;
@@ -54,21 +29,23 @@
       }
 
       if (!hasValidSession()) {
-        const redirect = encodeURIComponent(
-          location.pathname + location.search
+        location.replace(
+          "/admin/login?redirect=" +
+            encodeURIComponent(location.pathname + location.search)
         );
-
-        location.replace("/admin/login?redirect=" + redirect);
       }
     </script>
 
-    <script is:inline>window.CMS_MANUAL_INIT = true;</script>
+    <script is:inline>
+      window.CMS_MANUAL_INIT = true;
+    </script>
 
-    <script is:inline src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
+    <script
+      is:inline
+      src="https://unpkg.com/decap-cms@3.15.1/dist/decap-cms.js"></script>
 
     <script is:inline src="/admin/document-cms.js"></script>
 
     <script is:inline>window.CMS.init();</script>
-
   </body>
 </html>

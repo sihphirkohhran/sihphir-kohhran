@@ -1,92 +1,79 @@
 /**
- * Decap CMS document helpers
- * Compatible with Decap CMS v3.x
+ * Document save helpers for Decap CMS 3.x.
+ *
+ * Loaded after Decap CMS and before CMS.init(). This module only registers
+ * save hooks; it does not initialize or otherwise control CMS bootstrap.
  */
 (function () {
-  function sanitizeFilename(filename) {
-    var raw = String(filename || "")
-      .replace(/^.*[/\\]/, "")
-      .trim();
+  "use strict";
 
+  function sanitizeFilename(filename) {
+    var raw = String(filename || "").replace(/^.*[/\\]/, "").trim();
     if (!raw) return "document.pdf";
 
-    var extMatch = raw.match(/(\.[a-z0-9]{2,8})$/i);
-    var ext = extMatch ? extMatch[1].toLowerCase() : ".pdf";
-    var base = extMatch ? raw.slice(0, -ext.length) : raw;
-
-    var slug = base
+    var extensionMatch = raw.match(/(\.[a-z0-9]{2,8})$/i);
+    var extension = extensionMatch ? extensionMatch[1].toLowerCase() : ".pdf";
+    var basename = extensionMatch ? raw.slice(0, -extension.length) : raw;
+    var slug = basename
       .toLowerCase()
       .replace(/[<>:"/\\|?*]+/g, "")
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
 
-    return (slug || "document") + ext;
+    return (slug || "document") + extension;
   }
 
-  function normalizePdfUrl(url) {
-    if (!url) return "";
+  function normalizePdfUrl(value) {
+    if (!value) return "";
 
-    var value = String(url).trim().replace(/\\/g, "/");
+    var url = String(value).trim().replace(/\\/g, "/");
+    if (/^https?:\/\//i.test(url)) return url;
 
-    if (/^https?:\/\//i.test(value)) {
-      return value;
+    url = url.replace(/^\/?public\/documents\//, "/documents/");
+    url = url.replace(/^documents\//, "/documents/");
+
+    if (url.indexOf("/documents/") === 0) {
+      var segments = url.split("/");
+      segments[segments.length - 1] = sanitizeFilename(segments[segments.length - 1]);
+      return segments.join("/");
     }
 
-    value = value.replace(/^\/?public\/documents\//, "/documents/");
-    value = value.replace(/^documents\//, "/documents/");
-
-    if (value.startsWith("/documents/")) {
-      var parts = value.split("/");
-      parts[parts.length - 1] = sanitizeFilename(parts[parts.length - 1]);
-      return parts.join("/");
-    }
-
-    return "/documents/" + sanitizeFilename(value);
+    return "/documents/" + sanitizeFilename(url);
   }
 
   function resolveDocumentUrl(fileUrl, externalUrl) {
-    var file = normalizePdfUrl(fileUrl);
-    if (file) return file;
-
-    if (/^https?:\/\//i.test(externalUrl || "")) {
-      return externalUrl;
-    }
-
-    return "";
+    return normalizePdfUrl(fileUrl) || (/^https?:\/\//i.test(externalUrl || "") ? externalUrl : "");
   }
 
-  function register() {
-    if (!window.CMS || window.__sihphirDocumentCmsRegistered) return;
+  function registerDocumentEvents(CMS) {
+    if (!CMS || typeof CMS.registerEventListener !== "function") return;
+    if (window.__sihphirDocumentCmsEventsRegistered) return;
 
-    window.__sihphirDocumentCmsRegistered = true;
-
-    window.CMS.registerEventListener({
+    CMS.registerEventListener({
       name: "preSave",
-      handler: function ({ entry }) {
-        var data = entry.get("data");
-        if (!data) return;
+      handler: function (event) {
+        var entry = event && event.entry;
+        var data = entry && typeof entry.get === "function" ? entry.get("data") : null;
 
-        var next = Object.assign({}, data);
+        if (!data || typeof data.get !== "function" || typeof data.set !== "function") return;
 
-        next.pdf_url = resolveDocumentUrl(
-          next.pdf_url,
-          next.pdf_external
+        return data.set(
+          "pdf_url",
+          resolveDocumentUrl(data.get("pdf_url"), data.get("pdf_external"))
         );
-
-        // Decap CMS 3.x preSave handlers must return the updated entry data,
-        // not the Immutable entry itself. Decap applies that data to the entry.
-        return next;
       }
     });
 
-    window.CMS.registerEventListener({
+    CMS.registerEventListener({
       name: "postSave",
       handler: function () {
         console.log("Entry saved.");
       }
     });
+
+    window.__sihphirDocumentCmsEventsRegistered = true;
   }
 
-  register();
+  registerDocumentEvents(window.CMS);
 })();
