@@ -1,7 +1,6 @@
 {
   "items": [
     {
-      "type": "page",
       "title": "YouTube Official",
       "link": "https://www.youtube.com/@SihphirPresbyterianKohhran",
       "style": "button",
@@ -9,7 +8,6 @@
       "order": 0
     },
     {
-      "type": "page",
       "title": "Upa C. Zokunga vuina",
       "link": "https://www.youtube.com/watch?v=Q96GvaeKnp0",
       "style": "button",
