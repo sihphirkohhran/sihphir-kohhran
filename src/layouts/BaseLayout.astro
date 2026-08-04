@@ -10,6 +10,11 @@ import {
 } from '../lib/navigation';
 import { getFellowshipNavItems } from '../lib/fellowship-nav';
 import { getPagesForNav, mergeNavWithPages } from '../lib/pages';
+import {
+  absoluteSiteUrl,
+  DEFAULT_DESCRIPTION,
+  SITE_NAME,
+} from '../lib/site';
 
 const general = await getEntry('settings', 'general');
 const navEntry = await getEntry('settings', 'navigation');
@@ -30,12 +35,34 @@ interface Props {
 }
 
 const {
-  title = 'Sihphir Presbyterian Kohhran',
-  description = 'Sihphir Presbyterian Kohhran — Mizoram Presbyterian Kohhran, Presbyterian Church of India',
+  title = SITE_NAME,
+  description = DEFAULT_DESCRIPTION,
   activePage = 'home',
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
+const pageTitle = title === SITE_NAME || title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
+const canonicalUrl = absoluteSiteUrl(currentPath);
+const socialImageUrl = absoluteSiteUrl('/pci-logo.png');
+const socialLinks = [general?.data.facebook_url, general?.data.instagram_url, general?.data.youtube_url]
+  .filter((url): url is string => Boolean(url?.trim()));
+const organizationJsonLd = JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Church',
+  name: SITE_NAME,
+  url: canonicalUrl,
+  logo: socialImageUrl,
+  description,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: general?.data.address ?? 'Sihphir, Mizoram',
+    addressRegion: 'Mizoram',
+    addressCountry: 'IN',
+  },
+  email: general?.data.secretary_email,
+  telephone: general?.data.secretary_phone,
+  sameAs: socialLinks,
+}).replace(/</g, '\\u003c');
 ---
 
 <!doctype html>
@@ -44,7 +71,20 @@ const currentPath = Astro.url.pathname;
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content={description} />
-  <title>{title}</title>
+  <title>{pageTitle}</title>
+  <link rel="canonical" href={canonicalUrl} />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SITE_NAME} />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonicalUrl} />
+  <meta property="og:image" content={socialImageUrl} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={pageTitle} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:url" content={canonicalUrl} />
+  <meta name="twitter:image" content={socialImageUrl} />
+  <script type="application/ld+json" set:html={organizationJsonLd}></script>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
