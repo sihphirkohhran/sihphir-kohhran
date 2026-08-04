@@ -111,7 +111,12 @@ export const onRequestGet = async ({ request, env }: Context) => {
 export const onRequestPut = async ({ request, env }: Context) => {
   try {
     if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
-    const { path, content, message } = await request.json() as { path?: string; content?: string; message?: string };
+    const { path, content, message, updates } = await request.json() as { path?: string; content?: string; message?: string; updates?: Array<{ path?: string; content?: string; message?: string }> };
+    if (updates) {
+      if (!Array.isArray(updates) || !updates.length || updates.some(update => !update.path || typeof update.content !== 'string' || update.content.length > 1_000_000 || !allowedPath(update.path))) return json({ error: 'Invalid content updates.' }, 400);
+      for (const update of updates) await writeFile(env, update.path!, update.content!, update.message || `admin: update ${update.path}`);
+      return json({ ok: true });
+    }
     if (!path || typeof content !== 'string' || content.length > 1_000_000 || !allowedPath(path)) return json({ error: 'Invalid content update.' }, 400);
     await writeFile(env, path, content, message || `admin: update ${path}`);
     return json({ ok: true });
