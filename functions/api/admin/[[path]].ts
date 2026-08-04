@@ -45,7 +45,7 @@ function allowedPath(path: string) {
 async function github(env: Env, path: string, init: RequestInit = {}) {
   const { repo, token } = configuration(env);
   const response = await fetch(`https://api.github.com/repos/${repo}${path}`, {
-    ...init, headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'User-Agent': 'sihphir-admin', ...(init.headers || {}) },
+    ...init, cache: 'no-store', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'User-Agent': 'sihphir-admin', ...(init.headers || {}) },
   });
   if (!response.ok) throw new GitHubError(response.status, `GitHub ${response.status}: ${await response.text()}`);
   return response;
@@ -53,7 +53,7 @@ async function github(env: Env, path: string, init: RequestInit = {}) {
 
 async function readFile(env: Env, path: string) {
   const { branch } = configuration(env);
-  const response = await github(env, `/contents/${path}?ref=${encodeURIComponent(branch)}`);
+  const response = await github(env, `/contents/${path}?ref=${encodeURIComponent(branch)}&cache_bust=${Date.now()}`);
   const data = await response.json() as { content: string; sha: string };
   return { sha: data.sha, content: atob(data.content.replace(/\n/g, '')) };
 }
