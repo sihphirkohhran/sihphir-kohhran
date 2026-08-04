@@ -58,7 +58,7 @@ const settings = defineCollection({
             description: z.string().optional(),
             href: z.string(),
             action: z.string().optional(),
-          }),
+          }).passthrough(),
         )
         .optional(),
       highlights: z

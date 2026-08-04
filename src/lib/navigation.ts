@@ -5,6 +5,10 @@ export type NavItem = {
   visible?: boolean;
   order?: number;
   parent?: string;
+  open_in_new_tab?: boolean;
+  new_tab?: boolean;
+  target?: string;
+  openInNewTab?: boolean;
 };
 
 export type NavItemWithChildren = NavItem & {
@@ -32,6 +36,11 @@ export function normalizeNavItems(items: NavItem[] | undefined): NavItem[] {
     order: item.order ?? i * 10,
     parent: normalizeParentKey(item.parent),
     visible: item.visible !== false,
+    openInNewTab:
+      item.openInNewTab ??
+      item.open_in_new_tab ??
+      item.new_tab ??
+      item.target === '_blank',
   }));
 }
 

@@ -14,12 +14,14 @@ import { getPagesForNav, mergeNavWithPages } from '../lib/pages';
 const general = await getEntry('settings', 'general');
 const navEntry = await getEntry('settings', 'navigation');
 const pageNavItems = await getPagesForNav();
-const navTree = buildNavTree(
-  mergeNavWithPages(normalizeNavItems(navEntry?.data.items as NavItem[] | undefined), [
+const managedNavItems = navEntry?.data.items as NavItem[] | undefined;
+const navItems = managedNavItems?.length
+  ? normalizeNavItems(managedNavItems)
+  : mergeNavWithPages(normalizeNavItems(undefined), [
     ...pageNavItems,
     ...getFellowshipNavItems(),
-  ]),
-);
+  ]);
+const navTree = buildNavTree(navItems);
 
 interface Props {
   title?: string;
@@ -131,6 +133,8 @@ const currentPath = Astro.url.pathname;
                 class={`nav-link ${isActive ? 'active' : ''}`}
                 aria-haspopup={hasChildren ? 'true' : undefined}
                 aria-expanded={hasChildren ? 'false' : undefined}
+                target={item.openInNewTab ? '_blank' : undefined}
+                rel={item.openInNewTab ? 'noopener' : undefined}
               >
                 {item.label}
                 {hasChildren && (
@@ -144,6 +148,8 @@ const currentPath = Astro.url.pathname;
                       href={child.href}
                       role="menuitem"
                       class={`nav-sublink ${isNavChildActive(child, activePage, currentPath) ? 'active' : ''}`}
+                      target={child.openInNewTab ? '_blank' : undefined}
+                      rel={child.openInNewTab ? 'noopener' : undefined}
                     >
                       {child.label}
                     </a>

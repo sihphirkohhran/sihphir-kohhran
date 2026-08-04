@@ -107,7 +107,23 @@ const announcements = await Promise.all(
 const historyFullHtml = renderMarkdown(historyEntry?.data.full ?? '');
 const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
 
-const quickLinks = quickLinksEntry?.data.links ?? [];
+type QuickLinkData = {
+  label: string;
+  description?: string;
+  href: string;
+  action?: string;
+  visible?: boolean;
+  enabled?: boolean;
+  order?: number;
+  icon?: string;
+  open_in_new_tab?: boolean;
+  new_tab?: boolean;
+  target?: string;
+};
+
+const quickLinks = ((quickLinksEntry?.data.links ?? []) as QuickLinkData[])
+  .filter((link) => link.visible !== false && link.enabled !== false)
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 const highlightItems = normalizeHighlights(
   highlightsEntry?.data.items as Record<string, unknown>[] | undefined,
 );

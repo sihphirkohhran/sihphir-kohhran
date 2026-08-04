@@ -4,6 +4,13 @@ interface QuickLink {
   description?: string;
   href: string;
   action?: string;
+  visible?: boolean;
+  enabled?: boolean;
+  order?: number;
+  icon?: string;
+  open_in_new_tab?: boolean;
+  new_tab?: boolean;
+  target?: string;
 }
 
 interface Props {
@@ -11,24 +18,30 @@ interface Props {
 }
 
 const { links } = Astro.props;
+const visibleLinks = links
+  .filter((link) => link.visible !== false && link.enabled !== false)
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 ---
 
-{links.length > 0 && (
+{visibleLinks.length > 0 && (
   <section class="bg-cream py-6 px-4 border-b border-gold/15" id="quick-links">
     <div class="max-w-2xl mx-auto reveal">
       <div class="gold-divider mb-4">
         <h2>Quick Links</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {links.map((link, i) => (
+        {visibleLinks.map((link, i) => (
           <a
             href={link.href}
             class={`quick-link-card reveal reveal-delay-${(i % 3) + 1} group block bg-ivory border border-gold/20 rounded overflow-hidden hover:border-gold/40 transition-all hover:-translate-y-0.5`}
             data-quick-action={link.action ?? ''}
+            target={link.open_in_new_tab || link.new_tab || link.target === '_blank' ? '_blank' : undefined}
+            rel={link.open_in_new_tab || link.new_tab || link.target === '_blank' ? 'noopener' : undefined}
           >
             <div class="h-1 bg-gradient-to-r from-gold/60 to-gold/20"></div>
             <div class="p-4">
               <h3 class="font-body font-bold text-navy text-base mb-1 group-hover:text-navy-light transition-colors">
+                {link.icon && <span aria-hidden="true" class="mr-1.5">{link.icon}</span>}
                 {link.label}
               </h3>
               {link.description && (
