@@ -99,8 +99,19 @@ const settings = defineCollection({
 const fellowship = defineCollection({
   type: 'data',
   schema: z.object({
-    history_short: z.string(),
-    history_full: z.string(),
+    fellowship_name: z.string().optional(),
+    slug: z.string().optional(),
+    year: z.number().optional(),
+    banner_image: z.string().optional(),
+    bible_verse: z.string().optional(),
+    meeting_day: z.string().optional(),
+    meeting_time: z.string().optional(),
+    venue: z.string().optional(),
+    contact: z.string().optional(),
+    homepage_visible: z.boolean().optional(),
+    homepage_order: z.number().optional(),
+    history_short: z.string().default(''),
+    history_full: z.string().default(''),
     logo: z.string().optional(),
     group_photo: z.string().optional(),
     description: z.string().optional(),
@@ -111,11 +122,11 @@ const fellowship = defineCollection({
       .optional(),
     office_bearers: z.array(
       z.object({ role: z.string(), name: z.string() }),
-    ),
+    ).default([]),
     members: z.array(
-      z.object({ name: z.string(), role: z.string().optional() }),
-    ),
-  }),
+      z.object({ name: z.string(), role: z.string().optional(), photo: z.string().optional(), display_order: z.number().optional() }).passthrough(),
+    ).default([]),
+  }).passthrough(),
 });
 
 const committee = defineCollection({

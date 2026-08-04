@@ -1,13 +1,15 @@
 ---
 import FellowshipPage from '../../components/FellowshipPage.astro';
-import { getEntry } from 'astro:content';
+import { getCollection } from 'astro:content';
 import { fellowshipMeta } from '../../lib/fellowship-meta';
 import { fellowshipHistoryToHtml } from '../../lib/cms';
 import { resolveGroupPhotos } from '../../lib/fellowship';
+import { currentFellowshipRecord } from '../../lib/fellowship-records';
 
 const meta = fellowshipMeta['masihi-sangati'];
-const data = await getEntry('fellowship', 'masihi-sangati');
-if (!data) throw new Error('Fellowship content not found: masihi-sangati');
+const record = currentFellowshipRecord(await getCollection('fellowship'), 'masihi-sangati');
+if (!record) throw new Error('Fellowship content not found: masihi-sangati');
+const data = record.data;
 ---
 
 <FellowshipPage
@@ -15,12 +17,12 @@ if (!data) throw new Error('Fellowship content not found: masihi-sangati');
   abbr={meta.abbr}
   subtitle={meta.subtitle}
   accentColor={meta.accentColor}
-  logo={data.data.logo}
-  groupPhotos={resolveGroupPhotos(data.data)}
-  history={data.data.history_short}
-  historyFull={fellowshipHistoryToHtml(data.data.history_full)}
-  officeBearers={data.data.office_bearers}
-  committeeMembers={data.data.members.map((m) => ({
+  logo={data.logo}
+  groupPhotos={resolveGroupPhotos({ ...data, group_photo: data.banner_image ?? data.group_photo })}
+  history={data.description ?? data.history_short}
+  historyFull={fellowshipHistoryToHtml(data.history_full)}
+  officeBearers={data.office_bearers}
+  committeeMembers={data.members.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((m) => ({
     name: m.name,
     role: m.role ?? 'Member',
   }))}

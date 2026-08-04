@@ -2,21 +2,18 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { fellowshipMeta, type FellowshipSlug } from '../../lib/fellowship-meta';
+import { currentFellowshipRecord } from '../../lib/fellowship-records';
 
 const fellowshipEntries = await getCollection('fellowship');
-const fellowshipBySlug = Object.fromEntries(
-  fellowshipEntries.map((e) => [e.id as FellowshipSlug, e.data]),
-);
-
 const fellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
   const meta = fellowshipMeta[id];
-  const data = fellowshipBySlug[id];
+  const data = currentFellowshipRecord(fellowshipEntries, id)?.data;
   return {
     id,
     name: meta.name,
     abbr: meta.abbr,
     color: meta.accentColor,
-    description: data?.history_short ?? '',
+    description: data?.description ?? data?.history_short ?? '',
     logo: data?.logo,
   };
 });
