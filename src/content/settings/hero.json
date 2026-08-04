@@ -39,16 +39,6 @@
       "secondary_button": "",
       "enabled": true,
       "order": 3
-    },
-    {
-      "src": "/images/1785842255684-report-page.png",
-      "caption": "test",
-      "subtitle": "",
-      "description": "",
-      "primary_button": "",
-      "secondary_button": "",
-      "enabled": true,
-      "order": 4
     }
   ]
 }
