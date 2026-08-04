@@ -2,27 +2,15 @@
   "stats": [
     {
       "label": "Chhungkaw zat",
-      "value": "342"
+      "value": "497"
     },
     {
       "label": "Member zat",
-      "value": "1,248"
+      "value": "2,251"
     },
     {
       "label": "Dan zawh kim",
-      "value": "89"
-    },
-    {
-      "label": "Test ting",
-      "value": "66",
-      "order": 4,
-      "enabled": true
-    },
-    {
-      "label": "werdd",
-      "value": "44",
-      "order": 5,
-      "enabled": true
+      "value": "1,691"
     }
   ],
   "enabled": true
