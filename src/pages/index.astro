@@ -22,12 +22,27 @@ const pastorEntry = await getEntry('settings', 'pastor');
 const historyEntry = await getEntry('settings', 'history');
 const prayerEntry = await getEntry('settings', 'prayer');
 const generalEntry = await getEntry('settings', 'general');
+const homeEntry = await getEntry('settings', 'home');
 
 const stats = statsEntry?.data.stats ?? [];
 const heroSlides = heroEntry?.data.slides ?? [];
+const home = homeEntry?.data ?? {};
+const positiveCount = (value: unknown, fallback: number) => {
+  const count = Number(value);
+  return Number.isFinite(count) && count > 0 ? Math.floor(count) : fallback;
+};
 
 const allGalleryPhotos = await loadGalleryPhotos();
-const galleryPhotos = pickHomeGalleryPhotos(allGalleryPhotos, 6);
+const galleryCount = positiveCount(home.galleryCount, 6);
+const galleryCategory = String(home.galleryCategory ?? '').trim();
+const gallerySource = galleryCategory
+  ? allGalleryPhotos.filter((photo) => photo.category === galleryCategory)
+  : allGalleryPhotos;
+const galleryPhotos = home.galleryOrder === 'oldest'
+  ? [...gallerySource]
+      .sort((a, b) => a.sortKey.localeCompare(b.sortKey))
+      .slice(0, galleryCount)
+  : pickHomeGalleryPhotos(gallerySource, galleryCount);
 
 const latestWeekly = (await getWeeklySchedules())[0];
 const weeklySchedule = latestWeekly
@@ -58,14 +73,27 @@ const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
 const ktpDocs = await getKtpInlengDocs();
 const otherDocs = await getOtherDocuments();
 
-const homeDocuments = buildHomeDocumentSections(ktpDocs, otherDocs, docCategoriesList);
+const documentCount = positiveCount(home.documentCount, 3);
+const documentCategory = String(home.documentCategory ?? '').trim();
+const builtHomeDocuments = buildHomeDocumentSections(
+  ktpDocs,
+  otherDocs,
+  docCategoriesList,
+  documentCount,
+);
+const homeDocuments = documentCategory
+  ? builtHomeDocuments.filter(
+      (section) => section.id === documentCategory || section.category === documentCategory,
+    )
+  : builtHomeDocuments;
 
 const announcementEntries = (await getCollection('notices'))
   .filter((e) => e.id.startsWith('announcements/'))
   .sort((a, b) => String(b.data.date ?? b.id).localeCompare(String(a.data.date ?? a.id)));
 
+const noticeCount = positiveCount(home.noticeCount, 3);
 const announcements = await Promise.all(
-  announcementEntries.map(async (entry) => {
+  announcementEntries.slice(0, noticeCount).map(async (entry) => {
     const { Content } = await entry.render();
     return {
       id: entry.id.replace(/^announcements\//, ''),
