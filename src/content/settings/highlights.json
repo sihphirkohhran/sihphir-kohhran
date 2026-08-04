@@ -13,6 +13,13 @@
       "style": "button",
       "enabled": true,
       "order": 1
+    },
+    {
+      "title": "Test leh",
+      "link": "12334",
+      "style": "button",
+      "enabled": true,
+      "order": 2
     }
   ]
 }
