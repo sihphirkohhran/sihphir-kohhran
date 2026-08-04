@@ -47,7 +47,12 @@ async function github(env: Env, path: string, init: RequestInit = {}) {
   const response = await fetch(`https://api.github.com/repos/${repo}${path}`, {
     ...init, cache: 'no-store', headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'User-Agent': 'sihphir-admin', ...(init.headers || {}) },
   });
-  if (!response.ok) throw new GitHubError(response.status, `GitHub ${response.status}: ${await response.text()}`);
+  if (!response.ok) {
+    await response.text();
+    throw new GitHubError(response.status, response.status === 409
+      ? 'The content changed while you were editing.'
+      : `GitHub request failed (${response.status}).`);
+  }
   return response;
 }
 
@@ -58,18 +63,43 @@ async function readFile(env: Env, path: string) {
   return { sha: data.sha, content: atob(data.content.replace(/\n/g, '')) };
 }
 
-async function writeFile(env: Env, path: string, content: string, message: string) {
+async function latestFileSha(env: Env, path: string) {
+  try { return (await readFile(env, path)).sha; }
+  catch (error) {
+    if (error instanceof GitHubError && error.status === 404) return undefined;
+    throw error;
+  }
+}
+
+async function writeGitHubFile(env: Env, path: string, content: string, message: string) {
   const { branch } = configuration(env);
-  let sha: string | undefined;
-  try { sha = (await readFile(env, path)).sha; } catch (error) { if (!(error instanceof GitHubError && error.status === 404)) throw error; }
-  await github(env, `/contents/${path}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), branch, sha }) });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const sha = await latestFileSha(env, path);
+    try {
+      await github(env, `/contents/${path}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ message, content, branch, sha }),
+      });
+      return { retried: attempt > 0 };
+    } catch (error) {
+      if (!(error instanceof GitHubError && error.status === 409 && attempt === 0)) {
+        if (error instanceof GitHubError && error.status === 409) {
+          throw new GitHubError(409, 'The gallery changed while you were editing. The save was retried with the latest version but could not be completed. Your edits are still in the editor; please try saving again.');
+        }
+        throw error;
+      }
+    }
+  }
+  throw new GitHubError(409, 'The gallery could not be saved. Your edits are still in the editor; please try again.');
+}
+
+async function writeFile(env: Env, path: string, content: string, message: string) {
+  return writeGitHubFile(env, path, btoa(unescape(encodeURIComponent(content))), message);
 }
 
 async function writeBase64File(env: Env, path: string, base64: string, message: string) {
-  const { branch } = configuration(env);
-  let sha: string | undefined;
-  try { sha = (await readFile(env, path)).sha; } catch (error) { if (!(error instanceof GitHubError && error.status === 404)) throw error; }
-  await github(env, `/contents/${path}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, content: base64, branch, sha }) });
+  return writeGitHubFile(env, path, base64, message);
 }
 
 async function removeFile(env: Env, path: string, message: string) {
@@ -114,12 +144,16 @@ export const onRequestPut = async ({ request, env }: Context) => {
     const { path, content, message, updates } = await request.json() as { path?: string; content?: string; message?: string; updates?: Array<{ path?: string; content?: string; message?: string }> };
     if (updates) {
       if (!Array.isArray(updates) || !updates.length || updates.some(update => !update.path || typeof update.content !== 'string' || update.content.length > 1_000_000 || !allowedPath(update.path))) return json({ error: 'Invalid content updates.' }, 400);
-      for (const update of updates) await writeFile(env, update.path!, update.content!, update.message || `admin: update ${update.path}`);
-      return json({ ok: true });
+      let retried = false;
+      for (const update of updates) {
+        const result = await writeFile(env, update.path!, update.content!, update.message || `admin: update ${update.path}`);
+        retried ||= result.retried;
+      }
+      return json({ ok: true, retried, message: retried ? 'The content changed while you were editing. The save was completed with the latest version.' : undefined });
     }
     if (!path || typeof content !== 'string' || content.length > 1_000_000 || !allowedPath(path)) return json({ error: 'Invalid content update.' }, 400);
-    await writeFile(env, path, content, message || `admin: update ${path}`);
-    return json({ ok: true });
+    const result = await writeFile(env, path, content, message || `admin: update ${path}`);
+    return json({ ok: true, ...result, message: result.retried ? 'The gallery changed while you were editing. The save was completed with the latest version.' : undefined });
   } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to save content.' }, error instanceof GitHubError ? error.status : 500); }
 };
 
