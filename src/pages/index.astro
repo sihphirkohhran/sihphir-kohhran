@@ -110,6 +110,7 @@ const announcements = await Promise.all(
 );
 
 const historyFullHtml = renderMarkdown(history.full ?? '');
+const pastorMessageHtml = renderMarkdown(pastor.message ?? '');
 const lookerUrl = statsSettings.looker_url ?? generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
 
 type QuickLinkData = {
@@ -238,7 +239,7 @@ const highlightItems = normalizeHighlights(
             {pastor.message_title && <div class="font-display text-gold-pale text-sm mb-2">{pastor.message_title}</div>}
             {pastor.verse && <div class="font-body text-gold/80 text-xs mb-2">{pastor.verse}</div>}
             <div class={`font-body text-gold-pale/75 text-sm leading-relaxed ${pastor.quote_style === 'plain' ? '' : 'italic'}`}>
-              {pastor.quote_style === 'none' ? pastor.message ?? '' : `\"${pastor.message ?? ''}\"`}
+              {pastor.quote_style !== 'none' && '“'}<Fragment set:html={pastorMessageHtml} />{pastor.quote_style !== 'none' && '”'}
             </div>
           </div>
         </div>
