@@ -145,6 +145,7 @@ const pastoral = defineCollection({
     start_year: z.number(),
     end_year: z.number().optional(),
     notes: z.string().optional(),
+    cover_photo: z.string().optional(), biography: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), status: z.string().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }),
 });
 
@@ -159,6 +160,7 @@ const missionaries = defineCollection({
     notes: z.string().optional(),
     prayer_requests: z.string().optional(),
     family_photo: z.string().optional(),
+    cover_photo: z.string().optional(), biography: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }),
 });
 
@@ -170,6 +172,7 @@ const elders = defineCollection({
     ordained_year: z.number(),
     status: z.string().optional(),
     notes: z.string().optional(),
+    cover_photo: z.string().optional(), biography: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }),
 });
 
