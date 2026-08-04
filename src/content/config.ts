@@ -169,7 +169,12 @@ const elders = defineCollection({
 
 const photoEntry = z.union([
   z.string(),
-  z.object({ photo: z.string().optional(), src: z.string().optional() }),
+  z.object({
+    photo: z.string().optional(),
+    src: z.string().optional(),
+    alt: z.string().optional(),
+    caption: z.string().optional(),
+  }),
 ]);
 
 const gallery = defineCollection({
@@ -199,7 +204,16 @@ const pages = defineCollection({
 
 const dutyDay = z.object({
   day: z.string(),
-  duties: z.array(z.object({ role: z.string(), name: z.string() })),
+  duties: z.array(z.object({
+    role: z.string(),
+    name: z.string(),
+    time: z.string().optional(),
+    title: z.string().optional(),
+    person_responsible: z.string().optional(),
+    speaker: z.string().optional(),
+    bible_text: z.string().optional(),
+    notes: z.string().optional(),
+  })),
 });
 
 const monthlySection = z.object({
@@ -215,6 +229,7 @@ const notices = defineCollection({
   schema: z.object({
     week_start: z.string().optional(),
     week_end: z.string().optional(),
+    status: z.enum(['current', 'upcoming', 'archived']).optional(),
     days: z.array(dutyDay).optional(),
     month: z.string().optional(),
     sections: z.array(monthlySection).optional(),

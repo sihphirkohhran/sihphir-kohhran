@@ -20,6 +20,7 @@ const areas: Record<string, string[]> = {
   missionaries: ['src/content/missionaries/'], highlights: ['src/content/settings/highlights.json'],
   navigation: ['src/content/settings/navigation.json'],
   settings: ['src/content/settings/'], fellowship: ['src/content/fellowship/'],
+  'hun-ruatna': ['src/content/notices/weekly/'],
   media: ['public/images/', 'public/documents/'],
 };
 
