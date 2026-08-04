@@ -13,7 +13,7 @@
       "value": "89"
     },
     {
-      "label": "Test",
+      "label": "Test ting",
       "value": "66",
       "order": 4,
       "enabled": true
@@ -25,5 +25,5 @@
       "enabled": true
     }
   ],
-  "enabled": false
+  "enabled": true
 }
