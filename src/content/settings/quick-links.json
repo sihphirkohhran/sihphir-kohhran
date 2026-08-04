@@ -2,21 +2,24 @@
   "links": [
     {
       "label": "Hun Ruatna",
-      "description": "",
       "href": "/#notice-board",
-      "action": "tab-weekly"
+      "action": "tab-weekly",
+      "enabled": true,
+      "order": 0
     },
     {
       "label": "Thlabi Mawhphurtu",
-      "description": "",
       "href": "/#notice-board",
-      "action": "tab-monthly"
+      "action": "tab-monthly",
+      "enabled": true,
+      "order": 1
     },
     {
       "label": "Notice Board",
-      "description": "Announcements & notices",
       "href": "/#notice-board",
-      "action": "section"
+      "action": "section",
+      "enabled": true,
+      "order": 2
     }
   ]
 }
