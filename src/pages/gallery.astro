@@ -1,24 +1,61 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArchiveFilterBar from '../components/ArchiveFilterBar.astro';
-import { getEntry } from 'astro:content';
+import { getCollection, getEntry } from 'astro:content';
 import { getUniqueYears } from '../lib/archive';
-import { loadGalleryPhotos, getFallbackGalleryPhotos } from '../lib/gallery';
+import { getFallbackGalleryPhotos } from '../lib/gallery';
 
 const categoryRegistry = await getEntry('settings', 'gallery-categories');
 const categoryList = categoryRegistry?.data.categories ?? [];
 
-const loaded = await loadGalleryPhotos();
+const galleryEntries = (await getCollection('gallery'))
+  .filter((entry) => entry.data.status !== 'archived')
+  .sort((a, b) => {
+    const yearDifference = b.data.year - a.data.year;
+    if (yearDifference) return yearDifference;
+    const orderDifference =
+      (a.data.display_order ?? Number.MAX_SAFE_INTEGER) -
+      (b.data.display_order ?? Number.MAX_SAFE_INTEGER);
+    if (orderDifference) return orderDifference;
+    return a.id.localeCompare(b.id);
+  });
+
+const loaded = galleryEntries.flatMap((entry) => {
+  const rawPhotos = entry.data.photos?.length
+    ? entry.data.photos
+    : entry.data.photo
+      ? [entry.data.photo]
+      : [];
+  const photos = rawPhotos
+    .map((photo) =>
+      typeof photo === 'string'
+        ? { src: photo, alt: '', caption: '' }
+        : {
+            src: photo.src ?? photo.photo ?? '',
+            alt: photo.alt ?? '',
+            caption: photo.caption ?? '',
+          },
+    )
+    .filter((photo) => photo.src);
+  const cover = entry.data.photo;
+  const orderedPhotos =
+    cover && photos[0]?.src !== cover
+      ? [{ src: cover, alt: '', caption: '' }, ...photos.filter((photo) => photo.src !== cover)]
+      : photos;
+
+  return orderedPhotos.map((photo, index) => ({
+    src: photo.src,
+    alt: photo.alt || entry.data.caption,
+    category: entry.data.category,
+    year: entry.data.year,
+    caption: photo.caption || entry.data.caption,
+    id: `${entry.id}-${index}`,
+  }));
+});
+
 const photos =
   loaded.length > 0
-    ? loaded.map((p, i) => ({
-        src: p.src,
-        alt: p.alt,
-        category: p.category,
-        year: p.year,
-        caption: p.caption,
-        id: `gallery-${i}`,
-      }))
+    ? loaded
     : getFallbackGalleryPhotos(18).map((p, i) => ({
         src: p.src,
         alt: p.alt,
@@ -31,7 +68,10 @@ const photos =
 const years = getUniqueYears(photos.map((p) => p.year));
 const yearOptions = years.length > 0 ? years : [2026, 2025, 2024];
 
-const categories = ['All', ...categoryList.map((c) => c.name)];
+const categories = [
+  'All',
+  ...Array.from(new Set(photos.map((photo) => photo.category))).filter(Boolean),
+];
 ---
 
 <BaseLayout title="Gallery — Sihphir Presbyterian Kohhran" activePage="gallery">
