@@ -20,9 +20,33 @@ const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
 
 const ktpRaw = await getKtpInlengDocs();
 const otherRaw = await getOtherDocuments();
+const ktpCategory = { id: 'ktp-inleng', name: 'KTP Inleng' };
+const managedKtpRaw = otherRaw.filter((document) => normalizeCategoryMatch(document.category, ktpCategory));
+const managedCategoryNames = Array.from(
+  new Set(
+    otherRaw
+      .map((document) => String(document.category ?? '').trim())
+      .filter((category) => category && !normalizeCategoryMatch(category, ktpCategory)),
+  ),
+);
+const managedCategories = [
+  ...docCategoriesList,
+  ...managedCategoryNames
+    .filter(
+      (category) =>
+        !docCategoriesList.some((registered) => normalizeCategoryMatch(category, registered)),
+    )
+    .map((category) => ({
+      id: category
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, ''),
+      name: category,
+    })),
+];
 
 const ktpItems = sortDocumentItems(
-  ktpRaw.map((d) =>
+  [...ktpRaw, ...managedKtpRaw].map((d) =>
     toDocumentItem({
       id: d.id,
       name: d.name,
@@ -31,6 +55,8 @@ const ktpItems = sortDocumentItems(
       year: d.year,
       month: d.month,
       pinned: d.pinned,
+      featured: d.featured,
+      is_new: d.is_new,
     }),
   ),
   'newest',
@@ -49,7 +75,7 @@ const docCategories: DocumentCategory[] = [
     hasYearFilter: true,
     hasMonthFilter: true,
   },
-  ...docCategoriesList.map((cat) => {
+  ...managedCategories.map((cat) => {
     const items = sortDocumentItems(
       otherRaw
         .filter((d) => normalizeCategoryMatch(d.category, cat))
@@ -62,6 +88,8 @@ const docCategories: DocumentCategory[] = [
             year: d.year,
             month: d.month,
             pinned: d.pinned,
+            featured: d.featured,
+            is_new: d.is_new,
           }),
         ),
       'newest',
@@ -217,10 +245,13 @@ const archiveJson = categoryMeta.map((c) => ({
     const pinnedBadge = item.pinned
       ? '<span class="doc-badge doc-badge-pinned">Pinned</span>'
       : '';
+    const featuredBadge = item.featured
+      ? '<span class="doc-badge doc-badge-new">Featured</span>'
+      : '';
     const newBadge =
-      item.id === latestId && !item.pinned
+      (item.isNew || item.id === latestId) && !item.pinned
         ? '<span class="doc-badge doc-badge-new">New</span>'
-        : '';
+      : '';
     return `
       <div class="doc-item group doc-row"
         data-doc-id="${item.id}"
@@ -236,7 +267,7 @@ const archiveJson = categoryMeta.map((c) => ({
           <div class="min-w-0">
             <div class="flex items-center gap-1.5 flex-wrap">
               <span class="font-body text-gold-pale/80 text-sm truncate max-w-full">${item.name}</span>
-              ${pinnedBadge}${newBadge}
+              ${pinnedBadge}${featuredBadge}${newBadge}
             </div>
             <span class="font-body text-[0.6rem] text-gold-pale/30 tracking-wide">${item.date}</span>
           </div>

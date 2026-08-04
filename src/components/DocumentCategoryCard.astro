@@ -103,7 +103,10 @@ const showPagination = id === 'ktp-inleng' && items.length > perPage;
                   {item.pinned && (
                     <span class="doc-badge doc-badge-pinned">Pinned</span>
                   )}
-                  {latestIds.includes(item.id) && !item.pinned && (
+                  {item.featured && (
+                    <span class="doc-badge doc-badge-new">Featured</span>
+                  )}
+                  {(item.isNew || latestIds.includes(item.id)) && !item.pinned && (
                     <span class="doc-badge doc-badge-new">New</span>
                   )}
                 </div>

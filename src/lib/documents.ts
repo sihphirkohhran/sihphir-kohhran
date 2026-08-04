@@ -12,6 +12,8 @@ export type DocumentItem = {
   year: number | null;
   month: number | null;
   pinned: boolean;
+  featured: boolean;
+  isNew: boolean;
   sortKey: string;
 };
 
@@ -49,6 +51,8 @@ export function toDocumentItem(
     year?: number | null;
     month?: number | null;
     pinned?: boolean;
+    featured?: boolean;
+    is_new?: boolean;
   },
   idPrefix = '',
 ): DocumentItem {
@@ -69,6 +73,8 @@ export function toDocumentItem(
     year,
     month,
     pinned: Boolean(raw.pinned),
+    featured: Boolean(raw.featured),
+    isNew: Boolean(raw.is_new),
     sortKey: buildSortKey(raw.date, id),
   };
 }

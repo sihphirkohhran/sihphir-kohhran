@@ -104,16 +104,14 @@ export async function getKtpInlengDocs(): Promise<KtpInlengDoc[]> {
       const month = e.data.month ?? fromId.month;
       return {
         id,
+        ...e.data,
         year,
         month,
-        name: e.data.name,
-        date: e.data.date,
         pdf_url: resolveDocumentUrl(e.data.pdf_url, e.data.pdf_external),
-        pinned: e.data.pinned,
         body: e.body,
       };
     })
-    .filter((d) => Boolean(d.pdf_url))
+    .filter((d) => d.status !== 'archived' && Boolean(d.pdf_url))
     .sort((a, b) => String(b.id).localeCompare(String(a.id)));
 }
 
@@ -125,12 +123,11 @@ export async function getOtherDocuments() {
       id: e.id.replace(/^other\//, ''),
       year: e.data.year ?? null,
       month: e.data.month ?? null,
-      pinned: e.data.pinned,
       ...e.data,
       pdf_url: resolveDocumentUrl(e.data.pdf_url, e.data.pdf_external),
       body: e.body,
     }))
-    .filter((d) => Boolean(d.pdf_url))
+    .filter((d) => d.status !== 'archived' && Boolean(d.pdf_url))
     .sort((a, b) => String(b.date ?? b.id).localeCompare(String(a.date ?? a.id)));
 }
 
