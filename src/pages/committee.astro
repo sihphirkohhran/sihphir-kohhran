@@ -10,21 +10,36 @@ import {
 } from '../lib/committee';
 
 const committeeRegistry = await getEntry('settings', 'committees');
-const committees = committeeRegistry?.data.committees ?? [];
+const registeredCommittees = committeeRegistry?.data.committees ?? [];
 
 const committeeEntries = await getCollection('committee');
-const committeeByKey: Record<string, CommitteeRecord> = Object.fromEntries(
-  committeeEntries.map((entry) => [committeeKey(entry.data.committee_id, entry.data.year), entry.data]),
+const activeCommitteeEntries = committeeEntries.filter((entry) => entry.data.status !== 'archived');
+const committeeIdsWithRecords = new Set(committeeEntries.map((entry) => entry.data.committee_id));
+const activeCommitteeIds = new Set(activeCommitteeEntries.map((entry) => entry.data.committee_id));
+const registeredCommitteeIds = new Set(registeredCommittees.map((committee) => committee.id));
+const recordCommittees = Array.from(
+  new Map(
+    activeCommitteeEntries.map((entry) => [
+      entry.data.committee_id,
+      { id: entry.data.committee_id, name: entry.data.committee_name },
+    ]),
+  ).values(),
 );
-const yearsByCommittee = buildYearsByCommittee(committeeEntries);
+const committees = [
+  ...registeredCommittees.filter(
+    (committee) => !committeeIdsWithRecords.has(committee.id) || activeCommitteeIds.has(committee.id),
+  ),
+  ...recordCommittees.filter((committee) => !registeredCommitteeIds.has(committee.id)),
+];
+const committeeByKey: Record<string, CommitteeRecord> = Object.fromEntries(
+  activeCommitteeEntries.map((entry) => [committeeKey(entry.data.committee_id, entry.data.year), entry.data]),
+);
+const yearsByCommittee = buildYearsByCommittee(activeCommitteeEntries);
 
 const defaultCommittee = committees.find((c) => c.is_main) ?? committees[0];
-const defaultId = defaultCommittee?.id ?? 'kohhran';
+const defaultId = defaultCommittee?.id ?? '';
 const defaultYears = yearsByCommittee[defaultId] ?? [];
-const defaultYear =
-  committeeEntries.find((e) => e.data.committee_id === defaultId)?.data.year
-  ?? defaultYears[0]
-  ?? new Date().getFullYear();
+const defaultYear = defaultYears[0] ?? new Date().getFullYear();
 
 const defaultData = defaultYear
   ? committeeByKey[committeeKey(defaultId, defaultYear)]
