@@ -1,12 +1,16 @@
 {
   "categories": [
     {
-      "id": "biak-In",
+      "id": "biak-in",
       "name": "Biak In"
     },
     {
-      "id": "test",
+      "id": "gallery-test",
       "name": "Gallery test"
+    },
+    {
+      "id": "test",
+      "name": "Test"
     }
   ]
 }
