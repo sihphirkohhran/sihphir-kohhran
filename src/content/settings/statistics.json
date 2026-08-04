@@ -17,6 +17,12 @@
       "value": "66",
       "order": 4,
       "enabled": true
+    },
+    {
+      "label": "wer",
+      "value": "44",
+      "order": 5,
+      "enabled": true
     }
   ],
   "enabled": false
