@@ -1,17 +1,19 @@
 {
   "items": [
     {
+      "enabled": true,
+      "type": "page",
+      "style": "button",
       "title": "YouTube",
       "link": "https://www.youtube.com/@SihphirPresbyterianKohhran",
-      "style": "button",
-      "enabled": true,
       "order": 0
     },
     {
+      "enabled": true,
+      "type": "page",
+      "style": "button",
       "title": "Upa C. Zokunga vuina",
       "link": "https://www.youtube.com/watch?v=Q96GvaeKnp0",
-      "style": "button",
-      "enabled": true,
       "order": 1
     }
   ]
