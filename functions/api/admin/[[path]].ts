@@ -29,6 +29,10 @@ const json = (body: unknown, status = 200) => new Response(JSON.stringify(body),
   status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' },
 });
 
+class GitHubError extends Error {
+  constructor(readonly status: number, message: string) { super(message); }
+}
+
 function configuration(env: Env) {
   if (!env.GITHUB_TOKEN || !env.GITHUB_REPOSITORY) throw new Error('Admin API is not configured. Set GITHUB_TOKEN and GITHUB_REPOSITORY.');
   return { repo: env.GITHUB_REPOSITORY, branch: env.GITHUB_BRANCH || 'main', token: env.GITHUB_TOKEN };
@@ -43,7 +47,7 @@ async function github(env: Env, path: string, init: RequestInit = {}) {
   const response = await fetch(`https://api.github.com/repos/${repo}${path}`, {
     ...init, headers: { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'User-Agent': 'sihphir-admin', ...(init.headers || {}) },
   });
-  if (!response.ok) throw new Error(`GitHub ${response.status}: ${await response.text()}`);
+  if (!response.ok) throw new GitHubError(response.status, `GitHub ${response.status}: ${await response.text()}`);
   return response;
 }
 
@@ -57,14 +61,14 @@ async function readFile(env: Env, path: string) {
 async function writeFile(env: Env, path: string, content: string, message: string) {
   const { branch } = configuration(env);
   let sha: string | undefined;
-  try { sha = (await readFile(env, path)).sha; } catch { /* a new file has no SHA */ }
+  try { sha = (await readFile(env, path)).sha; } catch (error) { if (!(error instanceof GitHubError && error.status === 404)) throw error; }
   await github(env, `/contents/${path}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), branch, sha }) });
 }
 
 async function writeBase64File(env: Env, path: string, base64: string, message: string) {
   const { branch } = configuration(env);
   let sha: string | undefined;
-  try { sha = (await readFile(env, path)).sha; } catch { /* a new file has no SHA */ }
+  try { sha = (await readFile(env, path)).sha; } catch (error) { if (!(error instanceof GitHubError && error.status === 404)) throw error; }
   await github(env, `/contents/${path}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message, content: base64, branch, sha }) });
 }
 
@@ -101,7 +105,7 @@ export const onRequestGet = async ({ request, env }: Context) => {
       return { path: item.path, label: item.path.split('/').pop(), type: item.path.split('.').pop(), size: item.size || 0, uploadedAt: timestamp ? new Date(Number(timestamp)).toISOString() : null, kind: item.path.startsWith('public/images/') ? 'image' : 'document' };
     });
     return json({ area, items });
-  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to load content.' }, 500); }
+  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to load content.' }, error instanceof GitHubError ? error.status : 500); }
 };
 
 export const onRequestPut = async ({ request, env }: Context) => {
@@ -111,7 +115,7 @@ export const onRequestPut = async ({ request, env }: Context) => {
     if (!path || typeof content !== 'string' || content.length > 1_000_000 || !allowedPath(path)) return json({ error: 'Invalid content update.' }, 400);
     await writeFile(env, path, content, message || `admin: update ${path}`);
     return json({ ok: true });
-  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to save content.' }, 500); }
+  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to save content.' }, error instanceof GitHubError ? error.status : 500); }
 };
 
 export const onRequestPost = async ({ request, env }: Context) => {
