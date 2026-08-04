@@ -21,6 +21,7 @@ const areas: Record<string, string[]> = {
   navigation: ['src/content/settings/navigation.json'],
   settings: ['src/content/settings/'], fellowship: ['src/content/fellowship/'],
   'hun-ruatna': ['src/content/notices/weekly/'],
+  'thlabi-mawhphurtu': ['src/content/notices/monthly/'],
   media: ['public/images/', 'public/documents/'],
 };
 
