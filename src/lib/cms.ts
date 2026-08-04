@@ -27,6 +27,14 @@ function weeklyStatusPriority(status: string | undefined): number {
   return 1;
 }
 
+function monthlyTimestamp(value: unknown, id: string): number {
+  const month = String(value ?? '').trim();
+  const match = month.match(/^(\d{4})-(\d{2})$/);
+  const normalized = match ? `${month}-01` : id;
+  const timestamp = Date.parse(normalized);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
 export async function getWeeklySchedules() {
   const entries = await getCollection('notices');
   return entries
@@ -52,7 +60,11 @@ export async function getMonthlyDuties() {
       ...e.data,
       body: e.body,
     }))
-    .sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    .sort((a, b) => {
+      const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
+      if (statusDifference) return statusDifference;
+      return monthlyTimestamp(b.month, b.id) - monthlyTimestamp(a.month, a.id);
+    });
 }
 
 export async function getAnnouncements() {
