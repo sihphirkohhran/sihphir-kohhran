@@ -8,6 +8,25 @@ function parseYearMonthFromId(id: string): { year: number | null; month: number 
   return { year: null, month: null };
 }
 
+function weeklyStartTimestamp(value: unknown, id: string): number {
+  const date = String(value ?? '').trim();
+  const isoMatch = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const legacyMatch = date.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  const normalized = isoMatch
+    ? date
+    : legacyMatch
+      ? `${legacyMatch[3]}-${legacyMatch[2].padStart(2, '0')}-${legacyMatch[1].padStart(2, '0')}`
+      : id;
+  const timestamp = Date.parse(normalized);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+}
+
+function weeklyStatusPriority(status: string | undefined): number {
+  if (status === 'current') return 0;
+  if (status === 'archived') return 2;
+  return 1;
+}
+
 export async function getWeeklySchedules() {
   const entries = await getCollection('notices');
   return entries
@@ -17,7 +36,11 @@ export async function getWeeklySchedules() {
       ...e.data,
       body: e.body,
     }))
-    .sort((a, b) => String(b.id).localeCompare(String(a.id)));
+    .sort((a, b) => {
+      const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
+      if (statusDifference) return statusDifference;
+      return weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
+    });
 }
 
 export async function getMonthlyDuties() {
