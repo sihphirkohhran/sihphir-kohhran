@@ -1,7 +1,8 @@
 ---
-caption: New Gallery
+caption: adadas
 year: 2026
-category: Biak In
+category: Test
+description: sdfsd
 status: current
 photo: /images/1785876505092-screenshot-2025-09-01-125203.png
 display_order: 4
