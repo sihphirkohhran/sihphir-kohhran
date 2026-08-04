@@ -11,6 +11,13 @@
     {
       "label": "Dan zawh kim",
       "value": "89"
+    },
+    {
+      "label": "Test",
+      "value": "66",
+      "order": 4,
+      "enabled": true
     }
-  ]
+  ],
+  "enabled": false
 }
