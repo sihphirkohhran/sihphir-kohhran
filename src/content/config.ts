@@ -257,6 +257,14 @@ const documents = defineCollection({
     pdf_external: z.string().optional(),
     category: z.string().optional(),
     pinned: z.boolean().optional(),
+    description: z.string().optional(),
+    cover_image: z.string().optional(),
+    tags: z.array(z.string()).optional(),
+    author: z.string().optional(),
+    display_order: z.number().optional(),
+    featured: z.boolean().optional(),
+    is_new: z.boolean().optional(),
+    status: z.enum(['current', 'archived']).optional(),
   }),
 });
 
