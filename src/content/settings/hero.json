@@ -2,19 +2,43 @@
   "slides": [
     {
       "src": "/images/biak-in-1.jpg",
-      "caption": "Welcome"
+      "caption": "Welcome",
+      "subtitle": "",
+      "description": "",
+      "primary_button": "",
+      "secondary_button": "",
+      "enabled": true,
+      "order": 0
     },
     {
       "src": "/images/biak-in-2.jpg",
-      "caption": "Sihphir Kohhran Biak In"
+      "caption": "Sihphir Kohhran Biak In",
+      "subtitle": "",
+      "description": "",
+      "primary_button": "",
+      "secondary_button": "",
+      "enabled": true,
+      "order": 1
     },
     {
       "src": "/images/biak-in-chhung.jpg",
-      "caption": "Biak in chhung"
+      "caption": "Biak in chhung",
+      "subtitle": "",
+      "description": "",
+      "primary_button": "",
+      "secondary_button": "",
+      "enabled": true,
+      "order": 2
     },
     {
       "src": "/images/kohhran-hall.jpg",
-      "caption": "Kohhran Centenary Hall"
+      "caption": "Kohhran Centenary Hall",
+      "subtitle": "",
+      "description": "",
+      "primary_button": "",
+      "secondary_button": "",
+      "enabled": true,
+      "order": 3
     }
   ]
 }
