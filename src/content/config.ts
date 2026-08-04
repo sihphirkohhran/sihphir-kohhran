@@ -18,7 +18,7 @@ const settings = defineCollection({
         .array(z.object({ src: z.string(), caption: z.string() }))
         .optional(),
       stats: z
-        .array(z.object({ label: z.string(), value: z.string() }))
+        .array(z.object({ label: z.string(), value: z.string() }).passthrough())
         .optional(),
       name: z.string().optional(),
       title: z.string().optional(),

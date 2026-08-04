@@ -24,7 +24,12 @@ const prayerEntry = await getEntry('settings', 'prayer');
 const generalEntry = await getEntry('settings', 'general');
 const homeEntry = await getEntry('settings', 'home');
 
-const stats = statsEntry?.data.stats ?? [];
+const statsSettings = statsEntry?.data ?? {};
+const stats = (statsSettings.stats ?? [])
+  .filter((stat) => stat.enabled !== false)
+  .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+const pastor = pastorEntry?.data ?? {};
+const history = historyEntry?.data ?? {};
 const heroSlides = heroEntry?.data.slides ?? [];
 const home = homeEntry?.data ?? {};
 const positiveCount = (value: unknown, fallback: number) => {
@@ -104,8 +109,8 @@ const announcements = await Promise.all(
   }),
 );
 
-const historyFullHtml = renderMarkdown(historyEntry?.data.full ?? '');
-const lookerUrl = generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
+const historyFullHtml = renderMarkdown(history.full ?? '');
+const lookerUrl = statsSettings.looker_url ?? generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
 
 type QuickLinkData = {
   label: string;
@@ -185,10 +190,10 @@ const highlightItems = normalizeHighlights(
   <QuickLinks links={quickLinks} />
 
   <!-- ══════════════════════════════ STATISTICS ══════════════════════════════ -->
-  <section class="bg-cream py-8 px-4" id="statistics">
+  <section class="bg-cream py-8 px-4" id="statistics" style={statsSettings.enabled === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Kohhran inchhiarna</h2>
+        <h2>{statsSettings.title ?? 'Kohhran inchhiarna'}</h2>
       </div>
       <div class="grid grid-cols-3 gap-3 mb-4">
         {stats.map((stat, i) => (
@@ -200,21 +205,21 @@ const highlightItems = normalizeHighlights(
       </div>
       <a
         href={lookerUrl}
-        target="_blank"
+        target={statsSettings.looker_new_tab === false ? undefined : '_blank'}
         rel="noopener"
         class="reveal flex items-center justify-center gap-2 font-body text-xs text-navy border border-navy/20 hover:border-navy/50 hover:bg-navy hover:text-gold-pale py-2.5 px-4 rounded transition-all tracking-wide"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        Detailed Dashboard — Looker Studio →
+        {statsSettings.dashboard_text ?? 'Detailed Dashboard — Looker Studio →'}
       </a>
     </div>
   </section>
 
   <!-- ══════════════════════════════ PASTOR ══════════════════════════════ -->
-  <section class="bg-ivory py-8 px-4" id="pastor">
+  <section class="bg-ivory py-8 px-4" id="pastor" style={pastor.enabled === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Pastor's Message</h2>
+        <h2>{pastor.section_title ?? "Pastor's Message"}</h2>
       </div>
       <div class="reveal bg-navy border border-gold/20 rounded p-5 relative overflow-hidden">
         <!-- Large quote mark watermark -->
@@ -222,16 +227,18 @@ const highlightItems = normalizeHighlights(
         <div class="flex gap-4 items-start relative z-10">
           <div class="flex-shrink-0">
             <div class="w-16 h-16 rounded-full border-2 border-gold/60 overflow-hidden bg-navy-light flex items-center justify-center">
-              <img src={pastorEntry?.data.photo ?? '/images/pastor.jpg'} alt="Pastor" class="w-full h-full object-cover"
+              <img src={pastor.photo ?? '/images/pastor.jpg'} alt={pastor.name ?? 'Pastor'} class="w-full h-full object-cover"
                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
               <span class="w-full h-full items-center justify-center hidden font-display text-gold-pale text-xl">✝</span>
             </div>
           </div>
           <div class="flex-1 min-w-0">
-            <div class="font-display text-gold-light font-semibold text-base mb-0.5">{pastorEntry?.data.name ?? 'Rev. [Pastor Hming]'}</div>
-            <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase mb-3">{pastorEntry?.data.title ?? 'Head Pastor · Sihphir Kohhran'}</div>
-            <div class="font-body text-gold-pale/75 text-sm italic leading-relaxed">
-              "{pastorEntry?.data.message ?? ''}"
+            <div class="font-display text-gold-light font-semibold text-base mb-0.5">{pastor.name ?? 'Rev. [Pastor Hming]'}</div>
+            <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase mb-3">{pastor.title ?? 'Head Pastor · Sihphir Kohhran'}</div>
+            {pastor.message_title && <div class="font-display text-gold-pale text-sm mb-2">{pastor.message_title}</div>}
+            {pastor.verse && <div class="font-body text-gold/80 text-xs mb-2">{pastor.verse}</div>}
+            <div class={`font-body text-gold-pale/75 text-sm leading-relaxed ${pastor.quote_style === 'plain' ? '' : 'italic'}`}>
+              {pastor.quote_style === 'none' ? pastor.message ?? '' : `\"${pastor.message ?? ''}\"`}
             </div>
           </div>
         </div>
@@ -240,31 +247,32 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ CHURCH HISTORY ══════════════════════════════ -->
-  <section class="bg-cream py-8 px-4" id="history">
+  <section class="bg-cream py-8 px-4" id="history" style={history.enabled === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Sihphir Kohhran Chanchin</h2>
+        <h2>{history.section_title ?? 'Sihphir Kohhran Chanchin'}</h2>
       </div>
       <div class="reveal border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
         <!-- Church building photo -->
         <div class="w-full aspect-video rounded overflow-hidden mb-4 bg-ivory-dark border border-gold/20 flex items-center justify-center">
-          <img src={historyEntry?.data.building_photo ?? '/images/church-building.jpg'} alt="Sihphir Presbyterian Kohhran Building"
+          <img src={history.building_photo ?? '/images/church-building.jpg'} alt="Sihphir Presbyterian Kohhran Building"
             class="w-full h-full object-cover"
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
           <span class="hidden font-body text-xs text-gold/40 tracking-wide">Church Building Photo</span>
         </div>
 
         <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
-          {historyEntry?.data.short}
+          {history.short}
         </div>
         <div class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
           <Fragment set:html={historyFullHtml} />
         </div>
         <button
           id="history-toggle"
+          data-destination={history.destination ?? ''}
           class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/50 hover:border-navy transition-colors pb-0.5"
         >
-          Read More →
+          {history.read_more_text ?? 'Read More →'}
         </button>
       </div>
     </div>
@@ -534,6 +542,10 @@ const highlightItems = normalizeHighlights(
   const full = document.getElementById('history-full');
   let expanded = false;
   btn?.addEventListener('click', () => {
+    if (btn instanceof HTMLButtonElement && btn.dataset.destination) {
+      window.location.href = btn.dataset.destination;
+      return;
+    }
     expanded = !expanded;
     short!.classList.toggle('hidden', expanded);
     full!.classList.toggle('hidden', !expanded);
