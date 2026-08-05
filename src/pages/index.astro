@@ -106,11 +106,17 @@ const homeDocuments = documentCategory
     )
   : builtHomeDocuments;
 
+const noticeDate = (value: string) => { const parts=value.split(/[.\/-]/).map(Number);return parts.length===3 ? new Date(parts[2],parts[1]-1,parts[0]).getTime() : Date.parse(value)||0; };
 const announcementEntries = (await getCollection('notices'))
-  .filter((e) => e.id.startsWith('announcements/'))
-  .sort((a, b) => String(b.data.date ?? b.id).localeCompare(String(a.data.date ?? a.id)));
+  .filter((entry) => entry.id.startsWith('announcements/') && entry.data.published !== false && entry.data.status !== 'archived')
+  .sort((a, b) => noticeDate(String(b.data.date ?? '')) - noticeDate(String(a.data.date ?? '')) || b.id.localeCompare(a.id));
 
 const noticeCount = positiveCount(home.noticeCount, 3);
+const noticeVisible = home.noticeVisible !== false && visibility.notice_board !== false;
+const noticeHeading = String(home.noticeHeading ?? 'Notice Board');
+const noticeSubtitle = String(home.noticeSubtitle ?? '');
+const noticeButtonText = String(home.noticeButtonText ?? 'View All Notices');
+const noticeButtonLink = String(home.noticeLink ?? '/notices');
 const announcements = await Promise.all(
   announcementEntries.slice(0, noticeCount).map(async (entry) => {
     const { Content } = await entry.render();
@@ -382,11 +388,12 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ NOTICE BOARD ══════════════════════════════ -->
-  <section class="bg-ivory py-8 px-4" id="notice-board" style={visibility.notice_board === false ? 'display:none' : undefined}>
+  <section class="bg-ivory py-8 px-4" id="notice-board" style={noticeVisible ? undefined : 'display:none'}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Notice Board</h2>
+        <h2>{noticeHeading}</h2>
       </div>
+      {noticeSubtitle && <p class="font-body text-xs text-gray-500 text-center -mt-3 mb-5">{noticeSubtitle}</p>}
 
       <!-- Tabs -->
       <div class="flex border-b-2 border-navy mb-5 overflow-x-auto md:overflow-visible reveal">
@@ -456,6 +463,7 @@ const highlightItems = normalizeHighlights(
           </div>
         ))}
       </div>
+      <div class="mt-4 text-right"><a href={noticeButtonLink} class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/30 hover:border-navy transition-colors">{noticeButtonText} →</a></div>
     </div>
   </section>
 

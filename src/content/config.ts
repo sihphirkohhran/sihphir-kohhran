@@ -298,6 +298,7 @@ const notices = defineCollection({
     title: z.string().optional(),
     date: z.string().optional(),
     pdf_url: z.string().optional(),
+    published: z.boolean().optional(),
   }),
 });
 
