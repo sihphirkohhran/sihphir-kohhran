@@ -18,5 +18,9 @@
     "featured_committee": true,
     "featured_fellowship": true,
     "featured_ministries": true
-  }
+  },
+  "noticeVisible": true,
+  "noticeHeading": "Notice Board",
+  "noticeSubtitle": "",
+  "noticeButtonText": "View All Notices"
 }
