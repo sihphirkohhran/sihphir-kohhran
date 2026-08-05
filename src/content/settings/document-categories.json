@@ -1,34 +1,32 @@
 {
   "categories": [
     {
-      "id": "yearbook",
-      "name": "Year Book",
-      "badge": "Annual"
+      "id": "year-book",
+      "name": "Year Book"
     },
     {
       "id": "minutes",
-      "name": "Minutes",
-      "badge": "Meeting Records"
+      "name": "Minutes"
     },
     {
       "id": "reports",
-      "name": "Reports",
-      "badge": "Annual & Special"
+      "name": "Reports"
     },
     {
-      "id": "notices",
-      "name": "Notice & Circulars",
-      "badge": "Official Notices"
+      "id": "notice-circulars",
+      "name": "Notice & Circulars"
     },
     {
       "id": "other",
-      "name": "Other",
-      "badge": "Handbooks & Miscellaneous"
+      "name": "Other"
     },
     {
-      "id": "rawngbawltu",
-      "name": "Rawngbawltu list",
-      "badge": "Kohhrana hming hmerh rawngbawltute"
+      "id": "rawngbawltu-list",
+      "name": "Rawngbawltu list"
+    },
+    {
+      "id": "ktp-inleng",
+      "name": "KTP Inleng"
     }
   ]
 }
