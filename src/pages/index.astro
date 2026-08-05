@@ -32,6 +32,12 @@ const pastor = pastorEntry?.data ?? {};
 const history = historyEntry?.data ?? {};
 const heroSlides = heroEntry?.data.slides ?? [];
 const home = homeEntry?.data ?? {};
+const visibility = {
+  hero: true, highlights: true, notice_board: true, quick_access: true, prayer_topics: true,
+  featured_gallery: true, featured_documents: true, featured_committee: true,
+  featured_fellowship: true, featured_ministries: true,
+  ...(home.visibility ?? {}),
+};
 const positiveCount = (value: unknown, fallback: number) => {
   const count = Number(value);
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : fallback;
@@ -68,9 +74,15 @@ const monthlyDuties = latestMonthly
     }
   : { month: '', sections: [] };
 
-const prayerTopics = (prayerEntry?.data.topics ?? []).map((t) =>
-  typeof t === 'string' ? t : t.topic,
-);
+const prayerSettings = prayerEntry?.data ?? {};
+const prayerHeading = prayerSettings.heading ?? 'Tawngtai Thupui';
+const prayerSubtitle = prayerSettings.subtitle ?? '';
+const prayerLimit = positiveCount(prayerSettings.max_visible, 4);
+const prayerTopics = (prayerSettings.topics ?? [])
+  .map((topic, index) => typeof topic === 'string' ? { topic, display_order: index } : { topic: topic.topic, display_order: topic.display_order ?? index })
+  .sort((a, b) => a.display_order - b.display_order)
+  .slice(0, prayerLimit)
+  .map((item) => item.topic);
 
 const docCategoryRegistry = await getEntry('settings', 'document-categories');
 const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
@@ -138,7 +150,7 @@ const highlightItems = normalizeHighlights(
 <BaseLayout activePage="home">
 
   <!-- ══════════════════════════════ HERO ══════════════════════════════ -->
-  <section class="relative h-[62vw] min-h-[240px] max-h-[480px] overflow-hidden bg-navy" id="hero-section">
+  <section class="relative h-[62vw] min-h-[240px] max-h-[480px] overflow-hidden bg-navy" id="hero-section" style={visibility.hero === false ? 'display:none' : undefined}>
     <!-- Slides (replaced by real images in production) -->
     {heroSlides.map((slide, i) => (
       <div
@@ -186,9 +198,9 @@ const highlightItems = normalizeHighlights(
     </div>
   </section>
 
-  <Highlights items={highlightItems} />
+  <div style={visibility.highlights === false ? 'display:none' : 'display:contents'}><Highlights items={highlightItems} /></div>
 
-  <QuickLinks links={quickLinks} />
+  <div style={visibility.quick_access === false ? 'display:none' : 'display:contents'}><QuickLinks links={quickLinks} /></div>
 
   <!-- ══════════════════════════════ STATISTICS ══════════════════════════════ -->
   <section class="bg-cream py-8 px-4" id="statistics" style={statsSettings.enabled === false ? 'display:none' : undefined}>
@@ -280,7 +292,7 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ GALLERY ══════════════════════════════ -->
-  <section class="bg-ivory py-8 px-4" id="gallery">
+  <section class="bg-ivory py-8 px-4" id="gallery" style={visibility.featured_gallery === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
         <h2>Gallery</h2>
@@ -309,7 +321,7 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ DOCUMENTS ══════════════════════════════ -->
-  <section class="bg-cream py-8 px-4" id="documents">
+  <section class="bg-cream py-8 px-4" id="documents" style={visibility.featured_documents === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
         <h2>Documents</h2>
@@ -368,7 +380,7 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ NOTICE BOARD ══════════════════════════════ -->
-  <section class="bg-ivory py-8 px-4" id="notice-board">
+  <section class="bg-ivory py-8 px-4" id="notice-board" style={visibility.notice_board === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
         <h2>Notice Board</h2>
@@ -446,11 +458,11 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ PRAYER TOPICS ══════════════════════════════ -->
-  <section class="bg-navy py-8 px-4" id="prayer">
+  <section class="bg-navy py-8 px-4" id="prayer" style={prayerSettings.enabled === false || visibility.prayer_topics === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="flex items-center gap-3 mb-5 reveal">
         <div class="flex-1 h-px bg-gradient-to-r from-transparent to-gold/35"></div>
-        <h2 class="font-display text-gold-light text-xl font-semibold whitespace-nowrap">Tawngtai Thupui</h2>
+        <div class="text-center"><h2 class="font-display text-gold-light text-xl font-semibold whitespace-nowrap">{prayerHeading}</h2>{prayerSubtitle && <p class="font-body text-gold-pale/55 text-xs mt-1">{prayerSubtitle}</p>}</div>
         <div class="flex-1 h-px bg-gradient-to-l from-transparent to-gold/35"></div>
       </div>
       <div class="space-y-3">

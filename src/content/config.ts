@@ -28,8 +28,13 @@ const settings = defineCollection({
       short: z.string().optional(),
       full: z.string().optional(),
       topics: z
-        .array(z.union([z.string(), z.object({ topic: z.string() })]))
+        .array(z.union([z.string(), z.object({ topic: z.string(), display_order: z.number().optional() })]))
         .optional(),
+      enabled: z.boolean().optional(),
+      heading: z.string().optional(),
+      subtitle: z.string().optional(),
+      max_visible: z.number().optional(),
+      visibility: z.record(z.boolean()).optional(),
       items: z
         .array(
           z
