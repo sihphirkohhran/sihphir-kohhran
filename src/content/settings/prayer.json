@@ -1,8 +1,24 @@
 {
   "topics": [
-    "Hetah hian tawngtai thupui pakhatna a awm ang.",
-    "Hetah hian tawngtai thupui pahnihna a awm leh ang.",
-    "Pathum thleng pawh a awm thei",
-    "A aia tam daih pawh a dah theih"
-  ]
+    {
+      "topic": "Hetah hian tawngtai thupui pakhatna a awm ang.",
+      "display_order": 0
+    },
+    {
+      "topic": "Hetah hian tawngtai thupui pahnihna a awm leh ang.",
+      "display_order": 1
+    },
+    {
+      "topic": "Pathum thleng pawh a awm thei",
+      "display_order": 2
+    },
+    {
+      "topic": "A aia tam daih pawh a dah theih",
+      "display_order": 3
+    }
+  ],
+  "enabled": true,
+  "heading": "Tawngtai Thupui",
+  "subtitle": "",
+  "max_visible": 4
 }
