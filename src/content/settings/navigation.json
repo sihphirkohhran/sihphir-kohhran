@@ -22,7 +22,7 @@
       "key": "bialtu-pastor",
       "visible": true,
       "order": 2,
-      "parent": "Rawngbawltu"
+      "parent": "Rawngbawltute"
     },
     {
       "label": "Pro Pastor",
@@ -30,7 +30,7 @@
       "key": "pro-pastor",
       "visible": true,
       "order": 3,
-      "parent": "Rawngbawltu"
+      "parent": "Rawngbawltute"
     },
     {
       "label": "Kohhran Upa",
@@ -38,7 +38,7 @@
       "key": "kohhran-upa",
       "visible": true,
       "order": 4,
-      "parent": "Rawngbawltu"
+      "parent": "Rawngbawltute"
     },
     {
       "label": "Missionary",
@@ -46,7 +46,7 @@
       "key": "missionary",
       "visible": true,
       "order": 5,
-      "parent": "Rawngbawltu"
+      "parent": "Rawngbawltute"
     },
     {
       "label": "Fellowship",
