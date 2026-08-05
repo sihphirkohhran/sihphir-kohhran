@@ -81,7 +81,7 @@
     },
     {
       "label": "Te",
-      "href": "/Test page",
+      "href": "/test-page",
       "key": "new-item",
       "visible": true,
       "order": 10,
