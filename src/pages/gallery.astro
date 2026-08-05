@@ -1,188 +1,85 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ArchiveFilterBar from '../components/ArchiveFilterBar.astro';
 import { getCollection, getEntry } from 'astro:content';
-import { getUniqueYears } from '../lib/archive';
 import { getFallbackGalleryPhotos } from '../lib/gallery';
 
-const categoryRegistry = await getEntry('settings', 'gallery-categories');
-const categoryList = categoryRegistry?.data.categories ?? [];
+const registry = await getEntry('settings', 'gallery-categories');
+const registeredCategories = registry?.data.categories?.map((item) => item.name) ?? [];
+const entries = (await getCollection('gallery')).filter((entry) => entry.data.status !== 'archived');
 
-const galleryEntries = (await getCollection('gallery'))
-  .filter((entry) => entry.data.status !== 'archived')
-  .sort((a, b) => {
-    const yearDifference = b.data.year - a.data.year;
-    if (yearDifference) return yearDifference;
-    const orderDifference =
-      (a.data.display_order ?? Number.MAX_SAFE_INTEGER) -
-      (b.data.display_order ?? Number.MAX_SAFE_INTEGER);
-    if (orderDifference) return orderDifference;
-    return a.id.localeCompare(b.id);
-  });
-
-const loaded = galleryEntries.flatMap((entry) => {
-  const rawPhotos = entry.data.photos?.length
-    ? entry.data.photos
-    : entry.data.photo
-      ? [entry.data.photo]
-      : [];
-  const photos = rawPhotos
-    .map((photo) =>
-      typeof photo === 'string'
-        ? { src: photo, alt: '', caption: '' }
-        : {
-            src: photo.src ?? photo.photo ?? '',
-            alt: photo.alt ?? '',
-            caption: photo.caption ?? '',
-          },
-    )
+const albums = entries.map((entry) => {
+  const data = entry.data;
+  const raw = data.photos?.length ? data.photos : data.photo ? [data.photo] : [];
+  const photos = raw.map((photo) => typeof photo === 'string'
+    ? { src: photo, alt: data.caption, caption: data.caption }
+    : { src: photo.src || photo.photo || '', alt: photo.alt || data.caption, caption: photo.caption || data.caption })
     .filter((photo) => photo.src);
-  const cover = entry.data.photo;
-  const orderedPhotos =
-    cover && photos[0]?.src !== cover
-      ? [{ src: cover, alt: '', caption: '' }, ...photos.filter((photo) => photo.src !== cover)]
-      : photos;
+  if (data.photo && !photos.some((photo) => photo.src === data.photo)) photos.unshift({ src: data.photo, alt: data.caption, caption: data.caption });
+  return {
+    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), title: data.caption, year: data.year,
+    category: data.category, description: data.description || '', date: data.date || '',
+    order: data.display_order ?? Number.MAX_SAFE_INTEGER, featured: Boolean((data as typeof data & { featured?: boolean }).featured), photos,
+  };
+}).filter((album) => album.photos.length).sort((a, b) => b.year - a.year || a.order - b.order || a.title.localeCompare(b.title));
 
-  return orderedPhotos.map((photo, index) => ({
-    src: photo.src,
-    alt: photo.alt || entry.data.caption,
-    category: entry.data.category,
-    year: entry.data.year,
-    caption: photo.caption || entry.data.caption,
-    id: `${entry.id}-${index}`,
-  }));
-});
+if (!albums.length) {
+  const fallback = getFallbackGalleryPhotos(18);
+  if (fallback.length) albums.push({ id: 'church-gallery', title: 'Church Gallery', year: fallback[0].year, category: 'Gallery', description: 'Photographs from Sihphir Presbyterian Kohhran.', date: '', order: 0, featured: false, photos: fallback.map(({ src, alt, caption }) => ({ src, alt, caption })) });
+}
 
-const photos =
-  loaded.length > 0
-    ? loaded
-    : getFallbackGalleryPhotos(18).map((p, i) => ({
-        src: p.src,
-        alt: p.alt,
-        category: categoryList[i % Math.max(categoryList.length, 1)]?.name ?? 'Gallery',
-        year: p.year,
-        caption: p.caption,
-        id: `fallback-${i}`,
-      }));
-
-const years = getUniqueYears(photos.map((p) => p.year));
-const yearOptions = years.length > 0 ? years : [2026, 2025, 2024];
-
-const categories = [
-  'All',
-  ...Array.from(new Set(photos.map((photo) => photo.category))).filter(Boolean),
-];
+const featured = albums.filter((album) => album.featured);
+const archive = albums.filter((album) => !album.featured);
+const years = Array.from(new Set(albums.map((album) => album.year))).sort((a, b) => b - a);
+const categories = Array.from(new Set([...registeredCategories, ...albums.map((album) => album.category)])).filter(Boolean).sort();
+const photoCount = albums.reduce((sum, album) => sum + album.photos.length, 0);
+const formatDate = (value: string) => {
+  if (!value) return '';
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.valueOf()) ? value : new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(parsed);
+};
 ---
 
 <BaseLayout title="Gallery — Sihphir Presbyterian Kohhran" activePage="gallery">
+  <header class="gallery-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image:repeating-linear-gradient(45deg,#b8953f 0,#b8953f 1px,transparent 1px,transparent 28px)"></div>
+    <div class="relative z-10 max-w-3xl mx-auto"><p>Sihphir Presbyterian Kohhran</p><h1>Church Gallery</h1><div class="gallery-hero-copy">A living photo archive of our worship, fellowship and life together.</div><div class="gallery-hero-stats"><span>{albums.length} album{albums.length === 1 ? '' : 's'}</span><i></i><span>{photoCount} photo{photoCount === 1 ? '' : 's'}</span></div></div>
+  </header>
 
-  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.04]"
-      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
-    </div>
-    <div class="relative z-10">
-      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Gallery</h1>
-      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
-    </div>
-  </div>
+  <main class="gallery-page max-w-6xl mx-auto px-4 py-8 sm:py-10">
+    <section class="gallery-toolbar reveal" aria-label="Gallery search and filters">
+      <label class="gallery-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span class="sr-only">Search albums</span><input type="search" id="gallery-search" placeholder="Search albums, descriptions or categories…" autocomplete="off" /></label>
+      <div class="gallery-filter-row"><label><span>Year</span><select id="gallery-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label><label><span>Category</span><select id="gallery-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label><label><span>Sort</span><select id="gallery-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="photos">Most Photos</option></select></label></div>
+      <p id="gallery-count">{albums.length} albums · {photoCount} photos</p>
+    </section>
 
-  <div class="max-w-3xl mx-auto px-4 py-8">
+    {featured.length > 0 && <section class="gallery-section featured-section" id="featured-galleries"><div class="section-heading reveal"><div><span>Selected collection</span><h2>Featured Gallery</h2></div><p>Highlights from the church photo archive.</p></div><div class="featured-grid" data-album-grid>{featured.map((album) => <article class="featured-album reveal" data-album-card data-id={album.id} data-title={album.title.toLowerCase()} data-description={album.description.toLowerCase()} data-category={album.category} data-year={album.year} data-photos={album.photos.length}><div class="featured-cover"><img src={album.photos[0].src} alt={album.photos[0].alt} loading="lazy" /><span>Featured</span></div><div class="featured-copy"><div class="badges"><span>{album.category}</span><span>{album.year}</span><span>{album.photos.length} photos</span></div><h3>{album.title}</h3><p>{album.description || 'A selected collection from the Sihphir Presbyterian Kohhran photo archive.'}</p><button type="button" data-open-album={album.id}>Open Gallery <span>→</span></button></div></article>)}</div></section>}
 
-    <div class="archive-filters-row reveal">
-      <ArchiveFilterBar
-        id="gallery-year-filter"
-        label="Year"
-        options={yearOptions.map((y) => ({ value: String(y), label: String(y) }))}
-      />
-    </div>
+    <section class="gallery-section archive-section"><div class="section-heading reveal"><div><span>Complete collection</span><h2>Gallery Archive</h2></div><p>Browse church albums by year and category.</p></div><div class="album-grid" id="album-grid" data-album-grid>{archive.map((album, index) => <article class={`album-card reveal reveal-delay-${index % 3 + 1}`} data-album-card data-id={album.id} data-title={album.title.toLowerCase()} data-description={album.description.toLowerCase()} data-category={album.category} data-year={album.year} data-photos={album.photos.length}><button type="button" class="album-cover" data-open-album={album.id} aria-label={`Open ${album.title}`}><img src={album.photos[0].src} alt={album.photos[0].alt} loading="lazy" /><div class="cover-badges"><span>{album.year}</span><span>{album.category}</span></div><strong>{album.photos.length} photos</strong></button><div class="album-body"><h3>{album.title}</h3><p>{album.description || 'Photographs preserved in the church archive.'}</p>{album.date && <small>Updated {formatDate(album.date)}</small>}<button type="button" data-open-album={album.id}>Open Gallery <span>→</span></button></div></article>)}</div></section>
 
-    <div class="flex flex-wrap gap-2 mb-6 reveal" id="gallery-filters">
-      {categories.map((cat, i) => (
-        <button
-          class={`gallery-filter font-body text-[0.65rem] tracking-widest uppercase px-3 py-1.5 rounded border transition-all ${
-            i === 0
-              ? 'bg-navy text-gold-pale border-navy'
-              : 'bg-ivory text-navy border-navy/20 hover:bg-navy hover:text-gold-pale hover:border-navy'
-          }`}
-          data-filter={cat}
-        >
-          {cat}
-        </button>
-      ))}
-    </div>
+    <section class="gallery-empty" id="gallery-empty" hidden><div aria-hidden="true"><span></span><i></i></div><h2>No albums found</h2><p>Try a different search or clear the selected filters.</p><button type="button" id="gallery-clear">Clear filters</button></section>
 
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3" id="gallery-grid">
-      {photos.map((photo, i) => (
-        <div
-          class={`gallery-item reveal reveal-delay-${(i % 3) + 1} bg-ivory-dark rounded overflow-hidden cursor-pointer ${
-            i % 7 === 0 ? 'col-span-2 sm:col-span-1' : ''
-          }`}
-          style={i % 5 === 0 ? 'grid-row: span 2' : ''}
-          data-category={photo.category}
-          data-year={photo.year}
-          data-src={photo.src}
-          data-caption={photo.caption}
-        >
-          <img
-            src={photo.src}
-            alt={photo.alt}
-            class="w-full h-full object-cover aspect-square"
-            loading="lazy"
-            data-lightbox
-            data-lightbox-src={photo.src}
-            data-lightbox-caption={photo.caption}
-            onerror="this.parentElement.innerHTML='<div class=\'w-full aspect-square flex items-center justify-center bg-ivory-dark\'><svg class=\'w-8 h-8 text-gold/20\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><rect x=\'3\' y=\'3\' width=\'18\' height=\'18\' rx=\'2\'/><circle cx=\'8.5\' cy=\'8.5\' r=\'1.5\'/><path d=\'m21 15-5-5L5 21\'/></svg></div>'"
-          />
-        </div>
-      ))}
-    </div>
+    {albums.map((album) => <section class="album-detail" id={`album-${album.id}`} hidden><button type="button" class="back-button" data-close-album>← Back to Gallery</button><div class="detail-hero"><img src={album.photos[0].src} alt={album.photos[0].alt} loading="lazy" /><div class="detail-overlay"><div class="badges"><span>{album.category}</span><span>{album.year}</span><span>{album.photos.length} photos</span></div><h2>{album.title}</h2>{album.description && <p>{album.description}</p>}</div></div><div class="photo-heading"><div><span>Album collection</span><h3>Gallery Photos</h3></div><p>{album.photos.length} photographs</p></div><div class="photo-grid">{album.photos.map((photo, index) => <button type="button" class="photo-card" data-photo data-album={album.id} data-index={index} data-src={photo.src} data-caption={photo.caption} aria-label={`View photo ${index + 1} of ${album.photos.length}`}><img src={photo.src} alt={photo.alt} loading="lazy" /><span>View</span></button>)}</div></section>)}
+  </main>
 
-    <p id="gallery-empty" class="hidden font-body text-sm text-gray-500 text-center py-8">
-      No photos for this year and category.
-    </p>
-
-  </div>
-
+  <dialog class="photo-lightbox" id="photo-lightbox" aria-label="Photo viewer"><div class="lightbox-bar"><p><span id="lightbox-counter"></span><small id="lightbox-caption"></small></p><div><a id="lightbox-download" href="" download>Download</a><button type="button" id="lightbox-zoom" aria-label="Zoom photo">＋</button><button type="button" data-close-lightbox aria-label="Close photo viewer">×</button></div></div><button type="button" class="lightbox-arrow previous" data-lightbox-previous aria-label="Previous photo">‹</button><img src="" alt="" /><button type="button" class="lightbox-arrow next" data-lightbox-next aria-label="Next photo">›</button></dialog>
 </BaseLayout>
 
 <script>
-  let activeCategory = 'All';
-  let activeYear = 'all';
-
-  const yearSelect = document.getElementById('gallery-year-filter');
-  yearSelect?.addEventListener('change', () => {
-    activeYear = yearSelect.value;
-    applyGalleryFilters();
-  });
-
-  document.querySelectorAll('.gallery-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      activeCategory = (btn as HTMLElement).dataset.filter || 'All';
-      document.querySelectorAll('.gallery-filter').forEach((b) => {
-        b.classList.remove('bg-navy', 'text-gold-pale', 'border-navy');
-        b.classList.add('bg-ivory', 'text-navy', 'border-navy/20');
-      });
-      btn.classList.add('bg-navy', 'text-gold-pale', 'border-navy');
-      btn.classList.remove('bg-ivory', 'text-navy', 'border-navy/20');
-      applyGalleryFilters();
-    });
-  });
-
-  function applyGalleryFilters() {
-    let visible = 0;
-    document.querySelectorAll('#gallery-grid .gallery-item').forEach((item) => {
-      const cat = (item as HTMLElement).dataset.category;
-      const year = (item as HTMLElement).dataset.year;
-      const show =
-        (activeCategory === 'All' || cat === activeCategory) &&
-        (activeYear === 'all' || year === activeYear);
-      (item as HTMLElement).style.display = show ? '' : 'none';
-      if (show) visible++;
-    });
-    const empty = document.getElementById('gallery-empty');
-    if (empty) empty.classList.toggle('hidden', visible > 0);
-  }
-
-  applyGalleryFilters();
+  const search=document.querySelector<HTMLInputElement>('#gallery-search'),year=document.querySelector<HTMLSelectElement>('#gallery-year'),category=document.querySelector<HTMLSelectElement>('#gallery-category'),sort=document.querySelector<HTMLSelectElement>('#gallery-sort'),count=document.querySelector<HTMLElement>('#gallery-count'),empty=document.querySelector<HTMLElement>('#gallery-empty');
+  function applyFilters(){const query=search?.value.trim().toLowerCase()||'',selectedYear=year?.value||'all',selectedCategory=category?.value||'all';let albumTotal=0,photosTotal=0;document.querySelectorAll<HTMLElement>('[data-album-card]').forEach(card=>{const haystack=`${card.dataset.title} ${card.dataset.description} ${card.dataset.category?.toLowerCase()} ${card.dataset.year}`,show=(!query||haystack.includes(query))&&(selectedYear==='all'||card.dataset.year===selectedYear)&&(selectedCategory==='all'||card.dataset.category===selectedCategory);card.hidden=!show;if(show){albumTotal++;photosTotal+=Number(card.dataset.photos||0);}});document.querySelectorAll<HTMLElement>('[data-album-grid]').forEach(grid=>{[...grid.querySelectorAll<HTMLElement>('[data-album-card]')].sort((a,b)=>{if(sort?.value==='az'||sort?.value==='za'){const result=(a.dataset.title||'').localeCompare(b.dataset.title||'');return sort.value==='za'?-result:result;}if(sort?.value==='photos')return Number(b.dataset.photos)-Number(a.dataset.photos);const result=Number(b.dataset.year)-Number(a.dataset.year);return sort?.value==='oldest'?-result:result;}).forEach(card=>grid.append(card));});document.querySelector<HTMLElement>('#featured-galleries')?.toggleAttribute('hidden',!document.querySelector('#featured-galleries [data-album-card]:not([hidden])'));document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden',!document.querySelector('.archive-section [data-album-card]:not([hidden])'));if(empty)empty.hidden=albumTotal>0;if(count)count.textContent=`${albumTotal} album${albumTotal===1?'':'s'} · ${photosTotal} photo${photosTotal===1?'':'s'}`;}
+  [search,year,category].forEach(control=>control?.addEventListener(control===search?'input':'change',applyFilters));sort?.addEventListener('change',applyFilters);document.querySelector('#gallery-clear')?.addEventListener('click',()=>{if(search)search.value='';if(year)year.value='all';if(category)category.value='all';if(sort)sort.value='newest';applyFilters();search?.focus();});
+  document.querySelectorAll<HTMLButtonElement>('[data-open-album]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.gallery-toolbar,.gallery-section,.gallery-empty').forEach(item=>item.hidden=true);const detail=document.querySelector<HTMLElement>(`#album-${button.dataset.openAlbum}`);if(detail){detail.hidden=false;detail.scrollIntoView({behavior:'smooth',block:'start'});}}));document.querySelectorAll('[data-close-album]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.album-detail').forEach(item=>item.hidden=true);document.querySelector<HTMLElement>('.gallery-toolbar')!.hidden=false;document.querySelectorAll<HTMLElement>('.gallery-section').forEach(item=>item.hidden=false);applyFilters();document.querySelector('.gallery-toolbar')?.scrollIntoView({behavior:'smooth'});}));
+  const lightbox=document.querySelector<HTMLDialogElement>('#photo-lightbox'),lightboxImage=lightbox?.querySelector<HTMLImageElement>('img'),counter=document.querySelector('#lightbox-counter'),caption=document.querySelector('#lightbox-caption'),download=document.querySelector<HTMLAnchorElement>('#lightbox-download');let activePhotos:HTMLButtonElement[]=[],activeIndex=0,zoomed=false;
+  function showPhoto(index:number){if(!lightboxImage||!activePhotos.length)return;activeIndex=(index+activePhotos.length)%activePhotos.length;const item=activePhotos[activeIndex];lightboxImage.src=item.dataset.src||'';lightboxImage.alt=item.dataset.caption||'';if(counter)counter.textContent=`${activeIndex+1} / ${activePhotos.length}`;if(caption)caption.textContent=item.dataset.caption||'';if(download)download.href=item.dataset.src||'';zoomed=false;lightboxImage.classList.remove('zoomed');}
+  document.querySelectorAll<HTMLButtonElement>('[data-photo]').forEach(button=>button.addEventListener('click',()=>{activePhotos=[...document.querySelectorAll<HTMLButtonElement>(`[data-photo][data-album="${button.dataset.album}"]`)];showPhoto(Number(button.dataset.index));lightbox?.showModal();}));
+  const move=(direction:number)=>showPhoto(activeIndex+direction);document.querySelector('[data-lightbox-previous]')?.addEventListener('click',()=>move(-1));document.querySelector('[data-lightbox-next]')?.addEventListener('click',()=>move(1));document.querySelector('[data-close-lightbox]')?.addEventListener('click',()=>lightbox?.close());document.querySelector('#lightbox-zoom')?.addEventListener('click',()=>{zoomed=!zoomed;lightboxImage?.classList.toggle('zoomed',zoomed);});lightbox?.addEventListener('click',event=>{if(event.target===lightbox)lightbox.close();});document.addEventListener('keydown',event=>{if(!lightbox?.open)return;if(event.key==='ArrowLeft'){event.preventDefault();move(-1);}if(event.key==='ArrowRight'){event.preventDefault();move(1);}});applyFilters();
 </script>
+
+<style>
+  .gallery-hero p{margin:0 0 8px;color:rgba(242,221,163,.58);font-size:.6rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase}.gallery-hero h1{margin:0;color:white;font-family:var(--font-display,serif);font-size:clamp(2rem,5vw,2.55rem);font-weight:600}.hero-copy{margin:12px auto 0;color:rgba(242,221,163,.67);font-size:.88rem}.hero-stats{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;color:rgba(255,255,255,.58);font-size:.65rem;letter-spacing:.06em;text-transform:uppercase}.hero-stats i{width:3px;height:3px;border-radius:50%;background:#b8953f}.gallery-page{color:#172941}.gallery-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:14px;background:#fffdf8;box-shadow:0 12px 35px rgba(20,36,58,.07)}.gallery-search{grid-column:1/-1;display:flex;align-items:center;gap:11px;border:1px solid rgba(18,35,59,.18);border-radius:10px;padding:0 14px;background:white}.gallery-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 3px rgba(184,149,63,.12)}.gallery-search svg{width:19px;fill:none;stroke:#9a772b;stroke-width:1.7}.gallery-search input{width:100%;border:0;outline:0;padding:13px 0;background:transparent;color:#182941;font-size:.9rem}.filter-row{display:flex;gap:10px}.filter-row label{display:grid;gap:5px}.filter-row label>span{color:#7b8290;font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.filter-row select{min-width:145px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px;background:white;color:#263851;font-size:.76rem}.gallery-toolbar>p{align-self:end;margin:0 2px 10px;color:#79808b;font-size:.72rem}.gallery-section{margin-top:42px}.section-heading,.photo-heading{display:flex;justify-content:space-between;align-items:end;gap:25px;margin-bottom:18px}.section-heading span,.photo-heading span{color:#9c7628;font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.section-heading h2,.photo-heading h3{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.55rem}.section-heading p,.photo-heading p{max-width:340px;margin:0;color:#7a818d;font-size:.75rem;text-align:right}.featured-grid{display:grid;gap:18px}.featured-album{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,.8fr);overflow:hidden;border:1px solid rgba(184,149,63,.3);border-radius:16px;background:white;box-shadow:0 15px 40px rgba(23,38,59,.11)}.featured-cover{position:relative;min-height:360px;overflow:hidden}.featured-cover img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease}.featured-album:hover .featured-cover img{transform:scale(1.035)}.featured-cover>span{position:absolute;top:15px;left:15px;border-radius:999px;padding:6px 9px;background:#b8953f;color:white;font-size:.54rem;font-weight:800;text-transform:uppercase}.featured-copy{display:grid;align-content:center;padding:32px}.badges,.cover-badges{display:flex;flex-wrap:wrap;gap:6px}.badges span,.cover-badges span{border:1px solid rgba(184,149,63,.25);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:700;text-transform:uppercase}.featured-copy h3{margin:14px 0 8px;font-family:var(--font-display,serif);font-size:1.55rem}.featured-copy>p{margin:0;color:#737b87;font-size:.78rem;line-height:1.65}.featured-copy button,.album-body button,.gallery-empty button,.back-button{justify-self:start;margin-top:20px;border:0;border-radius:8px;padding:10px 13px;background:#142740;color:white;font-size:.68rem;font-weight:700}.featured-copy button span,.album-body button span{margin-left:8px;color:#e2ca85}.album-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.album-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:14px;background:white;box-shadow:0 7px 25px rgba(23,38,59,.07);transition:transform .22s,box-shadow .22s,border-color .22s}.album-card:hover{transform:translateY(-4px);border-color:rgba(184,149,63,.38);box-shadow:0 16px 36px rgba(23,38,59,.13)}.album-cover{position:relative;width:100%;height:220px;overflow:hidden;border:0;padding:0;background:#e8ebed;text-align:left;cursor:pointer}.album-cover img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}.album-card:hover .album-cover img{transform:scale(1.06)}.cover-badges{position:absolute;top:12px;left:12px}.cover-badges span{border:0;background:rgba(20,39,64,.88);color:#f4dfaa;backdrop-filter:blur(5px)}.album-cover>strong{position:absolute;right:12px;bottom:12px;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.91);color:#172941;font-size:.56rem}.album-body{display:flex;flex:1;flex-direction:column;padding:17px}.album-body h3{margin:0 0 8px;font-family:var(--font-display,serif);font-size:1.08rem}.album-body p{display:-webkit-box;min-height:3.5em;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:3}.album-body small{margin-top:11px;color:#949aa2;font-size:.6rem}.album-body button{margin-top:auto;padding-top:9px;padding-bottom:9px}.gallery-empty{display:grid;justify-items:center;margin-top:34px;padding:62px 20px;border:1px solid rgba(18,35,59,.1);border-radius:15px;background:#fffdf8;text-align:center;box-shadow:0 10px 30px rgba(23,38,59,.06)}.gallery-empty>div{position:relative;width:82px;height:65px}.gallery-empty>div span{position:absolute;inset:5px 10px;border:1px solid rgba(184,149,63,.35);border-radius:9px;background:white;transform:rotate(-4deg)}.gallery-empty>div i{position:absolute;right:3px;bottom:0;width:28px;height:28px;border-radius:50%;background:#142740}.gallery-empty h2{margin:12px 0 4px;font-family:var(--font-display,serif)}.gallery-empty p{margin:0;color:#7b828d;font-size:.76rem}.gallery-empty button{justify-self:center;margin-top:16px}.album-card[hidden],.gallery-section[hidden],.gallery-toolbar[hidden],.gallery-empty[hidden],.album-detail[hidden]{display:none}.album-detail{padding-top:4px}.back-button{margin:0 0 18px;background:white;color:#31445e;border:1px solid rgba(18,35,59,.14)}.detail-hero{position:relative;height:clamp(360px,53vw,570px);overflow:hidden;border-radius:16px;background:#142740;box-shadow:0 15px 40px rgba(17,34,56,.15)}.detail-hero>img{width:100%;height:100%;object-fit:cover}.detail-overlay{position:absolute;right:0;bottom:0;left:0;padding:100px 36px 30px;background:linear-gradient(transparent,rgba(8,20,36,.92));color:white}.detail-overlay h2{margin:13px 0 7px;color:white;font-family:var(--font-display,serif);font-size:clamp(1.65rem,4vw,2.35rem)}.detail-overlay>p{max-width:700px;margin:0;color:rgba(255,255,255,.73);font-size:.78rem;line-height:1.6}.photo-heading{margin-top:38px}.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.photo-card{position:relative;aspect-ratio:4/3;overflow:hidden;border:0;border-radius:11px;padding:0;background:#e9ecee;cursor:zoom-in;box-shadow:0 5px 17px rgba(23,38,59,.08)}.photo-card img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease,filter .4s ease}.photo-card span{position:absolute;inset:auto 10px 10px auto;border-radius:999px;padding:5px 8px;background:rgba(20,39,64,.86);color:white;font-size:.55rem;opacity:0;transform:translateY(5px);transition:.25s}.photo-card:hover img{transform:scale(1.055);filter:brightness(.9)}.photo-card:hover span{opacity:1;transform:none}.photo-lightbox{width:100vw;max-width:none;height:100vh;max-height:none;overflow:hidden;border:0;padding:70px 62px 28px;background:rgba(4,11,21,.96)}.photo-lightbox::backdrop{background:rgba(4,11,21,.96)}.photo-lightbox>img{display:block;width:100%;height:100%;object-fit:contain;transition:transform .25s;cursor:zoom-in}.photo-lightbox>img.zoomed{transform:scale(1.7);cursor:zoom-out}.lightbox-bar{position:fixed;z-index:2;top:0;right:0;left:0;display:flex;justify-content:space-between;align-items:center;gap:20px;padding:12px 18px;background:rgba(5,14,25,.84);color:white}.lightbox-bar p{display:flex;align-items:center;gap:12px;margin:0;min-width:0}.lightbox-bar p>span{color:#e2ca85;font-size:.7rem;font-weight:700}.lightbox-bar small{overflow:hidden;color:rgba(255,255,255,.65);font-size:.68rem;text-overflow:ellipsis;white-space:nowrap}.lightbox-bar>div{display:flex;align-items:center;gap:8px}.lightbox-bar a,.lightbox-bar button{border:1px solid rgba(255,255,255,.24);border-radius:7px;padding:7px 10px;background:transparent;color:white;text-decoration:none;font-size:.68rem}.lightbox-bar button:last-child{font-size:1.1rem}.lightbox-arrow{position:fixed;z-index:2;top:50%;width:42px;height:52px;border:1px solid rgba(255,255,255,.2);border-radius:9px;background:rgba(5,14,25,.7);color:white;font-size:2rem;transform:translateY(-50%)}.lightbox-arrow.previous{left:10px}.lightbox-arrow.next{right:10px}
+  @media(max-width:850px){.gallery-toolbar{grid-template-columns:1fr}.gallery-toolbar>p{margin:0}.filter-row label{flex:1}.filter-row select{width:100%;min-width:0}.featured-album{grid-template-columns:1fr}.featured-cover{min-height:300px}.album-grid,.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid,.photo-grid{grid-template-columns:1fr}.album-cover{height:210px}.detail-hero{height:68vw;min-height:300px}.detail-overlay{padding:75px 20px 20px}.photo-lightbox{padding:62px 8px 16px}.lightbox-bar{padding:10px}.lightbox-bar small{display:none}.lightbox-bar a{display:none}.lightbox-arrow{width:36px;height:46px}}
+  .gallery-hero-copy{max-width:650px;margin:12px auto 0;color:rgba(242,221,163,.67);font-size:.88rem;line-height:1.55}.gallery-hero-stats{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;color:rgba(255,255,255,.58);font-size:.65rem;letter-spacing:.06em;text-transform:uppercase}.gallery-hero-stats i{width:3px;height:3px;border-radius:50%;background:#b8953f}.gallery-search{min-width:0}.gallery-search svg{flex:0 0 19px}.gallery-search input{min-width:0}.gallery-filter-row{display:flex;gap:10px}.gallery-filter-row label{display:grid;min-width:0;gap:5px}.gallery-filter-row label>span{color:#7b8290;font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.gallery-filter-row select{min-width:145px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px;background:white;color:#263851;font-size:.76rem}
+  @media(max-width:850px){.gallery-toolbar{grid-template-columns:minmax(0,1fr)}.gallery-filter-row label{flex:1}.gallery-filter-row select{width:100%;min-width:0}}
+  @media(max-width:560px){.gallery-filter-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.gallery-filter-row label:last-child{grid-column:1/-1}}
+</style>
