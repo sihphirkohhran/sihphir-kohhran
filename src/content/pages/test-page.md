@@ -6,7 +6,7 @@ path: "/test-page"
 show_hero: true
 published: true
 display_order: 0
-updated_at: "2026-08-05T21:22:54.870Z"
+updated_at: "2026-08-05T21:23:22.225Z"
 hero_title: "New Page Test"
 hero_image: "/images/1785963759918-zsihphir-venglai.jpeg"
 hero_overlay: "dark"
