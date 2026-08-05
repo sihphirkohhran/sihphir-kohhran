@@ -3,8 +3,7 @@
   const root = document.querySelector('#admin-app');
   const menuGroups = [
     ['Website', [['home','Home','⌂'],['hun-ruatna','Hun Ruatna','▤'],['thlabi-mawhphurtu','Thlabi Mawhphurtu','♫'],['notices','Notices','▱'],['gallery','Gallery','▧'],['documents','Documents','▱']]],
-    ['Church', [['committee','Committee','♙'],['pastors','Pastors','✦'],['elders','Elders','✦'],['missionaries','Missionaries','✦'],['fellowship','Fellowship','◌']]],
-    ['History', [['pastoral-history','Pastoral History','◷'],['elders-history','Elders History','◷']]],
+    ['Church', [['committee','Committee','♙'],['pastors','Bialtu Pastor','✦'],['elders','Kohhran Upa','✦'],['missionaries','Missionary','✦'],['fellowship','Fellowship','◌']]],
     ['Settings', [['navigation','Navigation','☰'],['quick-access','Quick Access','↗'],['site-settings','Site Settings','⚙']]],
   ];
   const modules = [['dashboard', 'Dashboard', '▦'], ...menuGroups.flatMap(([, entries]) => entries)];
@@ -187,7 +186,7 @@
     draw();
   }
   const legacyRender=render;
-  render=async function(){if(area!=='documents')window.__sihphirDocumentCleanup?.();if(area!=='committee')window.__sihphirCommitteeCleanup?.();if(area==='gallery')return window.SihphirGalleryManager.mount({api,esc,slug,notification,readUpload});if(area==='documents')return window.SihphirDocumentManager.mount({api,esc,slug,notification,readUpload});if(area==='committee')return window.SihphirCommitteeManager.mount({api,esc,slug,notification,readUpload});if(area==='fellowship')return fellowshipManager();return legacyRender();};
+  render=async function(){if(area!=='documents')window.__sihphirDocumentCleanup?.();if(area!=='committee')window.__sihphirCommitteeCleanup?.();if(!['pastors','elders','missionaries'].includes(area))window.__sihphirMinistryCleanup?.();if(area==='gallery')return window.SihphirGalleryManager.mount({api,esc,slug,notification,readUpload});if(area==='documents')return window.SihphirDocumentManager.mount({api,esc,slug,notification,readUpload});if(area==='committee')return window.SihphirCommitteeManager.mount({api,esc,slug,notification,readUpload});if(['pastors','elders','missionaries'].includes(area))return window.SihphirMinistryManager.mount({area,api,esc,slug,notification,readUpload});if(area==='fellowship')return fellowshipManager();return legacyRender();};
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&current){e.preventDefault();document.querySelector('#form')?.requestSubmit();document.querySelector('#settings-form')?.requestSubmit();document.querySelector('#nav-form')?.requestSubmit();}});
   (async()=>{try{await api('/api/auth/session');render();}catch{location.replace('/admin/login');}})();
 })();

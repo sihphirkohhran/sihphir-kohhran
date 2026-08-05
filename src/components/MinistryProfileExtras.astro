@@ -1,0 +1,7 @@
+---
+interface Props { profile:{ name:string; gallery:{src:string;caption:string}[]; documents:string[] } }
+const { profile }=Astro.props;
+const filename=(url:string)=>{try{return decodeURIComponent(url.split(/[?#]/)[0].split('/').pop()||'Document')}catch{return 'Document'}};
+---
+{profile.gallery.length>0&&<section class="profile-gallery"><h4>Gallery</h4><div>{profile.gallery.map(photo=><button type="button" data-lightbox-src={photo.src} data-lightbox-caption={photo.caption||profile.name}><img src={photo.src} alt={photo.caption||profile.name} loading="lazy" /></button>)}</div></section>}
+{profile.documents.length>0&&<section class="related-documents"><h4>Related Documents</h4><div>{profile.documents.map(url=><a href={url} target="_blank" rel="noopener"><span>{filename(url).split('.').pop()?.toUpperCase()}</span><b>{filename(url)}</b><i>Open ↗</i></a>)}</div></section>}
