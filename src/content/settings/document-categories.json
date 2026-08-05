@@ -3,6 +3,10 @@
     {
       "id": "ktp-inleng",
       "name": "KTP Inleng"
+    },
+    {
+      "id": "year-book",
+      "name": "Year Book"
     }
   ]
 }
