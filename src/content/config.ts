@@ -191,11 +191,10 @@ const elders = defineCollection({
   schema: z.object({
     name: z.string(),
     photo: z.string().optional(),
-    ordained_year: z.number(),
     status: z.string().optional(),
     notes: z.string().optional(),
-    designation: z.string().optional(), ordination_date: z.string().optional(), date_of_birth: z.string().optional(), ordination_year: z.number().optional(), church_served: z.string().optional(), education: z.string().optional(), family_information: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), address: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), record_status: z.enum(['Current','Former']).optional(), short_description: z.string().optional(), biography: z.string().optional(), family_photo: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
-  }).passthrough(),
+    designation: z.string().optional(), ordination_date: z.string().optional(), date_of_birth: z.string().optional(), ordained_year: z.number().optional(), legacy_ordained_year: z.number().optional(), ordination_year: z.number().optional(), church_served: z.string().optional(), education: z.string().optional(), family_information: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), address: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), record_status: z.enum(['Current','Former']).optional(), short_description: z.string().optional(), biography: z.string().optional(), family_photo: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
+  }).passthrough().transform(data => ({ ...data, ordained_year: data.ordained_year ?? data.legacy_ordained_year })),
 });
 
 const photoEntry = z.union([
