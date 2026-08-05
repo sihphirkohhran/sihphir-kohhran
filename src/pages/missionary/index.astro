@@ -2,4 +2,4 @@
 import {getCollection} from 'astro:content';import MinistrySection from '../../components/MinistrySection.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
 const profiles=(await getCollection('missionaries')).map(entry=>normalizeMinistryProfile(entry,'missionary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
 ---
-<MinistrySection title="Missionary" subtitle="Current missionaries and the archive of those sent out in service across every mission field." activePage="missionary-ministry" basePath="/missionary" profiles={profiles}/>
+<MinistrySection title="Missionary" subtitle="Current missionaries and the archive of those sent out in service across every mission field." activePage="missionary" basePath="/missionary" profiles={profiles} multipleCurrent />

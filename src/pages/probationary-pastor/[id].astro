@@ -1,6 +1,6 @@
 ---
 import {getCollection} from 'astro:content';import MinistryDetail from '../../components/MinistryDetail.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
-export async function getStaticPaths(){return(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)).map(profile=>({params:{id:profile.id},props:{profile}}))}
-const {profile}=Astro.props;
+export async function getStaticPaths(){const dedicated=(await getCollection('proPastoral')).map(entry=>normalizeMinistryProfile(entry,'pro')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));const legacy=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)&&!dedicated.some(item=>item.id===profile?.id));const profiles=[...dedicated,...legacy];return profiles.map(profile=>({params:{id:profile.id},props:{profile,relatedProfiles:profiles.filter(item=>item.id!==profile.id)}}))}
+const {profile,relatedProfiles}=Astro.props;
 ---
-<MinistryDetail title="Probationary Pastor" activePage="pastoral-history" basePath="/probationary-pastor" profile={profile}/>
+<MinistryDetail title="Pro Pastor" activePage="pro-pastor" basePath="/probationary-pastor" profile={profile} relatedProfiles={relatedProfiles}/>

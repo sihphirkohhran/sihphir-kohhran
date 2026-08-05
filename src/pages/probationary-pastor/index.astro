@@ -1,5 +1,7 @@
 ---
 import {getCollection} from 'astro:content';import MinistrySection from '../../components/MinistrySection.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
-const profiles=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
+const dedicated=(await getCollection('proPastoral')).map(entry=>normalizeMinistryProfile(entry,'pro')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
+const legacy=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)&&!dedicated.some(item=>item.id===profile?.id));
+const profiles=[...dedicated,...legacy];
 ---
-<MinistrySection title="Probationary Pastor" subtitle="Profiles and service records of probationary pastors serving Sihphir Presbyterian Kohhran." activePage="pastoral-history" basePath="/probationary-pastor" profiles={profiles}/>
+<MinistrySection title="Pro Pastor" subtitle="Current and former probationary pastors serving Sihphir Presbyterian Kohhran." activePage="pro-pastor" basePath="/probationary-pastor" profiles={profiles}/>

@@ -17,25 +17,33 @@
       "parent": ""
     },
     {
-      "label": "Pastor lo ni tawh te",
-      "href": "/pastoral-history",
-      "key": "pastoral-history",
+      "label": "Bialtu Pastor",
+      "href": "/bialtu-pastor",
+      "key": "bialtu-pastor",
+      "visible": true,
+      "order": 0,
+      "parent": "Rawngbawltu"
+    },
+    {
+      "label": "Pro Pastor",
+      "href": "/probationary-pastor",
+      "key": "pro-pastor",
       "visible": true,
       "order": 1,
       "parent": "Rawngbawltu"
     },
     {
-      "label": "Rawngbawla chhuakte",
-      "href": "/missionary-ministry",
-      "key": "missionary-ministry",
+      "label": "Kohhran Upa",
+      "href": "/kohhran-upa",
+      "key": "kohhran-upa",
       "visible": true,
       "order": 2,
       "parent": "Rawngbawltu"
     },
     {
-      "label": "Kohhran Upa",
-      "href": "/elders-history",
-      "key": "elders-history",
+      "label": "Missionary",
+      "href": "/missionary",
+      "key": "missionary",
       "visible": true,
       "order": 3,
       "parent": "Rawngbawltu"
@@ -69,7 +77,7 @@
       "visible": true,
       "label": "Rawngbawltute",
       "key": "Rawngbawltu",
-      "href": "/"
+      "href": "/bialtu-pastor"
     }
   ]
 }

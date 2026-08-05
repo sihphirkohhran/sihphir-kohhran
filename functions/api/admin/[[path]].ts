@@ -16,7 +16,7 @@ type Context = { request: Request; env: Env };
 const areas: Record<string, string[]> = {
   pages: ['src/content/pages/'], gallery: ['src/content/gallery/'],
   documents: ['src/content/documents/'], committee: ['src/content/committee/'],
-  pastors: ['src/content/pastoral/'], elders: ['src/content/elders/'],
+  pastors: ['src/content/pastoral/'], 'pro-pastors': ['src/content/pro-pastoral/'], elders: ['src/content/elders/'],
   missionaries: ['src/content/missionaries/'], highlights: ['src/content/settings/highlights.json'],
   navigation: ['src/content/settings/navigation.json'],
   settings: ['src/content/settings/'], fellowship: ['src/content/fellowship/'],

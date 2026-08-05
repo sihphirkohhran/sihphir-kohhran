@@ -1,6 +1,6 @@
 ---
 import {getCollection} from 'astro:content';import MinistryDetail from '../../components/MinistryDetail.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
-export async function getStaticPaths(){return(await getCollection('elders')).map(entry=>normalizeMinistryProfile(entry,'elder')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)).map(profile=>({params:{id:profile.id},props:{profile}}))}
-const {profile}=Astro.props;
+export async function getStaticPaths(){const profiles=(await getCollection('elders')).map(entry=>normalizeMinistryProfile(entry,'elder')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));return profiles.map(profile=>({params:{id:profile.id},props:{profile,relatedProfiles:profiles.filter(item=>item.id!==profile.id)}}))}
+const {profile,relatedProfiles}=Astro.props;
 ---
-<MinistryDetail title="Kohhran Upa" activePage="elders-history" basePath="/kohhran-upa" profile={profile}/>
+<MinistryDetail title="Kohhran Upa" activePage="kohhran-upa" basePath="/kohhran-upa" profile={profile} relatedProfiles={relatedProfiles}/>

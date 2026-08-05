@@ -2,4 +2,4 @@
 import {getCollection} from 'astro:content';import MinistrySection from '../../components/MinistrySection.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
 const profiles=(await getCollection('elders')).map(entry=>normalizeMinistryProfile(entry,'elder')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
 ---
-<MinistrySection title="Kohhran Upa" subtitle="Current church elders and the archive of ordained leaders who have served the congregation." activePage="elders-history" basePath="/kohhran-upa" profiles={profiles}/>
+<MinistrySection title="Kohhran Upa" subtitle="Current church elders and the archive of ordained leaders who have served the congregation." activePage="kohhran-upa" basePath="/kohhran-upa" profiles={profiles} multipleCurrent />

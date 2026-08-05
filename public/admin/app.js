@@ -4,7 +4,7 @@
   const menuGroups = [
     ['Website', [['home','Home','⌂'],['hun-ruatna','Hun Ruatna','▤'],['thlabi-mawhphurtu','Thlabi Mawhphurtu','♫'],['notices','Notices','▱'],['gallery','Gallery','▧'],['documents','Documents','▱']]],
     ['Church', [['committee','Committee','♙'],['fellowship','Fellowship','◌']]],
-    ['Rawngbawltute', [['pastors','Bialtu Pastor','✦'],['probationary-pastors','Probationary Pastor','✦'],['elders','Kohhran Upa','✦'],['missionaries','Missionary','✦']]],
+    ['Rawngbawltute', [['pastors','Pastor','✦'],['probationary-pastors','Pro Pastor','✦'],['elders','Kohhran Upa','✦'],['missionaries','Missionary','✦']]],
     ['Settings', [['navigation','Navigation','☰'],['quick-access','Quick Access','↗'],['site-settings','Site Settings','⚙']]],
   ];
   const modules = [['dashboard', 'Dashboard', '▦'], ...menuGroups.flatMap(([, entries]) => entries)];
