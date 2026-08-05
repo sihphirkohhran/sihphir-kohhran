@@ -1,9 +1,12 @@
 ---
-title: "Kohhran General Inkhawm"
-date: "18.05.2026"
-pdf_url: ""
+title: "Test"
+date: "2026-05-18"
+slug: "test"
+category: "General"
+published: true
+pinned: false
+publish_date: "2026-05-18"
+display_order: 0
+status: "published"
 ---
-
-Thla chhung velah inkhawm chi hrang hrang a nei tur a ni. Member zawng zawng zahlen takin i ro lang ula.
-
-Pathianni Chawhnu inkhawm tur a awm bawk a, hemi chungchangah pawh member te hriattir a ni.
+Notice board test na
