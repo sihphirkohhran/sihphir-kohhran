@@ -3,11 +3,12 @@ import FellowshipPage from '../../components/FellowshipPage.astro';
 import { getCollection } from 'astro:content';
 import { fellowshipMeta } from '../../lib/fellowship-meta';
 import { fellowshipHistoryToHtml } from '../../lib/cms';
-import { resolveGroupPhotos } from '../../lib/fellowship';
+import { resolveGroupPhotos, resolveRelatedGalleryPhotos, resolveRelatedDocuments } from '../../lib/fellowship';
 import { currentFellowshipRecord } from '../../lib/fellowship-records';
 
 const meta = fellowshipMeta.kpp;
-const record = currentFellowshipRecord(await getCollection('fellowship'), 'kpp');
+const [fellowshipEntries, galleryEntries, documentEntries] = await Promise.all([getCollection('fellowship'), getCollection('gallery'), getCollection('documents')]);
+const record = currentFellowshipRecord(fellowshipEntries, 'kpp');
 if (!record) throw new Error('Fellowship content not found: kpp');
 const data = record.data;
 ---
@@ -18,12 +19,14 @@ const data = record.data;
   subtitle={meta.subtitle}
   accentColor={meta.accentColor}
   logo={data.logo}
-  groupPhotos={resolveGroupPhotos({ ...data, group_photo: data.banner_image ?? data.group_photo })}
+  groupPhotos={resolveGroupPhotos({ ...data, group_photo: data.cover_photo ?? data.banner_image ?? data.group_photo })}
   history={data.description ?? data.history_short}
-  historyFull={fellowshipHistoryToHtml(data.history_full)}
+  historyFull={fellowshipHistoryToHtml(data.full_history ?? data.history_full)}
+  relatedPhotos={resolveRelatedGalleryPhotos(galleryEntries, data.related_galleries)}
+  relatedDocuments={resolveRelatedDocuments(documentEntries, data.related_documents)}
   officeBearers={data.office_bearers}
   committeeMembers={data.members.sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((m) => ({
     name: m.name,
-    role: m.role ?? 'Member',
+    role: m.designation ?? m.role ?? 'Member', photo: m.photo, notes: m.notes,
   }))}
 />

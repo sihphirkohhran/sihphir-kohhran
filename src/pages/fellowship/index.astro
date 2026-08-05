@@ -5,7 +5,7 @@ import { fellowshipMeta, type FellowshipSlug } from '../../lib/fellowship-meta';
 import { currentFellowshipRecord } from '../../lib/fellowship-records';
 
 const fellowshipEntries = await getCollection('fellowship');
-const fellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
+const knownFellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
   const meta = fellowshipMeta[id];
   const data = currentFellowshipRecord(fellowshipEntries, id)?.data;
   return {
@@ -17,6 +17,21 @@ const fellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) =
     logo: data?.logo,
   };
 });
+const knownSlugs = new Set(knownFellowships.map((item) => item.id));
+const customFellowships = fellowshipEntries
+  .filter((entry) => entry.data.published !== false && entry.data.status !== 'archived')
+  .map((entry) => ({ entry, id: entry.data.slug ?? entry.id.replace(/-\d{4}$/, '') }))
+  .filter(({ id }) => !knownSlugs.has(id as FellowshipSlug))
+  .map(({ entry, id }) => ({
+    id,
+    name: entry.data.fellowship_name || id.replace(/-/g, ' '),
+    abbr: (entry.data.fellowship_name || id).split(/\s+/).map((word) => word[0]).join('').slice(0, 3).toUpperCase(),
+    color: 'from-navy to-navy-light',
+    description: entry.data.short_description ?? entry.data.description ?? entry.data.history_short ?? '',
+    logo: entry.data.logo,
+    order: entry.data.display_order ?? entry.data.homepage_order ?? 999,
+  }));
+const fellowships = [...knownFellowships.map((item, order) => ({ ...item, order })), ...customFellowships].sort((a, b) => a.order - b.order);
 ---
 
 <BaseLayout title="Fellowship — Sihphir Presbyterian Kohhran" activePage="fellowship">

@@ -1,0 +1,37 @@
+---
+import FellowshipPage from '../../components/FellowshipPage.astro';
+import { getCollection } from 'astro:content';
+import { fellowshipHistoryToHtml } from '../../lib/cms';
+import { fellowshipMeta } from '../../lib/fellowship-meta';
+import { resolveGroupPhotos, resolveRelatedGalleryPhotos, resolveRelatedDocuments } from '../../lib/fellowship';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('fellowship');
+  const known = new Set(Object.keys(fellowshipMeta));
+  return entries
+    .filter((entry) => entry.data.published !== false && entry.data.status !== 'archived')
+    .map((entry) => ({ entry, slug: entry.data.slug ?? entry.id.replace(/-\d{4}$/, '') }))
+    .filter(({ slug }) => !known.has(slug))
+    .map(({ entry, slug }) => ({ params: { slug }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const data = entry.data;
+const [galleryEntries, documentEntries] = await Promise.all([getCollection('gallery'), getCollection('documents')]);
+const name = data.fellowship_name || data.slug?.replace(/-/g, ' ') || 'Fellowship';
+const abbr = name.split(/\s+/).map((word: string) => word[0]).join('').slice(0, 3).toUpperCase();
+---
+
+<FellowshipPage
+  name={name}
+  abbr={abbr}
+  subtitle={data.motto || data.bible_verse || data.category || 'Sihphir Presbyterian Kohhran'}
+  logo={data.logo}
+  groupPhotos={resolveGroupPhotos({ ...data, group_photo: data.cover_photo ?? data.banner_image ?? data.group_photo })}
+  history={data.short_description ?? data.description ?? data.history_short}
+  historyFull={fellowshipHistoryToHtml(data.full_history ?? data.history_full)}
+  officeBearers={data.office_bearers}
+  committeeMembers={data.members.sort((a: any, b: any) => (a.display_order ?? 0) - (b.display_order ?? 0)).map((member: any) => ({ name: member.name, role: member.designation ?? member.role ?? 'Member', photo: member.photo, notes: member.notes }))}
+  relatedPhotos={resolveRelatedGalleryPhotos(galleryEntries, data.related_galleries)}
+  relatedDocuments={resolveRelatedDocuments(documentEntries, data.related_documents)}
+/>

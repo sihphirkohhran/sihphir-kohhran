@@ -101,6 +101,11 @@ const fellowship = defineCollection({
   schema: z.object({
     fellowship_name: z.string().optional(),
     slug: z.string().optional(),
+    established_year: z.number().optional(),
+    motto: z.string().optional(),
+    short_description: z.string().optional(),
+    full_history: z.string().optional(),
+    cover_photo: z.string().optional(),
     year: z.number().optional(),
     banner_image: z.string().optional(),
     bible_verse: z.string().optional(),
@@ -124,11 +129,13 @@ const fellowship = defineCollection({
     group_photos: z
       .array(z.object({ year: z.number(), photo: z.string() }))
       .optional(),
+    related_galleries: z.array(z.string()).optional(),
+    related_documents: z.array(z.string()).optional(),
     office_bearers: z.array(
-      z.object({ role: z.string(), name: z.string() }),
+      z.object({ role: z.string(), name: z.string(), photo: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), display_order: z.number().optional() }).passthrough(),
     ).default([]),
     members: z.array(
-      z.object({ name: z.string(), role: z.string().optional(), photo: z.string().optional(), display_order: z.number().optional() }).passthrough(),
+      z.object({ name: z.string(), role: z.string().optional(), designation: z.string().optional(), photo: z.string().optional(), notes: z.string().optional(), display_order: z.number().optional() }).passthrough(),
     ).default([]),
   }).passthrough(),
 });
