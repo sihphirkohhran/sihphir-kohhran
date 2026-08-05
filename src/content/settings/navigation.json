@@ -78,14 +78,6 @@
       "label": "Rawngbawltute",
       "key": "Rawngbawltu",
       "href": "/bialtu-pastor"
-    },
-    {
-      "label": "Te",
-      "href": "/test-page",
-      "key": "new-item",
-      "visible": true,
-      "order": 10,
-      "parent": ""
     }
   ]
 }
