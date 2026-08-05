@@ -14,6 +14,7 @@ import { renderMarkdown } from '../lib/markdown';
 import { loadGalleryPhotos, pickHomeGalleryPhotos } from '../lib/gallery';
 import { buildHomeDocumentSections } from '../lib/documents';
 import { normalizeContact } from '../lib/contact';
+import { normalizeNotice, noticeIsActive, sortNotices } from '../lib/notices';
 
 const heroEntry = await getEntry('settings', 'hero');
 const quickLinksEntry = await getEntry('settings', 'quick-links');
@@ -106,10 +107,11 @@ const homeDocuments = documentCategory
     )
   : builtHomeDocuments;
 
-const noticeDate = (value: string) => { const parts=value.split(/[.\/-]/).map(Number);return parts.length===3 ? new Date(parts[2],parts[1]-1,parts[0]).getTime() : Date.parse(value)||0; };
 const announcementEntries = (await getCollection('notices'))
-  .filter((entry) => entry.id.startsWith('announcements/') && entry.data.published !== false && entry.data.status !== 'archived')
-  .sort((a, b) => noticeDate(String(b.data.date ?? '')) - noticeDate(String(a.data.date ?? '')) || b.id.localeCompare(a.id));
+  .filter((entry) => entry.id.startsWith('announcements/'))
+  .map(normalizeNotice)
+  .filter((notice) => noticeIsActive(notice))
+  .sort((a, b) => sortNotices(a, b));
 
 const noticeCount = positiveCount(home.noticeCount, 3);
 const noticeVisible = home.noticeVisible !== false && visibility.notice_board !== false;
@@ -118,12 +120,12 @@ const noticeSubtitle = String(home.noticeSubtitle ?? '');
 const noticeButtonText = String(home.noticeButtonText ?? 'View All Notices');
 const noticeButtonLink = String(home.noticeLink ?? '/notices');
 const announcements = await Promise.all(
-  announcementEntries.slice(0, noticeCount).map(async (entry) => {
-    const { Content } = await entry.render();
+  announcementEntries.slice(0, noticeCount).map(async (notice) => {
+    const { Content } = await notice.entry.render();
     return {
-      id: entry.id.replace(/^announcements\//, ''),
-      title: entry.data.title ?? '',
-      date: entry.data.date ?? '',
+      id: notice.slug,
+      title: notice.title,
+      date: notice.publishDate,
       Content,
     };
   }),

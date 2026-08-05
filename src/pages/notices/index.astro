@@ -1,0 +1,89 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { normalizeNotice, sortNotices } from '../../lib/notices';
+
+const notices = (await getCollection('notices'))
+  .filter((entry) => entry.id.startsWith('announcements/'))
+  .map(normalizeNotice)
+  .filter((notice) => notice.published)
+  .sort((a, b) => sortNotices(a, b));
+const categories = [...new Set(notices.map((notice) => notice.category))].sort();
+const years = [...new Set(notices.map((notice) => notice.publishDate.match(/\d{4}/)?.[0]).filter(Boolean))].sort().reverse();
+const noticeCards = notices.map((notice, index) => ({
+  ...notice,
+  index,
+  searchText: `${notice.title} ${notice.summary}`.toLowerCase(),
+  year: notice.publishDate.match(/\d{4}/)?.[0] ?? '',
+  href: `/notices/${notice.slug}`,
+}));
+---
+
+<BaseLayout title="Notices" description="Sihphir Presbyterian Kohhran notice archive" activePage="notices">
+  <main class="notice-page">
+    <header class="notice-hero">
+      <div class="notice-wrap">
+        <p class="eyebrow">Sihphir Presbyterian Kohhran</p>
+        <h1>Notices</h1>
+        <p>Church announcements, circulars, meetings and events in one searchable archive.</p>
+      </div>
+    </header>
+
+    <section class="notice-wrap archive" aria-labelledby="archive-heading">
+      <div class="archive-heading">
+        <div><p class="eyebrow">Archive</p><h2 id="archive-heading">All Notices</h2></div>
+        <span id="notice-result-count">{notices.length} notices</span>
+      </div>
+      <div class="filters" aria-label="Notice archive filters">
+        <label><span>Search</span><input id="notice-search" type="search" placeholder="Search notices…" /></label>
+        <label><span>Category</span><select id="notice-category"><option value="">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
+        <label><span>Year</span><select id="notice-year"><option value="">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
+        <label><span>Order</span><select id="notice-order"><option value="newest">Newest</option><option value="oldest">Oldest</option></select></label>
+      </div>
+
+      <div class="notice-list" id="notice-list">
+        {noticeCards.map((notice) => (
+          <article class="notice-card" data-title={notice.searchText} data-category={notice.category} data-year={notice.year} data-pinned={notice.pinned ? '1' : '0'} data-index={notice.index}>
+            <div class="card-meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>PINNED</strong>}</div>
+            <h3><a href={notice.href}>{notice.title}</a></h3>
+            {notice.summary ? <p>{notice.summary}</p> : null}
+            <a class="read-link" href={notice.href}>Read notice <span aria-hidden="true">→</span></a>
+          </article>
+        ))}
+      </div>
+      <p class="empty" id="notice-empty" hidden>No notices match those filters.</p>
+      <button class="load-more" id="notice-load-more" type="button">Load more</button>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  const search=document.querySelector<HTMLInputElement>('#notice-search');
+  const category=document.querySelector<HTMLSelectElement>('#notice-category');
+  const year=document.querySelector<HTMLSelectElement>('#notice-year');
+  const order=document.querySelector<HTMLSelectElement>('#notice-order');
+  const list=document.querySelector<HTMLElement>('#notice-list');
+  const more=document.querySelector<HTMLButtonElement>('#notice-load-more');
+  const empty=document.querySelector<HTMLElement>('#notice-empty');
+  const count=document.querySelector<HTMLElement>('#notice-result-count');
+  let visible=9;
+  const apply=()=>{
+    if(!list)return;
+    const cards=[...list.querySelectorAll<HTMLElement>('.notice-card')];
+    const matches=cards.filter(card=>(!search?.value||card.dataset.title?.includes(search.value.toLowerCase()))&&(!category?.value||card.dataset.category===category.value)&&(!year?.value||card.dataset.year===year.value));
+    matches.sort((a,b)=>{ const pin=Number(b.dataset.pinned)-Number(a.dataset.pinned); if(pin)return pin; const rank=Number(a.dataset.index)-Number(b.dataset.index); return order?.value==='oldest'?-rank:rank; });
+    matches.forEach(card=>list.append(card));
+    cards.forEach(card=>card.hidden=true);
+    matches.slice(0,visible).forEach(card=>card.hidden=false);
+    if(count)count.textContent=`${matches.length} notice${matches.length===1?'':'s'}`;
+    if(empty)empty.hidden=matches.length>0;
+    if(more)more.hidden=matches.length<=visible;
+  };
+  [search,category,year,order].forEach(control=>control?.addEventListener(control===search?'input':'change',()=>{visible=9;apply();}));
+  more?.addEventListener('click',()=>{visible+=9;apply();});
+  apply();
+</script>
+
+<style>
+  .notice-page{background:#f5f2eb;min-height:70vh;color:#17271f}.notice-wrap{width:min(1120px,calc(100% - 2rem));margin:auto}.notice-hero{padding:5.5rem 0 4.5rem;color:#fff;background:linear-gradient(120deg,rgba(15,53,37,.97),rgba(26,86,57,.9)),url('/images/church-bg.jpg') center/cover}.notice-hero h1{font-size:clamp(2.6rem,7vw,5.2rem);margin:.25rem 0 .7rem;letter-spacing:-.04em}.notice-hero p:last-child{max-width:650px;font-size:1.06rem;color:#e2eee7}.eyebrow{margin:0;text-transform:uppercase;letter-spacing:.18em;font-weight:800;font-size:.72rem;color:#d4af5d}.archive{padding:3rem 0 5rem}.archive-heading{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-bottom:1.25rem}.archive-heading h2{margin:.2rem 0 0;font-size:2rem}.archive-heading>span{color:#657169;font-size:.9rem}.filters{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:.75rem;background:#fff;border:1px solid #ddd8cb;padding:1rem;border-radius:16px;box-shadow:0 8px 30px rgba(24,48,35,.06)}.filters label{display:grid;gap:.35rem}.filters span{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#536359}.filters input,.filters select{width:100%;border:1px solid #d5d5cd;border-radius:9px;background:#fbfbf8;padding:.72rem;color:inherit}.notice-list{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.25rem}.notice-card{background:#fff;border:1px solid #e2ddd1;border-radius:15px;padding:1.35rem;min-height:215px;display:flex;flex-direction:column;box-shadow:0 8px 24px rgba(27,48,36,.05)}.card-meta{display:flex;align-items:center;gap:.5rem;font-size:.72rem;color:#657169;text-transform:uppercase;letter-spacing:.06em}.card-meta span{color:#19613f;font-weight:800}.card-meta strong{margin-left:auto;background:#d4af5d;color:#253026;border-radius:99px;padding:.25rem .45rem;font-size:.62rem}.notice-card h3{font-size:1.25rem;line-height:1.3;margin:.85rem 0 .55rem}.notice-card h3 a{color:inherit;text-decoration:none}.notice-card p{margin:0;color:#657169;line-height:1.55;font-size:.92rem}.read-link{margin-top:auto;padding-top:1rem;color:#19613f;font-weight:800;text-decoration:none}.load-more{display:block;margin:1.5rem auto 0;border:0;border-radius:99px;background:#174f36;color:#fff;padding:.8rem 1.4rem;font-weight:800;cursor:pointer}.empty{text-align:center;padding:3rem;color:#657169}@media(max-width:850px){.filters{grid-template-columns:1fr 1fr}.notice-list{grid-template-columns:1fr 1fr}}@media(max-width:560px){.notice-hero{padding:4rem 0 3.5rem}.filters,.notice-list{grid-template-columns:1fr}.archive-heading{align-items:start;flex-direction:column}.notice-card{min-height:0}}
+</style>

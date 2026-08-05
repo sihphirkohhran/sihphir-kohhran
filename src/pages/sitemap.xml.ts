@@ -1,6 +1,7 @@
 import { getCollection } from 'astro:content';
 import { isPublishedPageSlug, pageUrlPath } from '../lib/pages';
 import { absoluteSiteUrl } from '../lib/site';
+import { normalizeNotice } from '../lib/notices';
 
 const staticPaths = [
   '/',
@@ -16,6 +17,7 @@ const staticPaths = [
   '/gallery',
   '/missionary-ministry',
   '/missionary',
+  '/notices',
   '/pastoral-history',
   '/probationary-pastor',
   '/kohhran-upa',
@@ -30,11 +32,16 @@ const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (character) => ({
 }[character] ?? character));
 
 export async function GET() {
-  const pages = await getCollection('pages');
+  const [pages, notices] = await Promise.all([getCollection('pages'), getCollection('notices')]);
   const contentPaths = pages
     .filter((page) => isPublishedPageSlug(page.slug))
     .map((page) => pageUrlPath(page.slug, page.data.path));
-  const urls = [...new Set([...staticPaths, ...contentPaths])];
+  const noticePaths = notices
+    .filter((notice) => notice.id.startsWith('announcements/'))
+    .map(normalizeNotice)
+    .filter((notice) => notice.published)
+    .map((notice) => `/notices/${notice.slug}`);
+  const urls = [...new Set([...staticPaths, ...contentPaths, ...noticePaths])];
   const entries = urls
     .map((path) => `  <url><loc>${escapeXml(absoluteSiteUrl(path))}</loc></url>`)
     .join('\n');

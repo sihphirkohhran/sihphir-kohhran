@@ -291,7 +291,7 @@ const notices = defineCollection({
   schema: z.object({
     week_start: z.string().optional(),
     week_end: z.string().optional(),
-    status: z.enum(['current', 'upcoming', 'archived']).optional(),
+    status: z.enum(['current', 'upcoming', 'archived', 'published', 'draft']).optional(),
     days: z.array(dutyDay).optional(),
     month: z.string().optional(),
     sections: z.array(monthlySection).optional(),
@@ -299,6 +299,16 @@ const notices = defineCollection({
     date: z.string().optional(),
     pdf_url: z.string().optional(),
     published: z.boolean().optional(),
+    summary: z.string().optional(),
+    short_summary: z.string().optional(),
+    category: z.string().optional(),
+    pinned: z.boolean().optional(),
+    publish_date: z.string().optional(),
+    expiry_date: z.string().optional(),
+    display_order: z.number().optional(),
+    featured_image: z.string().optional(),
+    cover_image: z.string().optional(),
+    attachments: z.array(z.object({ title: z.string().optional(), url: z.string() }).passthrough()).optional(),
   }),
 });
 

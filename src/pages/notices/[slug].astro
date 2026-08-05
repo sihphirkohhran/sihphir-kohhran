@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { normalizeNotice, sortNotices } from '../../lib/notices';
+
+export async function getStaticPaths() {
+  const notices=(await getCollection('notices')).filter((entry)=>entry.id.startsWith('announcements/')).map(normalizeNotice).filter((notice)=>notice.published).sort((a,b)=>sortNotices(a,b));
+  return notices.map((notice,index)=>({params:{slug:notice.slug},props:{notice,previous:notices[index+1]??null,next:notices[index-1]??null,related:notices.filter((item)=>item.slug!==notice.slug&&item.category===notice.category).slice(0,3)}}));
+}
+
+const { notice, previous, next, related }=Astro.props;
+const { Content }=await notice.entry.render();
+---
+
+<BaseLayout title={notice.title} description={notice.summary || `${notice.title} — Sihphir Presbyterian Kohhran`} activePage="notices">
+  <main class="detail-page">
+    <header class="detail-hero">
+      {notice.featuredImage && <img src={notice.featuredImage} alt="" />}
+      <div class="overlay"></div>
+      <div class="detail-wrap hero-content">
+        <a href="/notices" class="back">← Back to notices</a>
+        <div class="meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>PINNED</strong>}</div>
+        <h1>{notice.title}</h1>
+        {notice.summary && <p>{notice.summary}</p>}
+      </div>
+    </header>
+
+    <div class="detail-wrap detail-grid">
+      <article class="notice-body prose"><Content /></article>
+      <aside>
+        {notice.attachments.length > 0 && <section class="attachments"><p class="label">Downloads</p><h2>Attachments</h2><div>{notice.attachments.map((attachment) => <a href={attachment.url} download><span aria-hidden="true">↓</span><span>{attachment.title || 'Download attachment'}</span></a>)}</div></section>}
+        <section class="notice-facts"><p class="label">Notice details</p><dl><div><dt>Category</dt><dd>{notice.category}</dd></div><div><dt>Published</dt><dd>{notice.publishDate}</dd></div></dl></section>
+      </aside>
+    </div>
+
+    <nav class="detail-wrap pager" aria-label="Notice navigation">
+      {previous ? <a href={`/notices/${previous.slug}`}><small>Previous notice</small><span>← {previous.title}</span></a> : <span></span>}
+      {next && <a href={`/notices/${next.slug}`} class="next"><small>Next notice</small><span>{next.title} →</span></a>}
+    </nav>
+
+    {related.length > 0 && <section class="related"><div class="detail-wrap"><p class="label">More from {notice.category}</p><h2>Related notices</h2><div class="related-grid">{related.map((item) => <a href={`/notices/${item.slug}`}><time>{item.publishDate}</time><strong>{item.title}</strong><span>Read notice →</span></a>)}</div></div></section>}
+  </main>
+</BaseLayout>
+
+<style>
+  .detail-page{background:#f6f3ec;color:#17271f;min-height:70vh}.detail-wrap{width:min(1030px,calc(100% - 2rem));margin:auto}.detail-hero{position:relative;isolation:isolate;overflow:hidden;background:#123e2b;color:#fff;padding:4.5rem 0 4rem}.detail-hero>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}.overlay{position:absolute;inset:0;background:linear-gradient(110deg,rgba(10,42,28,.97),rgba(10,42,28,.7));z-index:-1}.back{display:inline-block;color:#e6eee8;text-decoration:none;margin-bottom:2.7rem;font-weight:700}.meta{display:flex;align-items:center;gap:.8rem;text-transform:uppercase;letter-spacing:.08em;font-size:.73rem;color:#d9e6dd}.meta span{color:#e0bd6d;font-weight:900}.meta strong{background:#d4af5d;color:#213328;border-radius:99px;padding:.25rem .55rem;font-size:.62rem}.detail-hero h1{font-size:clamp(2.25rem,6vw,4.6rem);letter-spacing:-.04em;line-height:1.03;max-width:850px;margin:.75rem 0 1rem}.detail-hero p{max-width:720px;font-size:1.08rem;line-height:1.6;color:#deebe2}.detail-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:2.5rem;padding:3.5rem 0}.notice-body{background:#fff;border:1px solid #e0dbcf;border-radius:16px;padding:clamp(1.3rem,4vw,2.5rem);box-shadow:0 12px 35px rgba(22,46,32,.05)}.prose :global(h2),.prose :global(h3){color:#174d35;margin-top:1.6em}.prose :global(p),.prose :global(li){line-height:1.75;color:#415048}.prose :global(a){color:#17613f}.prose :global(img){max-width:100%;height:auto;border-radius:10px}.label{text-transform:uppercase;letter-spacing:.13em;font-size:.7rem;color:#9b7421;font-weight:900;margin:0 0 .3rem}.attachments,.notice-facts{background:#fff;border:1px solid #e0dbcf;border-radius:15px;padding:1.25rem;margin-bottom:1rem}.attachments h2{margin:.2rem 0 1rem}.attachments>div{display:grid;gap:.55rem}.attachments a{display:flex;gap:.7rem;align-items:center;border-radius:9px;background:#edf4ef;color:#174d35;text-decoration:none;padding:.8rem;font-weight:800}.attachments a>span:first-child{display:grid;place-items:center;background:#174d35;color:#fff;width:28px;height:28px;border-radius:50%}.notice-facts dl{margin:.7rem 0 0}.notice-facts dl div{display:flex;justify-content:space-between;gap:1rem;padding:.7rem 0;border-top:1px solid #e7e3da}.notice-facts dt{color:#6a756e}.notice-facts dd{margin:0;font-weight:800}.pager{display:grid;grid-template-columns:1fr 1fr;gap:1rem;padding-bottom:3.5rem}.pager a{display:grid;gap:.35rem;color:#174d35;text-decoration:none;background:#fff;border:1px solid #ded9cc;border-radius:12px;padding:1rem}.pager small{color:#717c75;text-transform:uppercase;letter-spacing:.08em}.pager span{font-weight:800}.pager .next{text-align:right}.related{background:#e7eee9;padding:3.5rem 0 4rem}.related h2{font-size:2rem;margin:.25rem 0 1.2rem}.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}.related-grid a{display:grid;gap:.6rem;background:#fff;border-radius:12px;padding:1.2rem;text-decoration:none;color:#1c3025}.related-grid time{font-size:.76rem;color:#6d776f}.related-grid strong{font-size:1.05rem}.related-grid span{color:#17613f;font-weight:800}@media(max-width:750px){.detail-grid{grid-template-columns:1fr}.related-grid{grid-template-columns:1fr}.detail-hero{padding:3rem 0}.back{margin-bottom:2rem}}@media(max-width:480px){.pager{grid-template-columns:1fr}.pager .next{text-align:left}}
+</style>
