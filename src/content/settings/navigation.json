@@ -13,7 +13,7 @@
       "href": "/committee",
       "key": "committee",
       "visible": true,
-      "order": 10,
+      "order": 1,
       "parent": ""
     },
     {
@@ -21,7 +21,7 @@
       "href": "/bialtu-pastor",
       "key": "bialtu-pastor",
       "visible": true,
-      "order": 0,
+      "order": 2,
       "parent": "Rawngbawltu"
     },
     {
@@ -29,7 +29,7 @@
       "href": "/probationary-pastor",
       "key": "pro-pastor",
       "visible": true,
-      "order": 1,
+      "order": 3,
       "parent": "Rawngbawltu"
     },
     {
@@ -37,7 +37,7 @@
       "href": "/kohhran-upa",
       "key": "kohhran-upa",
       "visible": true,
-      "order": 2,
+      "order": 4,
       "parent": "Rawngbawltu"
     },
     {
@@ -45,7 +45,7 @@
       "href": "/missionary",
       "key": "missionary",
       "visible": true,
-      "order": 3,
+      "order": 5,
       "parent": "Rawngbawltu"
     },
     {
@@ -53,7 +53,7 @@
       "href": "/fellowship",
       "key": "fellowship",
       "visible": true,
-      "order": 20,
+      "order": 6,
       "parent": ""
     },
     {
@@ -61,7 +61,7 @@
       "href": "/gallery",
       "key": "gallery",
       "visible": true,
-      "order": 30,
+      "order": 7,
       "parent": ""
     },
     {
@@ -69,15 +69,23 @@
       "href": "/document",
       "key": "document",
       "visible": true,
-      "order": 40,
+      "order": 8,
       "parent": ""
     },
     {
-      "order": 0,
+      "order": 9,
       "visible": true,
       "label": "Rawngbawltute",
       "key": "Rawngbawltu",
       "href": "/bialtu-pastor"
+    },
+    {
+      "label": "Te",
+      "href": "/Test page",
+      "key": "new-item",
+      "visible": true,
+      "order": 10,
+      "parent": ""
     }
   ]
 }
