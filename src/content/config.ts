@@ -114,8 +114,12 @@ const fellowship = defineCollection({
     history_full: z.string().default(''),
     logo: z.string().optional(),
     group_photo: z.string().optional(),
+    category: z.string().optional(),
     description: z.string().optional(),
     display_order: z.number().optional(),
+    published: z.boolean().optional(),
+    featured: z.boolean().optional(),
+    updated_at: z.string().optional(),
     status: z.enum(['current', 'archived']).optional(),
     group_photos: z
       .array(z.object({ year: z.number(), photo: z.string() }))
@@ -142,7 +146,7 @@ const committee = defineCollection({
     chairman: z.string(),
     secretary: z.string(),
     members: z.array(
-      z.object({ name: z.string(), role: z.string().optional(), photo: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), address: z.string().optional(), notes: z.string().optional(), display_order: z.number().optional() }),
+      z.object({ name: z.string(), role: z.string().optional(), designation: z.string().optional(), photo: z.string().optional(), phone: z.string().optional(), email: z.string().optional(), address: z.string().optional(), bio: z.string().optional(), notes: z.string().optional(), display_order: z.number().optional() }),
     ),
   }),
 });

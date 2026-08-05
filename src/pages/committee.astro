@@ -1,360 +1,90 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ArchiveFilterBar from '../components/ArchiveFilterBar.astro';
-import { getCollection, getEntry } from 'astro:content';
-import {
-  buildYearsByCommittee,
-  committeeKey,
-  resolveCommitteePhoto,
-  type CommitteeRecord,
-} from '../lib/committee';
+import { getCollection } from 'astro:content';
+import { resolveCommitteePhoto } from '../lib/committee';
+import { renderMarkdown } from '../lib/markdown';
 
-const committeeRegistry = await getEntry('settings', 'committees');
-const registeredCommittees = committeeRegistry?.data.committees ?? [];
+const entries = (await getCollection('committee'))
+  .filter((entry) => entry.data.status !== 'archived' && entry.data.published !== false)
+  .sort((a, b) => b.data.year - a.data.year || (a.data.display_order ?? 999) - (b.data.display_order ?? 999));
 
-const committeeEntries = await getCollection('committee');
-const activeCommitteeEntries = committeeEntries.filter((entry) => entry.data.status !== 'archived');
-const committeeIdsWithRecords = new Set(committeeEntries.map((entry) => entry.data.committee_id));
-const activeCommitteeIds = new Set(activeCommitteeEntries.map((entry) => entry.data.committee_id));
-const registeredCommitteeIds = new Set(registeredCommittees.map((committee) => committee.id));
-const recordCommittees = Array.from(
-  new Map(
-    activeCommitteeEntries.map((entry) => [
-      entry.data.committee_id,
-      { id: entry.data.committee_id, name: entry.data.committee_name },
-    ]),
-  ).values(),
-);
-const committees = [
-  ...registeredCommittees.filter(
-    (committee) => !committeeIdsWithRecords.has(committee.id) || activeCommitteeIds.has(committee.id),
-  ),
-  ...recordCommittees.filter((committee) => !registeredCommitteeIds.has(committee.id)),
-];
-const committeeByKey: Record<string, CommitteeRecord> = Object.fromEntries(
-  activeCommitteeEntries.map((entry) => [committeeKey(entry.data.committee_id, entry.data.year), entry.data]),
-);
-const yearsByCommittee = buildYearsByCommittee(activeCommitteeEntries);
+const committees = entries.map((entry) => {
+  const data = entry.data;
+  const members = [...data.members]
+    .map((member, index) => ({
+      name: member.name,
+      designation: member.designation || member.role || 'Member',
+      photo: resolveCommitteePhoto(member.photo),
+      phone: member.phone || '',
+      email: member.email || '',
+      address: member.address || '',
+      bio: member.bio || member.notes || '',
+      order: member.display_order ?? index,
+    }))
+    .sort((a, b) => a.order - b.order);
+  const addLegacyLeader = (name: string, designation: string) => {
+    if (name?.trim() && !members.some((member) => member.name.toLowerCase() === name.toLowerCase())) members.unshift({ name, designation, photo: '', phone: '', email: '', address: '', bio: '', order: -1 });
+  };
+  addLegacyLeader(data.secretary, 'Secretary');
+  addLegacyLeader(data.chairman, 'Chairman');
+  const body = entry.body?.trim() || data.description || '';
+  return {
+    id: entry.id.replace(/[^a-z0-9]+/gi, '-'),
+    name: data.committee_name,
+    category: data.category || 'Other',
+    year: data.year,
+    photo: resolveCommitteePhoto(data.group_photo),
+    description: data.description || body.replace(/<[^>]*>/g, ' ').replace(/[#*_>`]/g, '').trim(),
+    descriptionHtml: renderMarkdown(body),
+    memberCount: members.length,
+    members,
+    featured: Boolean(data.featured),
+  };
+});
 
-const defaultCommittee = committees.find((c) => c.is_main) ?? committees[0];
-const defaultId = defaultCommittee?.id ?? '';
-const defaultYears = yearsByCommittee[defaultId] ?? [];
-const defaultYear = defaultYears[0] ?? new Date().getFullYear();
-
-const defaultData = defaultYear
-  ? committeeByKey[committeeKey(defaultId, defaultYear)]
-  : undefined;
-
-const defaultMembers = defaultData?.members ?? [];
-const defaultPhoto = resolveCommitteePhoto(defaultData?.group_photo);
+const featured = committees.filter((committee) => committee.featured);
+const archive = committees.filter((committee) => !committee.featured);
+const categories = Array.from(new Set(committees.map((committee) => committee.category))).sort();
+const years = Array.from(new Set(committees.map((committee) => committee.year))).sort((a, b) => b - a);
 ---
 
-<BaseLayout title="Committee — Sihphir Presbyterian Kohhran" activePage="committee">
-
-  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.04]"
-      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
-    </div>
-    <div class="relative z-10">
-      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Committee Members</h1>
-      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+<BaseLayout title="Committees — Sihphir Presbyterian Kohhran" activePage="committee">
+  <div class="committee-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image:repeating-linear-gradient(45deg,#b8953f 0,#b8953f 1px,transparent 1px,transparent 28px)"></div>
+    <div class="relative z-10 max-w-2xl mx-auto">
+      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">Church Committees</h1>
+      <p class="font-body text-gold-pale/60 text-sm mt-3">Meet the committees serving the church across its ministries and responsibilities.</p>
+      <div class="w-16 h-px bg-gold/50 mx-auto mt-5"></div>
     </div>
   </div>
 
-  <div class="max-w-3xl mx-auto px-4 py-8">
+  <main class="committee-public max-w-6xl mx-auto px-4 py-8 sm:py-10">
+    <section class="committee-filters reveal" aria-label="Committee filters">
+      <label class="committee-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span class="sr-only">Search committees</span><input type="search" id="committee-search" placeholder="Search committees…" autocomplete="off"></label>
+      <div><label><span>Category</span><select id="committee-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label><label><span>Year</span><select id="committee-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label></div>
+      <p id="committee-count">{committees.length} committees</p>
+    </section>
 
-    <div class="archive-filters-row reveal">
-      <div class="flex-1 min-w-[200px]">
-        <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5">Select Committee</label>
-        <select id="committee-select"
-          class="archive-filter-select w-full border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors">
-          {committees.map((c) => (
-            <option value={c.id} selected={c.id === defaultId}>{c.name}</option>
-          ))}
-        </select>
-      </div>
-      <ArchiveFilterBar
-        id="year-select"
-        label="Year"
-        showAll={false}
-        options={(defaultYears.length ? defaultYears : [defaultYear]).map((y) => ({
-          value: String(y),
-          label: String(y),
-        }))}
-      />
-    </div>
+    {featured.length > 0 && <section class="committee-section" id="featured-committees"><header class="section-heading reveal"><div><span>Serving the church</span><h2>Featured Committees</h2></div><p>Highlighted committees and their current members.</p></header><div class="committee-grid featured-grid">{featured.map((committee, index) => <article class={`committee-card featured reveal reveal-delay-${index % 3 + 1}`} data-committee-card data-name={committee.name.toLowerCase()} data-category={committee.category} data-year={committee.year}><div class="committee-cover">{committee.photo ? <img src={committee.photo} alt={`${committee.name} committee`} loading="lazy"> : <div class="committee-placeholder">♙</div>}<span>Featured</span></div><div class="committee-card-body"><div class="badges"><span>{committee.category}</span><span>{committee.year}</span></div><h3>{committee.name}</h3><p>{committee.description || 'A committee serving Sihphir Presbyterian Kohhran.'}</p><footer><span>{committee.memberCount} members</span><button type="button" data-view-committee={committee.id}>View Committee</button></footer></div></article>)}</div></section>}
 
-    <div id="committee-card" class="reveal committee-panel">
-      <div class="committee-panel-header">
-        <h2 id="committee-title" class="committee-panel-title">
-          {defaultData?.committee_name ?? defaultCommittee?.name}
-        </h2>
-        <p class="committee-panel-year" id="committee-year-label">Year: {defaultYear}</p>
-      </div>
+    <section class="committee-section archive-section"><header class="section-heading reveal"><div><span>Church leadership</span><h2>All Committees</h2></div><p>Browse committee records by category and year.</p></header><div class="committee-grid archive-grid">{archive.map((committee, index) => <article class={`committee-card reveal reveal-delay-${index % 3 + 1}`} data-committee-card data-name={committee.name.toLowerCase()} data-category={committee.category} data-year={committee.year}><div class="committee-cover">{committee.photo ? <img src={committee.photo} alt={`${committee.name} committee`} loading="lazy"> : <div class="committee-placeholder">♙</div>}</div><div class="committee-card-body"><div class="badges"><span>{committee.category}</span><span>{committee.year}</span></div><h3>{committee.name}</h3><p>{committee.description || 'A committee serving Sihphir Presbyterian Kohhran.'}</p><footer><span>{committee.memberCount} members</span><button type="button" data-view-committee={committee.id}>View Committee</button></footer></div></article>)}</div></section>
 
-      <div class="committee-leaders" id="leaders-section">
-        <dl class="committee-leader-block">
-          <dt>Chairman</dt>
-          <dd id="chairman-name">{defaultData?.chairman ?? '—'}</dd>
-        </dl>
-        <dl class="committee-leader-block">
-          <dt>Secretary</dt>
-          <dd id="secretary-name">{defaultData?.secretary ?? '—'}</dd>
-        </dl>
-      </div>
+    <section class="committee-empty" id="committee-empty" hidden><div aria-hidden="true">♙</div><h2>No committees found</h2><p>Try another search or clear the selected filters.</p><button type="button" id="committee-clear">Clear filters</button></section>
 
-      <div id="members-section">
-        <h3 class="committee-members-heading">Members</h3>
-
-        <div class="committee-members-desktop">
-          <table class="committee-table w-full" id="members-table">
-            <thead>
-              <tr>
-                <th class="w-10">#</th>
-                <th>Name</th>
-                <th>Role</th>
-              </tr>
-            </thead>
-            <tbody id="members-tbody">
-              {defaultMembers.map((m, i) => (
-                <tr>
-                  <td>{i + 1}</td>
-                  <td>{m.name}</td>
-                  <td class="committee-role">{m.role ?? 'Member'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div class="committee-members-mobile" id="members-mobile">
-          {defaultMembers.map((m, i) => (
-            <div class="committee-member-card">
-              <span class="num">{i + 1}</span>
-              <div>
-                <div class="font-display text-navy font-semibold text-base leading-snug">{m.name}</div>
-                <div class="font-body text-sm text-gray-600 mt-0.5">{m.role ?? 'Member'}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <p id="no-members-msg" class={`font-body text-sm text-gray-500 py-6 text-center px-4 ${defaultMembers.length ? 'hidden' : ''}`}>
-          No committee record for this year. Add one in Admin → Committee Members.
-        </p>
-      </div>
-
-      <div class="px-4 sm:px-6 py-4 border-t border-navy/10" id="group-photo-section">
-        <div id="group-photo-wrap" class={defaultPhoto ? '' : 'hidden'} style={defaultPhoto ? '' : 'display:none;'}>
-          <img
-            id="group-photo"
-            src={defaultPhoto}
-            alt="Committee group photo"
-            class="committee-group-photo"
-            loading="lazy"
-            data-lightbox
-            data-lightbox-src={defaultPhoto}
-            data-lightbox-caption={`${defaultData?.committee_name ?? defaultCommittee?.name} : ${defaultYear}`}
-          />
-          <p id="group-photo-caption" class="committee-group-caption">
-            {defaultData?.committee_name ?? defaultCommittee?.name} : {defaultYear}
-          </p>
-        </div>
-        <div id="group-photo-placeholder" class="committee-group-photo-placeholder" style={defaultPhoto ? 'display:none;' : ''}>
-          No group photo for this year. Upload in Admin → Committee Members.
-        </div>
-      </div>
-    </div>
-
-    <div class="mt-8 reveal">
-      <div class="gold-divider mb-4">
-        <h3 style="font-size:1rem">All Committees</h3>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {committees.map((c) => (
-          <button
-            type="button"
-            class={`committee-quick-btn ${c.id === defaultId ? 'is-active' : ''} ${c.is_main ? 'is-main' : ''}`}
-            data-committee={c.id}
-          >
-            {c.is_main && (
-              <span class="text-[0.6rem] tracking-widest uppercase text-gold/80 block mb-0.5">Main</span>
-            )}
-            {c.name}
-          </button>
-        ))}
-      </div>
-    </div>
-
-  </div>
-
+    {committees.map((committee) => <section class="committee-detail" id={`committee-detail-${committee.id}`} hidden><button type="button" class="detail-back" data-close-committee>← Back to committees</button><div class="detail-hero">{committee.photo ? <img src={committee.photo} alt={`${committee.name} committee`} loading="lazy"> : <div class="committee-placeholder">♙</div>}<div><div class="badges"><span>{committee.category}</span><span>{committee.year}</span></div><h2>{committee.name}</h2><p>{committee.memberCount} committee members</p></div></div>{committee.descriptionHtml && <div class="detail-description prose" set:html={committee.descriptionHtml}></div>}<div class="members-heading"><span>People serving</span><h3>Committee Members</h3></div><div class="member-grid">{committee.members.map((member) => <article class="member-card">{member.photo ? <img src={member.photo} alt={member.name} loading="lazy"> : <div class="member-photo-placeholder">{member.name.charAt(0)}</div>}<div><h4>{member.name}</h4><p class="designation">{member.designation}</p>{member.bio && <p class="bio">{member.bio}</p>}<address>{member.phone && <a href={`tel:${member.phone}`}>{member.phone}</a>}{member.email && <a href={`mailto:${member.email}`}>{member.email}</a>}{member.address && <span>{member.address}</span>}</address></div></article>)}</div></section>)}
+  </main>
 </BaseLayout>
 
-<script define:vars={{ committeeByKey, committees, yearsByCommittee }}>
-  function resolvePhoto(photo) {
-    if (!photo?.trim()) return '';
-    const s = photo.trim();
-    if (s.startsWith('http://') || s.startsWith('https://')) return s;
-    if (s.startsWith('/')) return s;
-    return '/' + s.replace(/^\.?\//, '');
-  }
-
-  const select = document.getElementById('committee-select');
-  const yearSelect = document.getElementById('year-select');
-  const titleEl = document.getElementById('committee-title');
-  const yearLabel = document.getElementById('committee-year-label');
-  const chairmanEl = document.getElementById('chairman-name');
-  const secretaryEl = document.getElementById('secretary-name');
-  const tbody = document.getElementById('members-tbody');
-  const mobileList = document.getElementById('members-mobile');
-  const noMsg = document.getElementById('no-members-msg');
-  const membersSection = document.getElementById('members-section');
-  const photoWrap = document.getElementById('group-photo-wrap');
-  const photoPlaceholder = document.getElementById('group-photo-placeholder');
-  const photoEl = document.getElementById('group-photo');
-  const captionEl = document.getElementById('group-photo-caption');
-  const quickBtns = document.querySelectorAll('.committee-quick-btn');
-
-  function syncYearOptions(committeeId, preferredYear) {
-    if (!yearSelect) return;
-    const years = yearsByCommittee[committeeId] ?? [];
-    const list = years.length ? years : [new Date().getFullYear()];
-    const prev = preferredYear || yearSelect.value;
-    yearSelect.innerHTML = list
-      .map((y) => `<option value="${y}">${y}</option>`)
-      .join('');
-    const pick = list.includes(Number(prev)) ? prev : String(list[0]);
-    yearSelect.value = pick;
-  }
-
-  function setQuickActive(id) {
-    quickBtns.forEach((btn) => {
-      btn.classList.toggle('is-active', btn.dataset.committee === id);
-    });
-  }
-
-  function renderMembers(data, committeeMeta, year) {
-    const members = data?.members ?? [];
-    const hasRecord = Boolean(data);
-    const hasMembers = members.length > 0;
-
-    if (chairmanEl) chairmanEl.textContent = data?.chairman?.trim() || '—';
-    if (secretaryEl) secretaryEl.textContent = data?.secretary?.trim() || '—';
-    if (captionEl) {
-      captionEl.textContent = `${data?.committee_name ?? committeeMeta?.name ?? 'Committee'} : ${year}`;
-    }
-
-    const photo = resolvePhoto(data?.group_photo);
-    if (photo && photoEl && photoWrap && photoPlaceholder) {
-      photoEl.src = photo;
-      photoEl.dataset.lightboxSrc = photo;
-      photoEl.dataset.lightboxCaption = `${data?.committee_name ?? committeeMeta?.name ?? 'Committee'} : ${year}`;
-
-      photoEl.onload = () => {
-        photoWrap.style.display = '';
-        photoPlaceholder.style.display = 'none';
-      };
-      photoEl.onerror = () => {
-        photoWrap.style.display = 'none';
-        photoPlaceholder.style.display = 'block';
-        photoPlaceholder.textContent = 'Group photo could not be loaded.';
-      };
-      photoWrap.style.display = '';
-      photoPlaceholder.style.display = 'none';
-    } else {
-      if (photoWrap) photoWrap.style.display = 'none';
-      if (photoPlaceholder) {
-        photoPlaceholder.style.display = 'block';
-        photoPlaceholder.textContent = hasRecord
-          ? 'No group photo for this year. Upload in Admin → Committee Members.'
-          : 'No committee record for this year.';
-      }
-    }
-
-    if (!hasRecord || !hasMembers) {
-      tbody && (tbody.innerHTML = '');
-      mobileList && (mobileList.innerHTML = '');
-      noMsg?.classList.remove('hidden');
-      membersSection?.querySelector('.committee-members-heading')?.classList.add('hidden');
-      membersSection?.querySelector('.committee-members-desktop')?.classList.add('hidden');
-      membersSection?.querySelector('.committee-members-mobile')?.classList.add('hidden');
-      if (!hasRecord && noMsg) {
-        noMsg.textContent = 'No committee record for this year. Add one in Admin → Committee Members.';
-      } else if (noMsg) {
-        noMsg.textContent = 'No members listed for this committee year.';
-        noMsg.classList.remove('hidden');
-      }
-      return;
-    }
-
-    noMsg?.classList.add('hidden');
-    membersSection?.querySelector('.committee-members-heading')?.classList.remove('hidden');
-    membersSection?.querySelector('.committee-members-desktop')?.classList.remove('hidden');
-    membersSection?.querySelector('.committee-members-mobile')?.classList.remove('hidden');
-
-    const rows = members
-      .map(
-        (m, i) => `
-        <tr>
-          <td>${i + 1}</td>
-          <td>${escapeHtml(m.name)}</td>
-          <td class="committee-role">${escapeHtml(m.role || 'Member')}</td>
-        </tr>`,
-      )
-      .join('');
-    if (tbody) tbody.innerHTML = rows;
-
-    if (mobileList) {
-      mobileList.innerHTML = members
-        .map(
-          (m, i) => `
-          <div class="committee-member-card">
-            <span class="num">${i + 1}</span>
-            <div>
-              <div class="font-display text-navy font-semibold text-base leading-snug">${escapeHtml(m.name)}</div>
-              <div class="font-body text-sm text-gray-600 mt-0.5">${escapeHtml(m.role || 'Member')}</div>
-            </div>
-          </div>`,
-        )
-        .join('');
-    }
-  }
-
-  function escapeHtml(text) {
-    return String(text)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function updateDisplay() {
-    const id = select?.value;
-    const year = yearSelect?.value;
-    if (!id) return;
-    const committeeMeta = committees.find((c) => c.id === id);
-    const data = committeeByKey[`${id}-${year}`];
-    if (titleEl) titleEl.textContent = data?.committee_name ?? committeeMeta?.name ?? '';
-    if (yearLabel) yearLabel.textContent = `Year: ${year}`;
-    renderMembers(data, committeeMeta, year);
-    setQuickActive(id);
-  }
-
-  select?.addEventListener('change', () => {
-    syncYearOptions(select.value);
-    updateDisplay();
-  });
-  yearSelect?.addEventListener('change', updateDisplay);
-
-  quickBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      if (select) select.value = btn.dataset.committee || '';
-      syncYearOptions(select.value);
-      updateDisplay();
-      document.getElementById('committee-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
-
-  updateDisplay();
+<script>
+  const search=document.querySelector<HTMLInputElement>('#committee-search'),category=document.querySelector<HTMLSelectElement>('#committee-category'),year=document.querySelector<HTMLSelectElement>('#committee-year'),count=document.querySelector<HTMLElement>('#committee-count'),empty=document.querySelector<HTMLElement>('#committee-empty');
+  function filter(){const query=search?.value.trim().toLowerCase()||'',cat=category?.value||'all',yr=year?.value||'all';let visible=0;document.querySelectorAll<HTMLElement>('[data-committee-card]').forEach(card=>{const show=(!query||(card.dataset.name||'').includes(query))&&(cat==='all'||card.dataset.category===cat)&&(yr==='all'||card.dataset.year===yr);card.hidden=!show;if(show)visible++;});document.querySelector<HTMLElement>('#featured-committees')?.toggleAttribute('hidden',!document.querySelector('#featured-committees [data-committee-card]:not([hidden])'));document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden',!document.querySelector('.archive-section [data-committee-card]:not([hidden])'));if(empty)empty.hidden=visible>0;if(count)count.textContent=`${visible} committee${visible===1?'':'s'}`;}
+  [search,category,year].forEach(control=>control?.addEventListener(control===search?'input':'change',filter));document.querySelector('#committee-clear')?.addEventListener('click',()=>{if(search)search.value='';if(category)category.value='all';if(year)year.value='all';filter();search?.focus();});
+  document.querySelectorAll<HTMLElement>('[data-view-committee]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.committee-section,.committee-filters,.committee-empty').forEach(element=>element.hidden=true);const detail=document.querySelector<HTMLElement>(`#committee-detail-${button.dataset.viewCommittee}`);if(detail){detail.hidden=false;detail.scrollIntoView({behavior:'smooth',block:'start'});}}));document.querySelectorAll('[data-close-committee]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.committee-detail').forEach(detail=>detail.hidden=true);document.querySelector<HTMLElement>('.committee-filters')!.hidden=false;document.querySelectorAll<HTMLElement>('.committee-section').forEach(section=>section.hidden=false);filter();document.querySelector('.committee-filters')?.scrollIntoView({behavior:'smooth'});}));filter();
 </script>
+
+<style>
+  .committee-public{color:#172941}.committee-filters{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:14px;background:#fffdf8;box-shadow:0 12px 35px rgba(20,36,58,.07)}.committee-search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid rgba(18,35,59,.17);border-radius:9px;padding:0 13px;background:white}.committee-search svg{width:18px;fill:none;stroke:#9a772b;stroke-width:1.7}.committee-search input{width:100%;border:0;outline:0;padding:12px 0;background:transparent;font-size:.85rem}.committee-filters>div{display:flex;gap:10px}.committee-filters label:not(.committee-search){display:grid;gap:5px}.committee-filters label>span{color:#7c8390;font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase}.committee-filters select{min-width:165px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px;background:white;color:#263851;font-size:.75rem}.committee-filters>p{align-self:end;margin:0 0 9px;color:#7e8590;font-size:.7rem}.committee-section{margin-top:42px}.section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:18px}.section-heading span,.members-heading span{color:#9c7628;font-size:.56rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.section-heading h2,.members-heading h3{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.55rem}.section-heading>p{max-width:330px;margin:0;color:#7b828d;font-size:.75rem;text-align:right}.committee-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.committee-card{overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:14px;background:white;box-shadow:0 7px 25px rgba(23,38,59,.07);transition:.2s}.committee-card:hover{transform:translateY(-3px);border-color:rgba(184,149,63,.38);box-shadow:0 15px 35px rgba(23,38,59,.12)}.committee-card[hidden],.committee-section[hidden],.committee-detail[hidden],.committee-filters[hidden],.committee-empty[hidden]{display:none}.committee-cover{position:relative;height:190px;background:linear-gradient(145deg,#e8ebed,#f8f4e9)}.committee-cover img{width:100%;height:100%;object-fit:cover}.committee-placeholder{display:grid;place-items:center;width:100%;height:100%;color:#b8953f;font-size:42px}.committee-cover>span{position:absolute;top:12px;right:12px;border-radius:999px;padding:5px 8px;background:#b8953f;color:white;font-size:.52rem;font-weight:800;text-transform:uppercase}.committee-card-body{padding:17px}.badges{display:flex;flex-wrap:wrap;gap:6px}.badges span{border:1px solid rgba(184,149,63,.22);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.52rem;font-weight:700;text-transform:uppercase}.committee-card h3{margin:11px 0 7px;font-family:var(--font-display,serif);font-size:1.08rem}.committee-card-body>p{display:-webkit-box;min-height:3.5em;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:3}.committee-card footer{display:flex;justify-content:space-between;align-items:center;margin-top:15px;padding-top:12px;border-top:1px solid rgba(18,35,59,.08)}.committee-card footer>span{color:#848b95;font-size:.62rem}.committee-card footer button,.committee-empty button,.detail-back{border:0;border-radius:7px;padding:8px 10px;background:#142740;color:white;font-size:.62rem;font-weight:700}.committee-empty{display:grid;justify-items:center;padding:70px 20px;text-align:center}.committee-empty>div{display:grid;place-items:center;width:70px;height:70px;border-radius:50%;background:#fff5df;color:#aa7d2a;font-size:29px}.committee-empty h2{margin:14px 0 4px;font-family:var(--font-display,serif)}.committee-empty p{margin:0 0 16px;color:#7b828d;font-size:.76rem}.committee-detail{padding-top:4px}.detail-back{margin-bottom:18px;background:white;color:#31445e;border:1px solid rgba(18,35,59,.14)}.detail-hero{display:grid;grid-template-columns:minmax(300px,1.3fr) minmax(260px,1fr);min-height:350px;overflow:hidden;border-radius:16px;background:#142740;color:white;box-shadow:0 15px 40px rgba(17,34,56,.15)}.detail-hero>img,.detail-hero>.committee-placeholder{width:100%;height:100%;max-height:440px;object-fit:cover}.detail-hero>div:last-child{display:grid;align-content:center;padding:35px}.detail-hero h2{margin:14px 0 8px;font-family:var(--font-display,serif);font-size:2rem;color:#fff}.detail-hero p{margin:0;color:#e3d5ab;font-size:.78rem}.detail-description{max-width:800px;margin:30px auto;color:#46556b;font-size:.86rem;line-height:1.75}.detail-description :global(h2),.detail-description :global(h3){font-family:var(--font-display,serif);color:#172941}.members-heading{margin:40px 0 16px}.member-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.member-card{overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:13px;background:white;box-shadow:0 6px 20px rgba(23,38,59,.06)}.member-card>img,.member-photo-placeholder{width:100%;aspect-ratio:4/3;object-fit:cover}.member-photo-placeholder{display:grid;place-items:center;background:linear-gradient(145deg,#e9ecee,#f8f4e9);color:#aa7d2a;font-family:var(--font-display,serif);font-size:2rem}.member-card>div{padding:15px}.member-card h4{margin:0;font-family:var(--font-display,serif);font-size:1rem}.designation{margin:4px 0 0;color:#9a7429;font-size:.65rem;font-weight:700}.bio{margin:10px 0 0;color:#737b87;font-size:.7rem;line-height:1.5}.member-card address{display:grid;gap:4px;margin-top:11px;padding-top:9px;border-top:1px solid rgba(18,35,59,.08);font-style:normal;font-size:.63rem}.member-card address a{color:#395572;text-decoration:none}.member-card address span{color:#7d8590}
+  @media(max-width:850px){.committee-grid,.member-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.committee-filters{grid-template-columns:1fr}.committee-filters>p{margin:0}.detail-hero{grid-template-columns:1fr}.detail-hero>img,.detail-hero>.committee-placeholder{max-height:350px}}
+  @media(max-width:560px){.committee-filters{padding:13px}.committee-filters>div{display:grid;grid-template-columns:1fr 1fr}.committee-filters select{width:100%;min-width:0}.committee-grid,.member-grid{grid-template-columns:1fr}.section-heading{display:block}.section-heading>p{margin-top:6px;text-align:left}.committee-cover{height:180px}.detail-hero>div:last-child{padding:24px}.detail-hero h2{font-size:1.55rem}}
+</style>
