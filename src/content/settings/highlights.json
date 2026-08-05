@@ -13,6 +13,13 @@
       "style": "button",
       "enabled": true,
       "order": 1
+    },
+    {
+      "title": "Sunday School",
+      "link": "/sunday-school",
+      "style": "button",
+      "enabled": true,
+      "order": 2
     }
   ]
 }
