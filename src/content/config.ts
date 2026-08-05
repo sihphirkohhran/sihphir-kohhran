@@ -282,6 +282,15 @@ const documents = defineCollection({
     display_order: z.number().optional(),
     featured: z.boolean().optional(),
     is_new: z.boolean().optional(),
+    published: z.boolean().optional(),
+    files: z.array(z.object({
+      url: z.string(),
+      filename: z.string().optional(),
+      size: z.number().optional(),
+      uploaded_at: z.string().optional(),
+      modified_at: z.string().optional(),
+      type: z.string().optional(),
+    })).optional(),
     status: z.enum(['current', 'archived']).optional(),
   }),
 });

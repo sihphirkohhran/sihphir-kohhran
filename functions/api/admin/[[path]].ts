@@ -187,7 +187,8 @@ export const onRequestPost = async ({ request, env }: Context) => {
     const safe = filename(original); const key = `${kind === 'image' ? 'images' : 'documents'}/${Date.now()}-${safe}`;
     const bytes = Uint8Array.from(atob(data.split(',').pop() || ''), char => char.charCodeAt(0));
     if (env.MEDIA_BUCKET && env.R2_PUBLIC_URL) {
-      await env.MEDIA_BUCKET.put(key, bytes, { httpMetadata: { contentType: kind === 'image' ? 'image/*' : 'application/pdf' } });
+      const contentType = data.match(/^data:([^;,]+)/)?.[1] || (kind === 'image' ? 'image/*' : 'application/octet-stream');
+      await env.MEDIA_BUCKET.put(key, bytes, { httpMetadata: { contentType } });
       return json({ url: `${env.R2_PUBLIC_URL.replace(/\/$/, '')}/${key}`, storage: 'r2' });
     }
     const repositoryPath = `public/${key}`;
