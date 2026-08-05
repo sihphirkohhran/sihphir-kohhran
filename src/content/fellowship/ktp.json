@@ -5,7 +5,8 @@
     {
       "role": "President",
       "name": "Pu/Pi President Hming",
-      "display_order": 0
+      "display_order": 0,
+      "photo": "/images/1785955755617-gallery5.jpg"
     },
     {
       "role": "Vice President",
@@ -32,7 +33,8 @@
     {
       "name": "Pu/Pi Member 1",
       "role": "Member",
-      "display_order": 0
+      "display_order": 0,
+      "photo": "/images/1785955717688-whatsapp-image-2026-07-05-at-4.55.04-pm.jpeg"
     },
     {
       "name": "Pu/Pi Member 2",
