@@ -15,8 +15,10 @@ import {
   DEFAULT_DESCRIPTION,
   SITE_NAME,
 } from '../lib/site';
+import { normalizeContact } from '../lib/contact';
 
 const general = await getEntry('settings', 'general');
+const contact = normalizeContact(general?.data);
 const navEntry = await getEntry('settings', 'navigation');
 const pageNavItems = await getPagesForNav();
 const managedNavItems = navEntry?.data.items as NavItem[] | undefined;
@@ -44,23 +46,24 @@ const currentPath = Astro.url.pathname;
 const pageTitle = title === SITE_NAME || title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const canonicalUrl = absoluteSiteUrl(currentPath);
 const socialImageUrl = absoluteSiteUrl('/pci-logo.png');
-const socialLinks = [general?.data.facebook_url, general?.data.instagram_url, general?.data.youtube_url]
+const socialLinks = [general?.data.facebook_url, general?.data.instagram_url, general?.data.youtube_url, general?.data.twitter_url, general?.data.telegram_url, general?.data.whatsapp_channel_url]
   .filter((url): url is string => Boolean(url?.trim()));
 const organizationJsonLd = JSON.stringify({
   '@context': 'https://schema.org',
   '@type': 'Church',
-  name: SITE_NAME,
+  name: contact.churchName,
   url: canonicalUrl,
   logo: socialImageUrl,
   description,
   address: {
     '@type': 'PostalAddress',
-    streetAddress: general?.data.address ?? 'Sihphir, Mizoram',
-    addressRegion: 'Mizoram',
-    addressCountry: 'IN',
+    streetAddress: contact.address,
+    addressRegion: general?.data.state ?? 'Mizoram',
+    addressCountry: general?.data.country ?? 'India',
+    postalCode: general?.data.pin_code,
   },
-  email: general?.data.secretary_email,
-  telephone: general?.data.secretary_phone,
+  email: contact.email,
+  telephone: contact.phone,
   sameAs: socialLinks,
 }).replace(/</g, '\\u003c');
 ---
@@ -222,18 +225,20 @@ const organizationJsonLd = JSON.stringify({
   <footer class="bg-navy-mid border-t border-gold/40 px-4 py-8 text-center">
     <div class="max-w-2xl mx-auto">
       <div class="font-display text-gold-light text-xl font-semibold mb-1">
-        Sihphir Presbyterian Kohhran
+        {contact.churchName}
       </div>
       <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase mb-1">
         Mizoram Presbyterian Kohhran · Presbyterian Church of India
       </div>
       <div class="w-12 h-px bg-gold/30 mx-auto my-3"></div>
       <div class="font-body text-sm text-gold-pale/60 mb-4">
-        Church Secretary: <span id="footer-secretary">{general?.data.secretary_name ?? 'Rev. Secretary Hming'}</span><br/>
-        <span id="footer-phone">{general?.data.secretary_phone}</span> &nbsp;·&nbsp;
-        <span id="footer-email">{general?.data.secretary_email}</span>
+        Church Secretary: <span id="footer-secretary">{contact.secretaryName}</span><br/>
+        <span id="footer-phone">{contact.phone}</span> &nbsp;·&nbsp;
+        <span id="footer-email">{contact.email}</span><br/>
+        <span>{contact.address}</span>
       </div>
-      <div class="flex justify-center gap-3 mb-5">
+      <div class="flex flex-wrap justify-center gap-3 mb-5">
+        {general?.data.facebook_url && <a href={general.data.facebook_url} target="_blank" rel="noopener" class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">Facebook</a>}
         <a href={general?.data.instagram_url ?? 'https://instagram.com'} target="_blank" rel="noopener"
           class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -247,6 +252,9 @@ const organizationJsonLd = JSON.stringify({
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 0 0-1.95 1.96A29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58A2.78 2.78 0 0 0 3.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.95A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon fill="#0f1f3d" points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg>
           YouTube
         </a>
+        {general?.data.twitter_url && <a href={general.data.twitter_url} target="_blank" rel="noopener" class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">X</a>}
+        {general?.data.telegram_url && <a href={general.data.telegram_url} target="_blank" rel="noopener" class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">Telegram</a>}
+        {general?.data.whatsapp_channel_url && <a href={general.data.whatsapp_channel_url} target="_blank" rel="noopener" class="flex items-center gap-2 text-gold-pale/70 hover:text-gold-light text-xs border border-gold/20 hover:border-gold/40 px-3 py-1.5 rounded transition-all font-body tracking-wide">WhatsApp</a>}
       </div>
       <div class="font-body text-[0.6rem] text-gold-pale/25 tracking-widest uppercase">
         © {new Date().getFullYear()} Sihphir Presbyterian Kohhran · All rights reserved
