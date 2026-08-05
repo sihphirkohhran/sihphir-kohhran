@@ -4,13 +4,13 @@
     "hero_title": "Committee hrang hrang te",
     "hero_subtitle": "Sihphir Kohhran hnuaia Committee peng hrang hrang te",
     "history_title": "Hei hi eng nge ni ang aw",
-    "office_bearers_title": "Test1",
-    "members_title": "Test2",
-    "gallery_title": "Test 3",
-    "documents_title": "Test 4",
+    "office_bearers_title": "",
+    "members_title": "Committee member",
+    "gallery_title": "",
+    "documents_title": "",
     "search_placeholder": "",
     "empty_message": "",
-    "back_button": "",
+    "back_button": "Back",
     "view_button": ""
   }
 }
