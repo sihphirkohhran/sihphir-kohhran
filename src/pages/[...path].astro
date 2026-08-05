@@ -1,12 +1,13 @@
 ---
 import ContentPageLayout from '../layouts/ContentPageLayout.astro';
+import DynamicPage from '../components/DynamicPage.astro';
 import { getCollection } from 'astro:content';
-import { isPublishedPageSlug, pageUrlPath } from '../lib/pages';
+import { isPublicPage, pageUrlPath } from '../lib/pages';
 
 export async function getStaticPaths() {
   const pages = await getCollection('pages');
   return pages
-    .filter((p) => isPublishedPageSlug(p.slug))
+    .filter(isPublicPage)
     .map((page) => {
       const urlPath = pageUrlPath(page.slug, page.data.path).replace(/^\//, '').replace(/\/$/, '');
       return {
@@ -17,14 +18,18 @@ export async function getStaticPaths() {
 }
 
 const { page } = Astro.props;
+if (page.data.page_type === 'redirect' && page.data.redirect_url) {
+  return Astro.redirect(page.data.redirect_url, 302);
+}
 const { Content } = await page.render();
 const activeKey = page.data.nav_key || page.slug;
+const managed = Boolean(page.data.page_type || page.data.status || page.data.updated_at);
 ---
 
-<ContentPageLayout
+{managed ? <DynamicPage page={page} Content={Content} /> : <ContentPageLayout
   title={page.data.title}
   description={page.data.description}
   activeKey={activeKey}
 >
   <Content />
-</ContentPageLayout>
+</ContentPageLayout>}

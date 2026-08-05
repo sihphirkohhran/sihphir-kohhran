@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { isPublishedPageSlug, pageUrlPath } from '../lib/pages';
+import { isPublicPage, pageUrlPath } from '../lib/pages';
 import { absoluteSiteUrl } from '../lib/site';
 import { normalizeNotice } from '../lib/notices';
 
@@ -34,7 +34,7 @@ const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (character) => ({
 export async function GET() {
   const [pages, notices] = await Promise.all([getCollection('pages'), getCollection('notices')]);
   const contentPaths = pages
-    .filter((page) => isPublishedPageSlug(page.slug))
+    .filter(isPublicPage)
     .map((page) => pageUrlPath(page.slug, page.data.path));
   const noticePaths = notices
     .filter((notice) => notice.id.startsWith('announcements/'))

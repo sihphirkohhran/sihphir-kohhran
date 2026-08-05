@@ -22,30 +22,30 @@ const contact = normalizeContact(general?.data);
 const navEntry = await getEntry('settings', 'navigation');
 const pageNavItems = await getPagesForNav();
 const managedNavItems = navEntry?.data.items as NavItem[] | undefined;
-const navItems = managedNavItems?.length
-  ? normalizeNavItems(managedNavItems)
-  : mergeNavWithPages(normalizeNavItems(undefined), [
-    ...pageNavItems,
-    ...getFellowshipNavItems(),
-  ]);
+const navItems = mergeNavWithPages(normalizeNavItems(managedNavItems), [
+  ...pageNavItems,
+  ...getFellowshipNavItems(),
+]);
 const navTree = buildNavTree(navItems);
 
 interface Props {
   title?: string;
   description?: string;
   activePage?: string;
+  socialImage?: string;
 }
 
 const {
   title = SITE_NAME,
   description = DEFAULT_DESCRIPTION,
   activePage = 'home',
+  socialImage = '',
 } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 const pageTitle = title === SITE_NAME || title.includes(SITE_NAME) ? title : `${title} | ${SITE_NAME}`;
 const canonicalUrl = absoluteSiteUrl(currentPath);
-const socialImageUrl = absoluteSiteUrl('/pci-logo.png');
+const socialImageUrl = absoluteSiteUrl(socialImage || '/pci-logo.png');
 const socialLinks = [general?.data.facebook_url, general?.data.instagram_url, general?.data.youtube_url, general?.data.twitter_url, general?.data.telegram_url, general?.data.whatsapp_channel_url]
   .filter((url): url is string => Boolean(url?.trim()));
 const organizationJsonLd = JSON.stringify({

@@ -7,6 +7,10 @@ export function isPublishedPageSlug(slug: string): boolean {
   return !slug.startsWith('_') && !PAGE_SLUG_EXCLUDE.has(slug);
 }
 
+export function isPublicPage(page: { slug: string; data: { status?: string; published?: boolean } }): boolean {
+  return isPublishedPageSlug(page.slug) && page.data.status !== 'draft' && page.data.published !== false;
+}
+
 export function pageUrlPath(slug: string, customPath?: string): string {
   const trimmed = customPath?.trim();
   const path = trimmed ? trimmed : `/p/${slug}`;
@@ -18,9 +22,9 @@ export function pageUrlPath(slug: string, customPath?: string): string {
 export async function getPagesForNav(): Promise<NavItem[]> {
   const pages = await getCollection('pages');
   return pages
-    .filter((p) => isPublishedPageSlug(p.slug) && p.data.show_in_nav)
+    .filter((p) => isPublicPage(p) && p.data.show_in_nav)
     .map((p) => ({
-      label: p.data.title,
+      label: p.data.nav_label || p.data.title,
       href: pageUrlPath(p.slug, p.data.path),
       key: (p.data.nav_key || p.slug).trim(),
       order: p.data.nav_order ?? 100,

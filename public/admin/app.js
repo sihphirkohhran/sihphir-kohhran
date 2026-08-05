@@ -10,6 +10,8 @@
   const modules = [['dashboard', 'Dashboard', '▦'], ...menuGroups.flatMap(([, entries]) => entries)];
   const labels = Object.fromEntries(modules.map(x => [x[0], x[1]]));
   const paths = { pages:'src/content/pages/', gallery:'src/content/gallery/', documents:'src/content/documents/other/', committee:'src/content/committee/', pastors:'src/content/pastoral/', missionaries:'src/content/missionaries/', elders:'src/content/elders/', fellowship:'src/content/fellowship/' };
+  menuGroups[0][1].splice(1,0,['pages','Pages','P']);
+  labels.pages='Pages';
   const templates = {
     pages:{title:'New page',description:'',path:'',body:''}, gallery:{caption:'New gallery',year:new Date().getFullYear(),category:'General',date:'',photo:'',photos:[],body:''}, documents:{name:'New document',year:new Date().getFullYear(),month:'',date:'',pdf_url:'',category:'Other',body:''},
     committee:{committee_id:'committee',committee_name:'Committee',year:new Date().getFullYear(),chairman:'',secretary:'',members:[],body:''}, pastors:{name:'',role:'pastor',start_year:new Date().getFullYear(),end_year:'',photo:'',notes:'',body:''}, missionaries:{name:'',mission_field:'',sent_year:new Date().getFullYear(),status:'Active',photo:'',notes:'',body:''}, elders:{name:'',ordained_year:new Date().getFullYear(),status:'',photo:'',notes:'',body:''}
@@ -207,5 +209,7 @@
   const legacyRender=render;
   render=async function(){if(area!=='documents')window.__sihphirDocumentCleanup?.();if(area!=='committee')window.__sihphirCommitteeCleanup?.();if(area!=='fellowship')window.__sihphirFellowshipCleanup?.();if(!['pastors','probationary-pastors','elders','missionaries'].includes(area))window.__sihphirMinistryCleanup?.();if(area==='gallery')return window.SihphirGalleryManager.mount({api,esc,slug,notification,readUpload});if(area==='documents')return window.SihphirDocumentManager.mount({api,esc,slug,notification,readUpload});if(area==='committee')return window.SihphirCommitteeManager.mount({api,esc,slug,notification,readUpload});if(area==='fellowship')return window.SihphirFellowshipManager.mount({api,esc,slug,notification,readUpload});if(area==='notices')return window.SihphirNoticeManager.mount({api,esc,slug,notification,readUpload});if(area==='site-settings')return window.SihphirSiteSettingsManager.mount({api,esc,notification});if(['pastors','probationary-pastors','elders','missionaries'].includes(area))return window.SihphirMinistryManager.mount({area,api,esc,slug,notification,readUpload});return legacyRender();};
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&current){e.preventDefault();document.querySelector('#form')?.requestSubmit();document.querySelector('#settings-form')?.requestSubmit();document.querySelector('#nav-form')?.requestSubmit();}});
+  const noticeAwareRender=render;
+  render=async function(){if(area==='pages'){layout();return window.SihphirPageManager.mount({api,esc,slug,notification,readUpload});}return noticeAwareRender();};
   (async()=>{try{await api('/api/auth/session');render();}catch{location.replace('/admin/login');}})();
 })();

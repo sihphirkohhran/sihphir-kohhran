@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { getEntryPhotoUrls } from '../lib/gallery';
+import { resolveDocumentUrl } from '../lib/documents-url';
+
+const { page, Content } = Astro.props;
+const [galleries, documents, committees] = await Promise.all([getCollection('gallery'), getCollection('documents'), getCollection('committee')]);
+const data = page.data;
+const selected = (items: string[] | undefined, value: string) => {
+  const normalized = value.replace(/\.md$/, '');
+  return (items ?? []).some((id) => normalized === id || normalized.endsWith(`/${id}`));
+};
+const galleryEntries = galleries.filter((entry: any) => selected(data.gallery_albums, entry.id));
+const galleryPhotos = galleryEntries.flatMap((entry: any) => getEntryPhotoUrls(entry.data).map((src) => ({ src, alt: entry.data.caption, caption: entry.data.caption })));
+const documentEntries = documents.filter((entry: any) => (data.document_categories ?? []).includes(entry.data.category));
+const committeeEntries = committees.filter((entry: any) => selected(data.committees, entry.data.committee_id || entry.id));
+const downloadEntries = (data.downloads ?? []).map((item: any) => ({ item, entry: documents.find((entry: any) => selected([item.document], entry.id)) })).filter((row: any) => row.entry);
+const documentUrl = (document: any) => resolveDocumentUrl(document.pdf_url || document.files?.[0]?.url, document.pdf_external);
+const title = data.seo_title || data.title;
+const description = data.seo_description || data.description || '';
+const heroTitle = data.hero_title || data.title;
+const overlay = data.hero_overlay === 'light' ? 'rgba(255,255,255,.72)' : data.hero_overlay === 'none' ? 'transparent' : 'rgba(8,35,23,.76)';
+---
+
+<BaseLayout title={title} description={description} activePage={data.nav_key || page.slug} socialImage={data.og_image}>
+  <main class:list={['dynamic-page', data.page_type === 'landing' && 'landing-page']}>
+    {data.show_hero !== false && <header class:list={['dynamic-hero', data.hero_overlay === 'light' && 'light']} style={data.hero_image ? `background-image:linear-gradient(${overlay},${overlay}),url('${data.hero_image}')` : undefined}>
+      <div class="page-shell"><p class="eyebrow">Sihphir Presbyterian Kohhran</p><h1>{heroTitle}</h1>{data.hero_subtitle && <p class="subtitle">{data.hero_subtitle}</p>}{data.page_type === 'landing' && data.cta_text && data.cta_url && <a class="cta" href={data.cta_url}>{data.cta_text}</a>}</div>
+    </header>}
+    <div class="page-shell page-content">
+      {data.show_hero === false && <header class="plain-title"><p class="eyebrow">Website Page</p><h1>{data.title}</h1>{data.description && <p>{data.description}</p>}</header>}
+      <article class="rich-content"><Content /></article>
+
+      {data.gallery_enabled && galleryPhotos.length > 0 && <section class="content-block"><div class="block-heading"><p class="eyebrow">Gallery</p><h2>Photo Gallery</h2></div><div class="photo-grid">{galleryPhotos.slice(0,12).map((photo) => <figure><img src={photo.src} alt={photo.alt || ''} loading="lazy" /><figcaption>{photo.caption}</figcaption></figure>)}</div></section>}
+      {data.documents_enabled && documentEntries.length > 0 && <section class="content-block"><div class="block-heading"><p class="eyebrow">Resources</p><h2>Documents</h2></div><div class="resource-grid">{documentEntries.map((document: any) => <a href={documentUrl(document.data)} target="_blank"><span>PDF</span><div><strong>{document.data.name}</strong><small>{document.data.category || 'Document'}{document.data.year ? ` · ${document.data.year}` : ''}</small></div><b>Download ↓</b></a>)}</div></section>}
+      {data.committee_enabled && committeeEntries.length > 0 && <section class="content-block"><div class="block-heading"><p class="eyebrow">Leadership</p><h2>Committees</h2></div><div class="committee-grid">{committeeEntries.map((committee: any) => <article>{committee.data.group_photo && <img src={committee.data.group_photo} alt="" loading="lazy" />}<div><small>{committee.data.year}</small><h3>{committee.data.committee_name}</h3><p>Chairman: {committee.data.chairman}</p><p>Secretary: {committee.data.secretary}</p><a href="/committee">View committee →</a></div></article>)}</div></section>}
+      {data.quick_links_enabled && data.quick_links?.length > 0 && <section class="content-block"><div class="block-heading"><p class="eyebrow">Explore</p><h2>Quick Links</h2></div><div class="quick-grid">{data.quick_links.map((link: any) => <a href={link.url}>{link.title}<span>→</span></a>)}</div></section>}
+      {data.downloads_enabled && downloadEntries.length > 0 && <section class="content-block"><div class="block-heading"><p class="eyebrow">Downloads</p><h2>Files</h2></div><div class="download-list">{downloadEntries.map(({ item, entry }: any) => <a href={documentUrl(entry.data)} target="_blank"><span>↓</span><strong>{item.title || entry.data.name}</strong><small>Download file</small></a>)}</div></section>}
+    </div>
+  </main>
+</BaseLayout>
+
+<style>
+  .dynamic-page{background:#f6f3eb;color:#1a2e23;min-height:70vh}.page-shell{width:min(1050px,calc(100% - 2rem));margin:auto}.dynamic-hero{min-height:340px;display:grid;place-items:center;text-align:center;color:#fff;background:#123f2b center/cover;padding:4rem 0}.dynamic-hero.light{color:#163426}.eyebrow{margin:0;text-transform:uppercase;letter-spacing:.16em;font:800 .7rem/1.4 system-ui;color:#d4af5d}.dynamic-hero h1,.plain-title h1{font-size:clamp(2.4rem,6vw,4.7rem);line-height:1.03;letter-spacing:-.04em;margin:.5rem 0 1rem}.subtitle{max-width:680px;margin:auto;font-size:1.08rem;line-height:1.6}.cta{display:inline-block;margin-top:1.6rem;background:#d4af5d;color:#173325;text-decoration:none;padding:.8rem 1.25rem;border-radius:99px;font-weight:800}.page-content{padding:3.5rem 0 5rem}.plain-title{padding-bottom:2rem;border-bottom:1px solid #d9d4c8}.plain-title p:last-child{color:#647168}.rich-content{background:#fff;border:1px solid #e0dbcf;border-radius:15px;padding:clamp(1.25rem,4vw,2.5rem);box-shadow:0 10px 35px rgba(25,48,35,.05);line-height:1.75}.rich-content :global(h2),.rich-content :global(h3){color:#174d35;margin-top:1.6em}.rich-content :global(img){max-width:100%;height:auto;border-radius:10px}.rich-content :global(table){width:100%;border-collapse:collapse;overflow:auto}.rich-content :global(th),.rich-content :global(td){border:1px solid #d8d8d0;padding:.7rem;text-align:left}.rich-content :global(blockquote){border-left:4px solid #d4af5d;margin-left:0;padding-left:1rem;color:#5b675f}.rich-content :global(pre){overflow:auto;background:#14271d;color:#e5eee8;padding:1rem;border-radius:8px}.rich-content :global(.video-embed){aspect-ratio:16/9}.rich-content :global(.video-embed iframe){width:100%;height:100%;border:0}.content-block{padding-top:3.5rem}.block-heading h2{font-size:2rem;margin:.25rem 0 1.2rem}.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}.photo-grid figure{margin:0;background:#fff;border-radius:10px;overflow:hidden}.photo-grid img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}.photo-grid figcaption{padding:.65rem;font-size:.8rem;color:#647168}.resource-grid,.download-list{display:grid;gap:.7rem}.resource-grid a{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:1rem;background:#fff;border:1px solid #dfdbd0;border-radius:10px;padding:1rem;text-decoration:none;color:#20352a}.resource-grid>a>span{background:#174d35;color:#fff;padding:.55rem;border-radius:7px;font-size:.7rem;font-weight:900}.resource-grid div{display:grid}.resource-grid small,.download-list small{color:#758078}.resource-grid>b{color:#17613f;font-size:.8rem}.committee-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}.committee-grid article{background:#fff;border-radius:12px;overflow:hidden}.committee-grid img{width:100%;height:190px;object-fit:cover}.committee-grid article>div{padding:1.2rem}.committee-grid h3{margin:.3rem 0}.committee-grid p{margin:.25rem 0;color:#68736c}.committee-grid a{display:inline-block;margin-top:.8rem;color:#17613f;font-weight:800;text-decoration:none}.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem}.quick-grid a{display:flex;justify-content:space-between;background:#174d35;color:#fff;padding:1rem;border-radius:10px;text-decoration:none;font-weight:800}.download-list a{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:.8rem;background:#fff;border-radius:9px;padding:.9rem;text-decoration:none;color:#20352a}.download-list>a>span{font-size:1.3rem;color:#b68b32}@media(max-width:750px){.photo-grid{grid-template-columns:repeat(2,1fr)}.committee-grid,.quick-grid{grid-template-columns:1fr}}@media(max-width:480px){.photo-grid{grid-template-columns:1fr}.resource-grid a{grid-template-columns:auto 1fr}.resource-grid a>b{grid-column:2}.dynamic-hero{min-height:280px}}
+</style>
