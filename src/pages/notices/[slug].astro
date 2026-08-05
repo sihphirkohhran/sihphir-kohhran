@@ -2,6 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { normalizeNotice, sortNotices } from '../../lib/notices';
+import { getPageSettings } from '../../lib/page-settings';
 
 export async function getStaticPaths() {
   const notices=(await getCollection('notices')).filter((entry)=>entry.id.startsWith('announcements/')).map(normalizeNotice).filter((notice)=>notice.published).sort((a,b)=>sortNotices(a,b));
@@ -10,6 +11,7 @@ export async function getStaticPaths() {
 
 const { notice, previous, next, related }=Astro.props;
 const { Content }=await notice.entry.render();
+const ui=await getPageSettings('notices',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Notices',hero_subtitle:'',search_placeholder:'Search notices…',read_more:'Read notice',back_button:'Back to notices',pinned_badge:'Pinned',expired_badge:'Expired',empty_message:'No notices found',previous_button:'Previous notice',next_button:'Next notice',download_button:'Download'});
 ---
 
 <BaseLayout title={notice.title} description={notice.summary || `${notice.title} — Sihphir Presbyterian Kohhran`} activePage="notices">
@@ -18,8 +20,8 @@ const { Content }=await notice.entry.render();
       {notice.featuredImage && <img src={notice.featuredImage} alt="" />}
       <div class="overlay"></div>
       <div class="detail-wrap hero-content">
-        <a href="/notices" class="back">← Back to notices</a>
-        <div class="meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>PINNED</strong>}</div>
+        <a href="/notices" class="back">← {ui.back_button}</a>
+        <div class="meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>{ui.pinned_badge}</strong>}</div>
         <h1>{notice.title}</h1>
         {notice.summary && <p>{notice.summary}</p>}
       </div>
@@ -28,14 +30,14 @@ const { Content }=await notice.entry.render();
     <div class="detail-wrap detail-grid">
       <article class="notice-body prose"><Content /></article>
       <aside>
-        {notice.attachments.length > 0 && <section class="attachments"><p class="label">Downloads</p><h2>Attachments</h2><div>{notice.attachments.map((attachment) => <a href={attachment.url} download><span aria-hidden="true">↓</span><span>{attachment.title || 'Download attachment'}</span></a>)}</div></section>}
+        {notice.attachments.length > 0 && <section class="attachments"><p class="label">Downloads</p><h2>Attachments</h2><div>{notice.attachments.map((attachment) => <a href={attachment.url} download><span aria-hidden="true">↓</span><span>{attachment.title || ui.download_button}</span></a>)}</div></section>}
         <section class="notice-facts"><p class="label">Notice details</p><dl><div><dt>Category</dt><dd>{notice.category}</dd></div><div><dt>Published</dt><dd>{notice.publishDate}</dd></div></dl></section>
       </aside>
     </div>
 
     <nav class="detail-wrap pager" aria-label="Notice navigation">
-      {previous ? <a href={`/notices/${previous.slug}`}><small>Previous notice</small><span>← {previous.title}</span></a> : <span></span>}
-      {next && <a href={`/notices/${next.slug}`} class="next"><small>Next notice</small><span>{next.title} →</span></a>}
+      {previous ? <a href={`/notices/${previous.slug}`}><small>{ui.previous_button}</small><span>← {previous.title}</span></a> : <span></span>}
+      {next && <a href={`/notices/${next.slug}`} class="next"><small>{ui.next_button}</small><span>{next.title} →</span></a>}
     </nav>
 
     {related.length > 0 && <section class="related"><div class="detail-wrap"><p class="label">More from {notice.category}</p><h2>Related notices</h2><div class="related-grid">{related.map((item) => <a href={`/notices/${item.slug}`}><time>{item.publishDate}</time><strong>{item.title}</strong><span>Read notice →</span></a>)}</div></div></section>}

@@ -3,6 +3,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { resolveCommitteePhoto } from '../lib/committee';
 import { renderMarkdown } from '../lib/markdown';
+import { getPageSettings } from '../lib/page-settings';
+
+const ui=await getPageSettings('committee',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Church Committees',hero_subtitle:'Meet the committees serving the church across its ministries and responsibilities.',history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search committees…',empty_message:'No committees found',back_button:'Back to committees',view_button:'View Committee'});
 
 const entries = (await getCollection('committee'))
   .filter((entry) => entry.data.status !== 'archived' && entry.data.published !== false)
@@ -61,16 +64,16 @@ const defaultMemberPhoto = '/images/pastor.jpg';
   <div class="committee-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
     <div class="absolute inset-0 opacity-[0.04]" style="background-image:repeating-linear-gradient(45deg,#b8953f 0,#b8953f 1px,transparent 1px,transparent 28px)"></div>
     <div class="relative z-10 max-w-2xl mx-auto">
-      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">Church Committees</h1>
-      <p class="font-body text-gold-pale/60 text-sm mt-3">Meet the committees serving the church across its ministries and responsibilities.</p>
+      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">{ui.hero_caption}</p>
+      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">{ui.hero_title}</h1>
+      <p class="font-body text-gold-pale/60 text-sm mt-3">{ui.hero_subtitle}</p>
       <div class="w-16 h-px bg-gold/50 mx-auto mt-5"></div>
     </div>
   </div>
 
-  <main class="committee-public max-w-6xl mx-auto px-4 py-8 sm:py-10">
+  <main class="committee-public max-w-6xl mx-auto px-4 py-8 sm:py-10" data-view-label={ui.view_button}>
     <section class="committee-filters reveal" aria-label="Committee filters">
-      <label class="committee-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span class="sr-only">Search committees</span><input type="search" id="committee-search" placeholder="Search committees…" autocomplete="off"></label>
+      <label class="committee-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span class="sr-only">{ui.search_placeholder}</span><input type="search" id="committee-search" placeholder={ui.search_placeholder} autocomplete="off"></label>
       <div><label><span>Category</span><select id="committee-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label><label><span>Year</span><select id="committee-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label></div>
       <p id="committee-count">{committees.length} committees</p>
     </section>
@@ -79,14 +82,14 @@ const defaultMemberPhoto = '/images/pastor.jpg';
 
     <section class="committee-section archive-section"><header class="section-heading reveal"><div><span>Church leadership</span><h2>All Committees</h2></div><p>Browse committee records by category and year.</p></header><div class="committee-grid archive-grid">{archive.map((committee, index) => <article class={`committee-card reveal reveal-delay-${index % 3 + 1}`} data-committee-card data-name={committee.name.toLowerCase()} data-category={committee.category} data-year={committee.year}><div class="committee-cover"><img src={committee.photo || defaultCommitteePhoto} alt={`${committee.name} committee`} loading="lazy" data-fallback={defaultCommitteePhoto} /></div><div class="committee-card-body"><div class="badges"><span>{committee.category}</span><span>{committee.year}</span></div><h3>{committee.name}</h3><p>{committee.description || 'A committee serving Sihphir Presbyterian Kohhran.'}</p><footer><span>{committee.memberCount} members</span><button type="button" data-view-committee={committee.id}>View Committee</button></footer></div></article>)}</div></section>
 
-    <section class="committee-empty" id="committee-empty" hidden><h2>No committees found</h2><p>Try another search or clear the selected filters.</p><button type="button" id="committee-clear">Clear filters</button></section>
+    <section class="committee-empty" id="committee-empty" hidden><h2>{ui.empty_message}</h2><p>Try another search or clear the selected filters.</p><button type="button" id="committee-clear">Clear filters</button></section>
 
     {committees.map((committee) => <section class="committee-detail" id={`committee-detail-${committee.id}`} hidden>
-      <button type="button" class="detail-back" data-close-committee>← Back to committees</button>
+      <button type="button" class="detail-back" data-close-committee>← {ui.back_button}</button>
       <div class="detail-hero"><button type="button" class="detail-photo" data-lightbox-src={committee.photo || defaultCommitteePhoto} data-lightbox-alt={`${committee.name} committee group photo`} aria-label={`View ${committee.name} group photo fullscreen`}><img src={committee.photo || defaultCommitteePhoto} alt={`${committee.name} committee`} loading="lazy" data-fallback={defaultCommitteePhoto} /></button><div class="detail-hero-caption"><div class="badges"><span>{committee.category}</span><span>{committee.year}</span></div><h2>{committee.name}</h2><p>{committee.memberCount} committee members</p></div></div>
       {committee.descriptionHtml && <div class="detail-description prose" set:html={committee.descriptionHtml}></div>}
-      {committee.officeBearers.length > 0 && <section class="directory-section office-section"><div class="members-heading"><span>Leadership</span><h3>Office Bearers</h3></div><div class="office-directory">{committee.officeBearers.map((member) => <article class="office-entry"><img src={member.photo || defaultMemberPhoto} alt="" loading="lazy" data-fallback={defaultMemberPhoto} /><div><p>{member.designation}</p><h4>{member.name}</h4>{(member.phone || member.email) && <address>{member.phone && <a href={`tel:${member.phone}`}>{member.phone}</a>}{member.email && <a href={`mailto:${member.email}`}>{member.email}</a>}</address>}</div></article>)}</div></section>}
-      <section class="directory-section member-section"><div class="members-heading"><span>People serving</span><h3>Committee Members</h3></div>{committee.members.length > 0 ? <div class="member-directory">{committee.members.map((member) => <article class="member-entry"><img src={member.photo || defaultMemberPhoto} alt="" loading="lazy" data-fallback={defaultMemberPhoto} /><div><h4>{member.name}</h4>{member.designation !== 'Member' && <p>{member.designation}</p>}</div></article>)}</div> : <p class="directory-empty">No additional committee members are listed.</p>}</section>
+      {committee.officeBearers.length > 0 && <section class="directory-section office-section"><div class="members-heading"><span>Leadership</span><h3>{ui.office_bearers_title}</h3></div><div class="office-directory">{committee.officeBearers.map((member) => <article class="office-entry"><img src={member.photo || defaultMemberPhoto} alt="" loading="lazy" data-fallback={defaultMemberPhoto} /><div><p>{member.designation}</p><h4>{member.name}</h4>{(member.phone || member.email) && <address>{member.phone && <a href={`tel:${member.phone}`}>{member.phone}</a>}{member.email && <a href={`mailto:${member.email}`}>{member.email}</a>}</address>}</div></article>)}</div></section>}
+      <section class="directory-section member-section"><div class="members-heading"><span>People serving</span><h3>{ui.members_title}</h3></div>{committee.members.length > 0 ? <div class="member-directory">{committee.members.map((member) => <article class="member-entry"><img src={member.photo || defaultMemberPhoto} alt="" loading="lazy" data-fallback={defaultMemberPhoto} /><div><h4>{member.name}</h4>{member.designation !== 'Member' && <p>{member.designation}</p>}</div></article>)}</div> : <p class="directory-empty">{ui.empty_message}</p>}</section>
     </section>)}
   </main>
   <dialog class="committee-lightbox" id="committee-lightbox" aria-label="Committee group photo"><button type="button" aria-label="Close fullscreen photo" data-close-lightbox>×</button><img src="" alt="" /></dialog>
@@ -94,6 +97,7 @@ const defaultMemberPhoto = '/images/pastor.jpg';
 
 <script>
   const search=document.querySelector<HTMLInputElement>('#committee-search'),category=document.querySelector<HTMLSelectElement>('#committee-category'),year=document.querySelector<HTMLSelectElement>('#committee-year'),count=document.querySelector<HTMLElement>('#committee-count'),empty=document.querySelector<HTMLElement>('#committee-empty');
+  const viewLabel=document.querySelector<HTMLElement>('.committee-public')?.dataset.viewLabel;document.querySelectorAll('[data-view-committee]').forEach(button=>{if(viewLabel)button.textContent=viewLabel;});
   function filter(){const query=search?.value.trim().toLowerCase()||'',cat=category?.value||'all',yr=year?.value||'all';let visible=0;document.querySelectorAll<HTMLElement>('[data-committee-card]').forEach(card=>{const show=(!query||(card.dataset.name||'').includes(query))&&(cat==='all'||card.dataset.category===cat)&&(yr==='all'||card.dataset.year===yr);card.hidden=!show;if(show)visible++;});document.querySelector<HTMLElement>('#featured-committees')?.toggleAttribute('hidden',!document.querySelector('#featured-committees [data-committee-card]:not([hidden])'));document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden',!document.querySelector('.archive-section [data-committee-card]:not([hidden])'));if(empty)empty.hidden=visible>0;if(count)count.textContent=`${visible} committee${visible===1?'':'s'}`;}
   [search,category,year].forEach(control=>control?.addEventListener(control===search?'input':'change',filter));document.querySelector('#committee-clear')?.addEventListener('click',()=>{if(search)search.value='';if(category)category.value='all';if(year)year.value='all';filter();search?.focus();});
   document.querySelectorAll<HTMLElement>('[data-view-committee]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.committee-section,.committee-filters,.committee-empty').forEach(element=>element.hidden=true);const detail=document.querySelector<HTMLElement>(`#committee-detail-${button.dataset.viewCommittee}`);if(detail){detail.hidden=false;detail.scrollIntoView({behavior:'smooth',block:'start'});}}));document.querySelectorAll('[data-close-committee]').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll<HTMLElement>('.committee-detail').forEach(detail=>detail.hidden=true);document.querySelector<HTMLElement>('.committee-filters')!.hidden=false;document.querySelectorAll<HTMLElement>('.committee-section').forEach(section=>section.hidden=false);filter();document.querySelector('.committee-filters')?.scrollIntoView({behavior:'smooth'});}));filter();

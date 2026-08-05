@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import type { FellowshipGroupPhoto } from '../lib/fellowship';
+import { getPageSettings } from '../lib/page-settings';
 
 interface Props {
   name: string;
@@ -33,6 +34,7 @@ const {
 } = Astro.props;
 
 const defaultGroupYear = groupPhotos[0]?.year;
+const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:name,hero_subtitle:subtitle,history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search fellowships…',empty_message:'No fellowships found',back_button:'All Fellowships'});
 ---
 
 <BaseLayout title={`${name} — Sihphir Presbyterian Kohhran`} activePage="fellowship">
@@ -45,7 +47,7 @@ const defaultGroupYear = groupPhotos[0]?.year;
     <div class="relative z-10 max-w-2xl mx-auto">
       <a href="/fellowship" class="inline-flex items-center gap-1 font-body text-[0.65rem] tracking-widest uppercase text-gold/50 hover:text-gold transition-colors mb-4">
         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-        All Fellowships
+        {ui.back_button}
       </a>
       <div class="flex items-center gap-4">
         <div class="w-14 h-14 rounded-full border-2 border-gold/60 flex items-center justify-center bg-gold/[0.07] flex-shrink-0 overflow-hidden">
@@ -56,8 +58,8 @@ const defaultGroupYear = groupPhotos[0]?.year;
           )}
         </div>
         <div>
-          <h1 class="font-display text-white text-xl sm:text-2xl font-semibold">{name}</h1>
-          <p class="font-body text-gold-pale/50 text-xs tracking-widest uppercase mt-0.5">{subtitle}</p>
+          <h1 class="font-display text-white text-xl sm:text-2xl font-semibold">{ui.hero_title}</h1>
+          <p class="font-body text-gold-pale/50 text-xs tracking-widest uppercase mt-0.5">{ui.hero_subtitle}</p>
         </div>
       </div>
     </div>
@@ -67,7 +69,7 @@ const defaultGroupYear = groupPhotos[0]?.year;
 
     <!-- History -->
     <div class="reveal">
-      <div class="gold-divider mb-4"><h2>History</h2></div>
+      <div class="gold-divider mb-4"><h2>{ui.history_title}</h2></div>
       <div class="border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
         <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>
         {historyFull && (
@@ -85,7 +87,7 @@ const defaultGroupYear = groupPhotos[0]?.year;
 
     <!-- Office Bearers -->
     <div class="reveal">
-      <div class="gold-divider mb-4"><h2>Office Bearers</h2></div>
+      <div class="gold-divider mb-4"><h2>{ui.office_bearers_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         {officeBearers.map((ob, i) => (
           <div class={`flex items-center justify-between gap-4 px-5 py-3 ${i < officeBearers.length - 1 ? 'border-b border-gold/[0.08]' : ''}`}>
@@ -101,7 +103,7 @@ const defaultGroupYear = groupPhotos[0]?.year;
 
     <!-- Committee Members -->
     <div class="reveal">
-      <div class="gold-divider mb-4"><h2>Committee Members</h2></div>
+      <div class="gold-divider mb-4"><h2>{ui.members_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         <table class="w-full">
           <thead>
@@ -160,13 +162,13 @@ const defaultGroupYear = groupPhotos[0]?.year;
     )}
     {relatedPhotos.length > 0 && (
       <section class="reveal fellowship-related-section">
-        <div class="gold-divider mb-4"><h2>Gallery</h2></div>
+        <div class="gold-divider mb-4"><h2>{ui.gallery_title}</h2></div>
         <div class="fellowship-related-gallery">{relatedPhotos.map((photo) => <button data-lightbox-src={photo.src} aria-label="View gallery photo"><img src={photo.src} alt={photo.caption || name} loading="lazy" /></button>)}</div>
       </section>
     )}
     {relatedDocuments.length > 0 && (
       <section class="reveal fellowship-related-section">
-        <div class="gold-divider mb-4"><h2>Documents</h2></div>
+        <div class="gold-divider mb-4"><h2>{ui.documents_title}</h2></div>
         <div class="fellowship-related-documents">{relatedDocuments.map((document) => <a href={document.url} target="_blank" rel="noopener"><span>{document.category}</span><b>{document.name}</b><i>Open ↗</i></a>)}</div>
       </section>
     )}

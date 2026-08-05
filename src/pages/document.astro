@@ -3,6 +3,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
+import { getPageSettings } from '../lib/page-settings';
+const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Church Documents',hero_subtitle:'Browse official documents, reports, circulars, notices and publications of Sihphir Presbyterian Kohhran.',search_placeholder:'Search title, description, category or year…',download_button:'Download',category_label:'Category',document_label:'Document',empty_message:'No documents found'});
 
 const categoryRegistry = await getEntry('settings', 'document-categories');
 const registeredCategories = categoryRegistry?.data.categories ?? [];
@@ -118,22 +120,22 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   <div class="documents-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
     <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);"></div>
     <div class="relative z-10 max-w-3xl mx-auto">
-      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">Church Documents</h1>
-      <p class="font-body text-gold-pale/65 text-sm sm:text-base mt-3 leading-relaxed">Browse official documents, reports, circulars, notices and publications of Sihphir Presbyterian Kohhran.</p>
+      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">{ui.hero_caption}</p>
+      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">{ui.hero_title}</h1>
+      <p class="font-body text-gold-pale/65 text-sm sm:text-base mt-3 leading-relaxed">{ui.hero_subtitle}</p>
       <div class="w-16 h-px bg-gold/50 mx-auto mt-5"></div>
     </div>
   </div>
 
-  <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10">
+  <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10" data-download-label={ui.download_button}>
     <section class="document-toolbar reveal" aria-label="Document search and filters">
       <label class="document-search" for="document-search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-        <span class="sr-only">Search documents</span>
-        <input id="document-search" type="search" placeholder="Search title, description, category or year…" autocomplete="off" />
+        <span class="sr-only">{ui.search_placeholder}</span>
+        <input id="document-search" type="search" placeholder={ui.search_placeholder} autocomplete="off" />
       </label>
       <div class="document-filter-row">
-        <label><span>Category</span><select id="document-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
+        <label><span>{ui.category_label}</span><select id="document-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
         <label><span>Year</span><select id="document-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
         <label><span>Sort</span><select id="document-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select></label>
       </div>
@@ -191,7 +193,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 
     <section class="document-empty" id="document-empty" hidden>
       <div class="empty-illustration" aria-hidden="true"><span></span><i>⌕</i></div>
-      <h2>No documents found</h2>
+      <h2>{ui.empty_message}</h2>
       <p>Try a different search term or clear one of the filters.</p>
       <button type="button" id="document-clear">Clear filters</button>
     </section>
@@ -205,6 +207,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   const sort = document.querySelector<HTMLSelectElement>('#document-sort');
   const empty = document.querySelector<HTMLElement>('#document-empty');
   const count = document.querySelector<HTMLElement>('#document-count');
+  const downloadLabel=document.querySelector<HTMLElement>('.documents-page')?.dataset.downloadLabel;document.querySelectorAll('.download-link').forEach(link=>{if(downloadLabel)link.textContent=downloadLabel;});
 
   function applyFilters() {
     const query = search?.value.trim().toLowerCase() || '';

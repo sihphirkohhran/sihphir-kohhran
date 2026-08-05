@@ -16,9 +16,11 @@ import {
   SITE_NAME,
 } from '../lib/site';
 import { normalizeContact } from '../lib/contact';
+import { getPageSettings } from '../lib/page-settings';
 
 const general = await getEntry('settings', 'general');
 const contact = normalizeContact(general?.data);
+const homeUi=await getPageSettings('home',{footer_heading:contact.churchName,footer_description:'Mizoram Presbyterian Kohhran · Presbyterian Church of India'});
 const navEntry = await getEntry('settings', 'navigation');
 const pageNavItems = await getPagesForNav();
 const managedNavItems = navEntry?.data.items as NavItem[] | undefined;
@@ -225,10 +227,10 @@ const organizationJsonLd = JSON.stringify({
   <footer class="bg-navy-mid border-t border-gold/40 px-4 py-8 text-center">
     <div class="max-w-2xl mx-auto">
       <div class="font-display text-gold-light text-xl font-semibold mb-1">
-        {contact.churchName}
+        {homeUi.footer_heading}
       </div>
       <div class="font-body text-[0.65rem] text-gold-pale/50 tracking-widest uppercase mb-1">
-        Mizoram Presbyterian Kohhran · Presbyterian Church of India
+        {homeUi.footer_description}
       </div>
       <div class="w-12 h-px bg-gold/30 mx-auto my-3"></div>
       <div class="font-body text-sm text-gold-pale/60 mb-4">

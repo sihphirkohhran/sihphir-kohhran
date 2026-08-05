@@ -3,7 +3,10 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { fellowshipMeta, type FellowshipSlug } from '../../lib/fellowship-meta';
 import { currentFellowshipRecord } from '../../lib/fellowship-records';
+import { getPageSettings } from '../../lib/page-settings';
+const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Fellowship',hero_subtitle:'Thalai, hmeichhia, mipa leh member zawng zawng tan',history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search fellowships…',empty_message:'No fellowships found',back_button:'All Fellowships'});
 
+const fellowshipViewButton=ui.view_button||'View Details';
 const fellowshipEntries = await getCollection('fellowship');
 const knownFellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
   const meta = fellowshipMeta[id];
@@ -38,9 +41,9 @@ const fellowships = [...knownFellowships.map((item, order) => ({ ...item, order 
 
   <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden fellowship-hero">
     <div class="relative z-10">
-      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Fellowship</h1>
-      <p class="font-body text-gold-pale/60 text-sm mt-2 italic">Thalai, hmeichhia, mipa leh member zawng zawng tan</p>
+      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">{ui.hero_caption}</p>
+      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">{ui.hero_title}</h1>
+      <p class="font-body text-gold-pale/60 text-sm mt-2 italic">{ui.hero_subtitle}</p>
       <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
     </div>
   </div>
@@ -64,7 +67,7 @@ const fellowships = [...knownFellowships.map((item, order) => ({ ...item, order 
             <h2 class="font-display text-white text-lg font-semibold leading-tight mb-3">{f.name}</h2>
             <p class="font-body text-gold-pale/60 text-xs leading-relaxed mb-4">{f.description}</p>
             <div class="flex items-center gap-1 font-body text-[0.65rem] tracking-wider uppercase text-gold/70 group-hover:text-gold transition-colors">
-              View Details
+              {fellowshipViewButton}
               <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
             </div>
           </div>

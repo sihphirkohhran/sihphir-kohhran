@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { normalizeNotice, sortNotices } from '../../lib/notices';
+import { getPageSettings } from '../../lib/page-settings';
+const ui=await getPageSettings('notices',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Notices',hero_subtitle:'Church announcements, circulars, meetings and events in one searchable archive.',search_placeholder:'Search notices…',read_more:'Read notice',back_button:'Back to notices',pinned_badge:'Pinned',expired_badge:'Expired',empty_message:'No notices match those filters.',previous_button:'Previous notice',next_button:'Next notice',download_button:'Download'});
 
 const notices = (await getCollection('notices'))
   .filter((entry) => entry.id.startsWith('announcements/'))
@@ -23,9 +25,9 @@ const noticeCards = notices.map((notice, index) => ({
   <main class="notice-page">
     <header class="notice-hero">
       <div class="notice-wrap">
-        <p class="eyebrow">Sihphir Presbyterian Kohhran</p>
-        <h1>Notices</h1>
-        <p>Church announcements, circulars, meetings and events in one searchable archive.</p>
+        <p class="eyebrow">{ui.hero_caption}</p>
+        <h1>{ui.hero_title}</h1>
+        <p>{ui.hero_subtitle}</p>
       </div>
     </header>
 
@@ -35,7 +37,7 @@ const noticeCards = notices.map((notice, index) => ({
         <span id="notice-result-count">{notices.length} notices</span>
       </div>
       <div class="filters" aria-label="Notice archive filters">
-        <label><span>Search</span><input id="notice-search" type="search" placeholder="Search notices…" /></label>
+        <label><span>Search</span><input id="notice-search" type="search" placeholder={ui.search_placeholder} /></label>
         <label><span>Category</span><select id="notice-category"><option value="">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
         <label><span>Year</span><select id="notice-year"><option value="">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
         <label><span>Order</span><select id="notice-order"><option value="newest">Newest</option><option value="oldest">Oldest</option></select></label>
@@ -44,14 +46,14 @@ const noticeCards = notices.map((notice, index) => ({
       <div class="notice-list" id="notice-list">
         {noticeCards.map((notice) => (
           <article class="notice-card" data-title={notice.searchText} data-category={notice.category} data-year={notice.year} data-pinned={notice.pinned ? '1' : '0'} data-index={notice.index}>
-            <div class="card-meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>PINNED</strong>}</div>
+            <div class="card-meta"><span>{notice.category}</span><time>{notice.publishDate}</time>{notice.pinned && <strong>{ui.pinned_badge}</strong>}</div>
             <h3><a href={notice.href}>{notice.title}</a></h3>
             {notice.summary ? <p>{notice.summary}</p> : null}
-            <a class="read-link" href={notice.href}>Read notice <span aria-hidden="true">→</span></a>
+            <a class="read-link" href={notice.href}>{ui.read_more} <span aria-hidden="true">→</span></a>
           </article>
         ))}
       </div>
-      <p class="empty" id="notice-empty" hidden>No notices match those filters.</p>
+      <p class="empty" id="notice-empty" hidden>{ui.empty_message}</p>
       <button class="load-more" id="notice-load-more" type="button">Load more</button>
     </section>
   </main>

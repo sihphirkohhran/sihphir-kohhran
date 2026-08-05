@@ -14,6 +14,7 @@ import { renderMarkdown } from '../lib/markdown';
 import { loadGalleryPhotos, pickHomeGalleryPhotos } from '../lib/gallery';
 import { buildHomeDocumentSections } from '../lib/documents';
 import { normalizeContact } from '../lib/contact';
+import { getPageSettings } from '../lib/page-settings';
 import { normalizeNotice, noticeIsActive, sortNotices } from '../lib/notices';
 
 const heroEntry = await getEntry('settings', 'hero');
@@ -80,6 +81,7 @@ const monthlyDuties = latestMonthly
 const prayerSettings = prayerEntry?.data ?? {};
 const prayerHeading = prayerSettings.heading ?? 'Tawngtai Thupui';
 const prayerSubtitle = prayerSettings.subtitle ?? '';
+const homeUi=await getPageSettings('home',{hero_caption:'',hero_title:'',hero_subtitle:'',statistics_title:String(statsSettings.title??'Kohhran inchhiarna'),statistics_subtitle:'',notice_title:String(home.noticeHeading??'Notice Board'),notice_subtitle:String(home.noticeSubtitle??''),quick_links_title:'Quick Links',quick_links_subtitle:'',prayer_title:String(prayerSettings.heading??'Tawngtai Thupui'),prayer_subtitle:String(prayerSettings.subtitle??''),contact_title:'Contact',contact_subtitle:'',footer_heading:contact.churchName,footer_description:'Mizoram Presbyterian Kohhran · Presbyterian Church of India'});
 const prayerLimit = positiveCount(prayerSettings.max_visible, 4);
 const prayerTopics = (prayerSettings.topics ?? [])
   .map((topic, index) => typeof topic === 'string' ? { topic, display_order: index } : { topic: topic.topic, display_order: topic.display_order ?? index })
@@ -115,8 +117,8 @@ const announcementEntries = (await getCollection('notices'))
 
 const noticeCount = positiveCount(home.noticeCount, 3);
 const noticeVisible = home.noticeVisible !== false && visibility.notice_board !== false;
-const noticeHeading = String(home.noticeHeading ?? 'Notice Board');
-const noticeSubtitle = String(home.noticeSubtitle ?? '');
+const noticeHeading = homeUi.notice_title || String(home.noticeHeading ?? 'Notice Board');
+const noticeSubtitle = homeUi.notice_subtitle || String(home.noticeSubtitle ?? '');
 const noticeButtonText = String(home.noticeButtonText ?? 'View All Notices');
 const noticeButtonLink = String(home.noticeLink ?? '/notices');
 const announcements = await Promise.all(
@@ -185,10 +187,11 @@ const highlightItems = normalizeHighlights(
           YouTube
         </a>
       </div>
-      <h2 class="font-display text-white text-2xl sm:text-3xl font-semibold leading-tight mb-2" id="hero-caption">
-        {heroSlides[0].caption}
+      {homeUi.hero_caption && <span class="font-body text-gold-pale/60 text-[0.6rem] tracking-widest uppercase">{homeUi.hero_caption}</span>}
+      <h2 class="font-display text-white text-2xl sm:text-3xl font-semibold leading-tight mb-2" id="hero-caption" data-fixed-caption={homeUi.hero_title}>
+        {homeUi.hero_title || heroSlides[0].caption}
       </h2>
-      <p class="font-body text-gold-pale/70 text-sm mb-4">Sihphir Presbyterian Kohhran</p>
+      <p class="font-body text-gold-pale/70 text-sm mb-4">{homeUi.hero_subtitle || 'Sihphir Presbyterian Kohhran'}</p>
 
       <!-- Slide indicators -->
       <div class="flex gap-2 items-center" id="slide-dots">
@@ -210,14 +213,15 @@ const highlightItems = normalizeHighlights(
 
   <div style={visibility.highlights === false ? 'display:none' : 'display:contents'}><Highlights items={highlightItems} /></div>
 
-  <div style={visibility.quick_access === false ? 'display:none' : 'display:contents'}><QuickLinks links={quickLinks} /></div>
+  <div style={visibility.quick_access === false ? 'display:none' : 'display:contents'}><QuickLinks links={quickLinks} heading={homeUi.quick_links_title} subtitle={homeUi.quick_links_subtitle} /></div>
 
   <!-- ══════════════════════════════ STATISTICS ══════════════════════════════ -->
   <section class="bg-cream py-8 px-4" id="statistics" style={statsSettings.enabled === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>{statsSettings.title ?? 'Kohhran inchhiarna'}</h2>
+        <h2>{homeUi.statistics_title}</h2>
       </div>
+      {homeUi.statistics_subtitle && <p class="font-body text-xs text-gray-500 text-center mb-4">{homeUi.statistics_subtitle}</p>}
       <div class="grid grid-cols-3 gap-3 mb-4">
         {stats.map((stat, i) => (
           <div class={`stat-card reveal reveal-delay-${i + 1}`}>
@@ -474,7 +478,7 @@ const highlightItems = normalizeHighlights(
     <div class="max-w-2xl mx-auto">
       <div class="flex items-center gap-3 mb-5 reveal">
         <div class="flex-1 h-px bg-gradient-to-r from-transparent to-gold/35"></div>
-        <div class="text-center"><h2 class="font-display text-gold-light text-xl font-semibold whitespace-nowrap">{prayerHeading}</h2>{prayerSubtitle && <p class="font-body text-gold-pale/55 text-xs mt-1">{prayerSubtitle}</p>}</div>
+        <div class="text-center"><h2 class="font-display text-gold-light text-xl font-semibold whitespace-nowrap">{homeUi.prayer_title}</h2>{homeUi.prayer_subtitle && <p class="font-body text-gold-pale/55 text-xs mt-1">{homeUi.prayer_subtitle}</p>}</div>
         <div class="flex-1 h-px bg-gradient-to-l from-transparent to-gold/35"></div>
       </div>
       <div class="space-y-3">
@@ -492,8 +496,9 @@ const highlightItems = normalizeHighlights(
   <section class="bg-cream py-8 px-4" id="contact" style={contact.showHomeContact ? undefined : 'display:none'}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
-        <h2>Contact</h2>
+        <h2>{homeUi.contact_title}</h2>
       </div>
+      {homeUi.contact_subtitle && <p class="font-body text-xs text-gray-500 text-center mb-4">{homeUi.contact_subtitle}</p>}
       <div class="reveal bg-navy border border-gold/20 rounded p-5">
         <div class="flex items-center gap-4 mb-4">
           <div class="w-12 h-12 rounded-full border border-gold/40 bg-navy-light flex items-center justify-center flex-shrink-0">
@@ -546,7 +551,7 @@ const highlightItems = normalizeHighlights(
     slides[current].classList.add('active');
     dots[current].classList.replace('w-5', 'w-8');
     dots[current].classList.replace('bg-gold/30', 'bg-gold');
-    if (caption) caption.textContent = slides[current].getAttribute('data-caption') || '';
+    if (caption) caption.textContent = caption.dataset.fixedCaption || slides[current].getAttribute('data-caption') || '';
     if (counter) counter.textContent = `${current + 1} / ${slides.length}`;
   }
 

@@ -15,9 +15,11 @@ interface QuickLink {
 
 interface Props {
   links: QuickLink[];
+  heading?: string;
+  subtitle?: string;
 }
 
-const { links } = Astro.props;
+const { links, heading = 'Quick Links', subtitle = '' } = Astro.props;
 const visibleLinks = links
   .filter((link) => link.visible !== false && link.enabled !== false)
   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
@@ -27,7 +29,8 @@ const visibleLinks = links
   <section class="bg-cream py-6 px-4 border-b border-gold/15" id="quick-links">
     <div class="max-w-2xl mx-auto reveal">
       <div class="gold-divider mb-4">
-        <h2>Quick Links</h2>
+        <h2>{heading}</h2>
+        {subtitle && <p>{subtitle}</p>}
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {visibleLinks.map((link, i) => (
