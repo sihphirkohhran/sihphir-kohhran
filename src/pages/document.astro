@@ -1,449 +1,256 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ArchiveFilterBar from '../components/ArchiveFilterBar.astro';
-import DocumentCategoryCard from '../components/DocumentCategoryCard.astro';
-import { getEntry } from 'astro:content';
-import { getKtpInlengDocs, getOtherDocuments } from '../lib/cms';
-import { getUniqueYears, getUniqueMonthsForYear, MONTH_NAMES } from '../lib/archive';
-import {
-  toDocumentItem,
-  sortDocumentItems,
-  markLatestInCategory,
-  normalizeCategoryMatch,
-  categoryHasMonthData,
-  categoryHasYearData,
-  type DocumentCategory,
-} from '../lib/documents';
+import { getCollection, getEntry } from 'astro:content';
+import { resolveDocumentUrl } from '../lib/documents-url';
+import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
 
-const docCategoryRegistry = await getEntry('settings', 'document-categories');
-const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
+const categoryRegistry = await getEntry('settings', 'document-categories');
+const registeredCategories = categoryRegistry?.data.categories ?? [];
+const entries = await getCollection('documents');
 
-const ktpRaw = await getKtpInlengDocs();
-const otherRaw = await getOtherDocuments();
-const ktpCategory = { id: 'ktp-inleng', name: 'KTP Inleng' };
-const managedKtpRaw = otherRaw.filter((document) => normalizeCategoryMatch(document.category, ktpCategory));
-const managedCategoryNames = Array.from(
-  new Set(
-    otherRaw
-      .map((document) => String(document.category ?? '').trim())
-      .filter((category) => category && !normalizeCategoryMatch(category, ktpCategory)),
-  ),
-);
-const managedCategories = [
-  ...docCategoriesList,
-  ...managedCategoryNames
-    .filter(
-      (category) =>
-        !docCategoriesList.some((registered) => normalizeCategoryMatch(category, registered)),
-    )
-    .map((category) => ({
-      id: category
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, ''),
-      name: category,
-    })),
-];
+const fileExtension = (value: string) => {
+  const clean = value.split(/[?#]/)[0];
+  const match = clean.match(/\.([a-z0-9]+)$/i);
+  return match?.[1]?.toLowerCase() ?? 'file';
+};
 
-const ktpItems = sortDocumentItems(
-  [...ktpRaw, ...managedKtpRaw].map((d) =>
-    toDocumentItem({
-      id: d.id,
-      name: d.name,
-      pdf_url: d.pdf_url,
-      date: d.date,
-      year: d.year,
-      month: d.month,
-      pinned: d.pinned,
-      featured: d.featured,
-      is_new: d.is_new,
-    }),
-  ),
-  'newest',
-);
+const filenameFromUrl = (value: string) => {
+  try {
+    const pathname = value.startsWith('http') ? new URL(value).pathname : value;
+    return decodeURIComponent(pathname.split('/').pop() || 'Document');
+  } catch {
+    return value.split('/').pop() || 'Document';
+  }
+};
 
-const ktpYears = getUniqueYears(ktpItems.map((d) => d.year));
-const defaultKtpYear = ktpYears[0] ?? new Date().getFullYear();
-const ktpMonthsForYear = getUniqueMonthsForYear(ktpItems, defaultKtpYear);
+const documentSortDate = (value: string | undefined, year: number | null, month: number | null, id: string) => {
+  const text = String(value || '').trim();
+  const dayFirst = text.match(/^(\d{1,2})[.\-/](\d{1,2})[.\-/](\d{4})$/);
+  if (dayFirst) return `${dayFirst[3]}-${dayFirst[2].padStart(2, '0')}-${dayFirst[1].padStart(2, '0')}`;
+  const parsed = Date.parse(text);
+  if (text && !Number.isNaN(parsed)) return new Date(parsed).toISOString();
+  return `${String(year ?? 0).padStart(4, '0')}-${String(month ?? 0).padStart(2, '0')}-${id}`;
+};
 
-const docCategories: DocumentCategory[] = [
-  {
-    id: 'ktp-inleng',
-    name: 'KTP Inleng',
-    badge: 'Weekly · Archived',
-    items: ktpItems,
-    hasYearFilter: true,
-    hasMonthFilter: true,
-  },
-  ...managedCategories.map((cat) => {
-    const items = sortDocumentItems(
-      otherRaw
-        .filter((d) => normalizeCategoryMatch(d.category, cat))
-        .map((d) =>
-          toDocumentItem({
-            id: d.id,
-            name: d.name,
-            pdf_url: d.pdf_url,
-            date: d.date,
-            year: d.year,
-            month: d.month,
-            pinned: d.pinned,
-            featured: d.featured,
-            is_new: d.is_new,
-          }),
-        ),
-      'newest',
+const documents = entries
+  .filter((entry) => entry.data.status !== 'archived' && entry.data.published !== false)
+  .map((entry) => {
+    const data = entry.data;
+    const legacyUrl = resolveDocumentUrl(data.pdf_url, data.pdf_external);
+    const storedFiles = Array.isArray(data.files) ? data.files : [];
+    const normalizedFiles = storedFiles
+      .map((file) => ({
+        url: resolveDocumentUrl(file.url),
+        filename: file.filename || filenameFromUrl(file.url),
+        size: file.size ?? null,
+        uploadedAt: file.uploaded_at || '',
+        modifiedAt: file.modified_at || '',
+        type: file.type || '',
+      }))
+      .filter((file) => file.url);
+    if (legacyUrl && !normalizedFiles.some((file) => file.url === legacyUrl)) {
+      normalizedFiles.unshift({
+        url: legacyUrl,
+        filename: filenameFromUrl(legacyUrl),
+        size: null,
+        uploadedAt: '',
+        modifiedAt: '',
+        type: '',
+      });
+    }
+    const primary = normalizedFiles[0];
+    const fromId = parseYearMonthFromId(entry.id);
+    const year = data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
+    const month = data.month ?? fromId.month ?? parseMonthFromDate(data.date) ?? null;
+    const category = String(
+      data.category || (entry.id.startsWith('ktp-inleng/') ? 'KTP Inleng' : 'Other'),
     );
+    const description = String(data.description || entry.body || '').replace(/<[^>]*>/g, '').trim();
+    const uploadDate = primary?.uploadedAt || data.date || '';
+    const sortDate = documentSortDate(primary?.uploadedAt || primary?.modifiedAt || data.date, year, month, entry.id);
+    const ext = fileExtension(primary?.filename || primary?.url || '');
     return {
-      id: cat.id,
-      name: cat.name,
-      badge: cat.badge ?? 'Archive',
-      items,
-      hasYearFilter: categoryHasYearData(items),
-      hasMonthFilter: categoryHasMonthData(items),
+      id: entry.id,
+      title: String(data.name),
+      description,
+      category,
+      year,
+      uploadDate,
+      sortDate,
+      featured: Boolean(data.featured),
+      pinned: Boolean(data.pinned),
+      url: primary?.url || '',
+      filename: primary?.filename || '',
+      size: primary?.size ?? null,
+      extension: ext,
+      previewable: ext === 'pdf' || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
+      image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
+      fileCount: normalizedFiles.length,
     };
-  }),
-];
+  })
+  .filter((document) => document.url)
+  .sort((a, b) => b.sortDate.localeCompare(a.sortDate));
 
-const allYears = getUniqueYears(
-  docCategories.flatMap((c) => c.items.map((i) => i.year)),
-);
+const categories = Array.from(new Set([
+  ...registeredCategories.map((category) => category.name),
+  ...documents.map((document) => document.category),
+])).filter(Boolean);
+const years = Array.from(new Set(documents.map((document) => document.year).filter((year): year is number => year != null))).sort((a, b) => b - a);
+const featuredDocuments = documents.filter((document) => document.featured);
+const archiveDocuments = documents.filter((document) => !document.featured);
 
-const categoryMeta = docCategories.map((cat, di) => ({
-  ...cat,
-  latestIds: [...markLatestInCategory(cat.items)],
-  defaultOpen: di === 0,
-  revealClass: `reveal-delay-${(di % 3) + 1}`,
-  perPage: cat.id === 'ktp-inleng' ? 8 : 10,
-  yearOptions: getUniqueYears(cat.items.map((i) => i.year)).map((y) => ({
-    value: String(y),
-    label: String(y),
-  })),
-  monthOptions: cat.hasMonthFilter && cat.items.length
-    ? getUniqueMonthsForYear(
-        cat.items,
-        getUniqueYears(cat.items.map((i) => i.year))[0] ?? new Date().getFullYear(),
-      ).map((m) => ({ value: String(m), label: MONTH_NAMES[m] ?? String(m) }))
-    : [],
-}));
-
-const archiveJson = categoryMeta.map((c) => ({
-  id: c.id,
-  items: c.items,
-  perPage: c.perPage,
-  hasYearFilter: c.hasYearFilter,
-  hasMonthFilter: c.hasMonthFilter,
-}));
+const formatSize = (size: number | null) => {
+  if (size == null) return 'Size unavailable';
+  if (size < 1024) return `${size} B`;
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`;
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+const formatDate = (value: string) => {
+  if (!value) return 'Archive record';
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.valueOf())) return value;
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric', year: 'numeric' }).format(parsed);
+};
+const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pptx: 'PPTX', zip: 'ZIP' }[ext] || (['jpg','jpeg','png','gif','webp','avif','svg'].includes(ext) ? 'IMAGE' : ext.toUpperCase()));
 ---
 
-<BaseLayout title="Documents — Sihphir Presbyterian Kohhran" activePage="document">
-
-  <div class="bg-navy border-b-2 border-gold px-4 py-8 text-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.04]"
-      style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);">
-    </div>
-    <div class="relative z-10">
-      <p class="font-body text-[0.6rem] tracking-[0.14em] uppercase text-gold-pale/50 mb-2">Sihphir Presbyterian Kohhran</p>
-      <h1 class="font-display text-white text-2xl sm:text-3xl font-semibold">Documents</h1>
-      <p class="font-body text-gold-pale/50 text-sm mt-2 italic">Archive · All records preserved</p>
-      <div class="w-16 h-px bg-gold/40 mx-auto mt-3"></div>
+<BaseLayout title="Church Documents — Sihphir Presbyterian Kohhran" activePage="document">
+  <div class="documents-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
+    <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);"></div>
+    <div class="relative z-10 max-w-3xl mx-auto">
+      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">Sihphir Presbyterian Kohhran</p>
+      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">Church Documents</h1>
+      <p class="font-body text-gold-pale/65 text-sm sm:text-base mt-3 leading-relaxed">Browse official documents, reports, circulars, notices and publications of Sihphir Presbyterian Kohhran.</p>
+      <div class="w-16 h-px bg-gold/50 mx-auto mt-5"></div>
     </div>
   </div>
 
-  <div class="max-w-2xl mx-auto px-4 py-8 space-y-6">
-
-    <div class="reveal bg-ivory border border-navy/10 rounded px-5 py-4 space-y-3">
-      <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block" for="doc-search">
-        Search documents
+  <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10">
+    <section class="document-toolbar reveal" aria-label="Document search and filters">
+      <label class="document-search" for="document-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <span class="sr-only">Search documents</span>
+        <input id="document-search" type="search" placeholder="Search title, description, category or year…" autocomplete="off" />
       </label>
-      <input
-        type="search"
-        id="doc-search"
-        placeholder="Search by name…"
-        class="doc-search-input w-full border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-white focus:outline-none focus:border-navy/60 transition-colors"
-        autocomplete="off"
-      />
-      <div class="archive-filters-row !mb-0">
-        {allYears.length > 0 && (
-          <ArchiveFilterBar
-            id="doc-global-year"
-            label="Year"
-            options={allYears.map((y) => ({ value: String(y), label: String(y) }))}
-          />
-        )}
-        <ArchiveFilterBar
-          id="doc-global-month"
-          label="Month"
-          allLabel="All months"
-          options={MONTH_NAMES.slice(1).map((name, i) => ({
-            value: String(i + 1),
-            label: name,
-          }))}
-        />
-        <div class="archive-filter reveal">
-          <label class="font-body text-[0.65rem] tracking-widest uppercase text-gray-400 block mb-1.5" for="doc-sort">
-            Sort
-          </label>
-          <select
-            id="doc-sort"
-            class="archive-filter-select w-full sm:w-auto min-w-[140px] border border-navy/20 rounded px-3 py-2.5 font-body text-sm text-navy bg-ivory focus:outline-none focus:border-navy/60 transition-colors"
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-          </select>
-        </div>
+      <div class="document-filter-row">
+        <label><span>Category</span><select id="document-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
+        <label><span>Year</span><select id="document-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
+        <label><span>Sort</span><select id="document-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select></label>
       </div>
-    </div>
+      <p id="document-count" class="document-count">{documents.length} documents</p>
+    </section>
 
-    <div class="space-y-6" id="doc-categories">
-      {categoryMeta.map((cat) => (
-        <DocumentCategoryCard
-          id={cat.id}
-          name={cat.name}
-          badge={cat.badge}
-          items={cat.items}
-          latestIds={cat.latestIds}
-          defaultOpen={cat.defaultOpen}
-          revealClass={cat.revealClass}
-          hasYearFilter={cat.hasYearFilter}
-          hasMonthFilter={cat.hasMonthFilter}
-          yearOptions={cat.yearOptions}
-          monthOptions={cat.monthOptions}
-          perPage={cat.perPage}
-        />
-      ))}
-    </div>
+    {featuredDocuments.length > 0 && (
+      <section class="document-section" id="featured-documents">
+        <div class="document-section-heading reveal">
+          <div><span>Selected archive</span><h2>Featured Documents</h2></div>
+          <p>Important publications and frequently requested records.</p>
+        </div>
+        <div class="document-grid featured-grid" id="featured-grid">
+          {featuredDocuments.map((document, index) => (
+            <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.year ?? ''} data-date={document.sortDate}>
+              <div class="document-preview">
+                {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
+                <span class="featured-ribbon">Featured</span>
+              </div>
+              <div class="document-card-body">
+                <div class="document-badges"><span>{document.category}</span>{document.year && <span>{document.year}</span>}</div>
+                <h3>{document.title}</h3>
+                <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
+                <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
+                <div class="document-actions">{document.previewable && <a href={document.url} target="_blank" rel="noopener" class="preview-link">Preview</a>}<a href={document.url} download class="download-link">Download</a><a href={document.url} target="_blank" rel="noopener" class="open-link" aria-label={`Open ${document.title}`}>Open ↗</a></div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+    )}
 
-    <p id="doc-no-results" class="hidden font-body text-sm text-gray-500 text-center py-4 reveal">
-      No documents match your search.
-    </p>
+    <section class="document-section archive-section">
+      <div class="document-section-heading reveal">
+        <div><span>Complete collection</span><h2>Document Archive</h2></div>
+        <p>Browse all available church records and publications.</p>
+      </div>
+      <div class="document-grid" id="document-grid">
+        {archiveDocuments.map((document, index) => (
+          <article class={`document-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.year ?? ''} data-date={document.sortDate}>
+            <div class="document-preview">
+              {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
+            </div>
+            <div class="document-card-body">
+              <div class="document-badges"><span>{document.category}</span>{document.year && <span>{document.year}</span>}</div>
+              <h3>{document.title}</h3>
+              <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
+              <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
+              <div class="document-actions">{document.previewable && <a href={document.url} target="_blank" rel="noopener" class="preview-link">Preview</a>}<a href={document.url} download class="download-link">Download</a><a href={document.url} target="_blank" rel="noopener" class="open-link" aria-label={`Open ${document.title}`}>Open ↗</a></div>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
 
-  </div>
-
+    <section class="document-empty" id="document-empty" hidden>
+      <div class="empty-illustration" aria-hidden="true"><span></span><i>⌕</i></div>
+      <h2>No documents found</h2>
+      <p>Try a different search term or clear one of the filters.</p>
+      <button type="button" id="document-clear">Clear filters</button>
+    </section>
+  </main>
 </BaseLayout>
 
-<script define:vars={{ archiveJson, monthNames: MONTH_NAMES }}>
-  const searchInput = document.getElementById('doc-search');
-  const globalYear = document.getElementById('doc-global-year');
-  const globalMonth = document.getElementById('doc-global-month');
-  const sortSelect = document.getElementById('doc-sort');
-  const noResults = document.getElementById('doc-no-results');
+<script>
+  const search = document.querySelector<HTMLInputElement>('#document-search');
+  const category = document.querySelector<HTMLSelectElement>('#document-category');
+  const year = document.querySelector<HTMLSelectElement>('#document-year');
+  const sort = document.querySelector<HTMLSelectElement>('#document-sort');
+  const empty = document.querySelector<HTMLElement>('#document-empty');
+  const count = document.querySelector<HTMLElement>('#document-count');
 
-  const archiveById = Object.fromEntries(archiveJson.map((c) => [c.id, c]));
+  function applyFilters() {
+    const query = search?.value.trim().toLowerCase() || '';
+    const selectedCategory = category?.value || 'all';
+    const selectedYear = year?.value || 'all';
+    let visible = 0;
 
-  function sortItems(items, order) {
-    const pinned = items.filter((i) => i.pinned);
-    const rest = items.filter((i) => !i.pinned);
-    const cmp = (a, b) => {
-      const diff = b.sortKey.localeCompare(a.sortKey);
-      return order === 'newest' ? diff : -diff;
-    };
-    return [...pinned.sort(cmp), ...rest.sort(cmp)];
-  }
-
-  function renderDocRow(item, latestId) {
-    const pinnedBadge = item.pinned
-      ? '<span class="doc-badge doc-badge-pinned">Pinned</span>'
-      : '';
-    const featuredBadge = item.featured
-      ? '<span class="doc-badge doc-badge-new">Featured</span>'
-      : '';
-    const newBadge =
-      (item.isNew || item.id === latestId) && !item.pinned
-        ? '<span class="doc-badge doc-badge-new">New</span>'
-      : '';
-    return `
-      <div class="doc-item group doc-row"
-        data-doc-id="${item.id}"
-        data-year="${item.year ?? ''}"
-        data-month="${item.month ?? ''}"
-        data-pinned="${item.pinned ? '1' : '0'}"
-        data-name="${item.name.toLowerCase()}"
-        data-date="${item.date}">
-        <div class="flex items-center gap-2.5 min-w-0 flex-1">
-          <svg class="w-4 h-4 text-gold/40 flex-shrink-0 group-hover:text-gold/70 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-          <div class="min-w-0">
-            <div class="flex items-center gap-1.5 flex-wrap">
-              <span class="font-body text-gold-pale/80 text-sm truncate max-w-full">${item.name}</span>
-              ${pinnedBadge}${featuredBadge}${newBadge}
-            </div>
-            <span class="font-body text-[0.6rem] text-gold-pale/30 tracking-wide">${item.date}</span>
-          </div>
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0 ml-2">
-          <a href="${item.url}" target="_blank" rel="noopener" class="doc-action-btn" title="Preview PDF">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-            <span class="hidden sm:inline">Preview</span>
-          </a>
-          <a href="${item.url}" download class="doc-action-btn" title="Download PDF">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-            <span class="hidden sm:inline">Download</span>
-          </a>
-        </div>
-      </div>`;
-  }
-
-  const catState = {};
-
-  function getCatFilters(catId) {
-    const yearEl = document.getElementById(`${catId}-year-filter`);
-    const monthEl = document.getElementById(`${catId}-month-filter`);
-    return {
-      year: yearEl?.value ?? 'all',
-      month: monthEl?.value ?? 'all',
-    };
-  }
-
-  function filterCatItems(catId, items) {
-    const q = (searchInput?.value ?? '').trim().toLowerCase();
-    const gYear = globalYear?.value ?? 'all';
-    const gMonth = globalMonth?.value ?? 'all';
-    const { year: cYear, month: cMonth } = getCatFilters(catId);
-    const meta = archiveById[catId];
-
-    return items.filter((item) => {
-      const matchSearch = !q || item.name.toLowerCase().includes(q);
-      const yearVal = String(item.year ?? '');
-      const monthVal = String(item.month ?? '');
-      const matchGlobalYear = gYear === 'all' || yearVal === gYear;
-      const matchGlobalMonth = gMonth === 'all' || monthVal === gMonth;
-      const matchCatYear = !meta?.hasYearFilter || cYear === 'all' || yearVal === cYear;
-      const matchCatMonth =
-        !meta?.hasMonthFilter || cMonth === 'all' || monthVal === cMonth;
-      return matchSearch && matchGlobalYear && matchGlobalMonth && matchCatYear && matchCatMonth;
+    document.querySelectorAll<HTMLElement>('[data-document-card]').forEach((card) => {
+      const haystack = `${card.dataset.title} ${card.dataset.description} ${card.dataset.category?.toLowerCase()} ${card.dataset.year}`;
+      const matches = (!query || haystack.includes(query)) &&
+        (selectedCategory === 'all' || card.dataset.category === selectedCategory) &&
+        (selectedYear === 'all' || card.dataset.year === selectedYear);
+      card.hidden = !matches;
+      if (matches) visible++;
     });
-  }
 
-  function renderCategory(catId) {
-    const meta = archiveById[catId];
-    if (!meta) return;
-    const order = sortSelect?.value === 'oldest' ? 'oldest' : 'newest';
-    if (!catState[catId]) catState[catId] = { page: 1 };
-    const filtered = filterCatItems(catId, sortItems(meta.items, order));
-    const sorted = sortItems(filtered, order);
-    const latestId = sorted.find((i) => !i.pinned)?.id ?? sorted[0]?.id;
-    const perPage = meta.perPage;
-    const totalPages = Math.max(1, Math.ceil(sorted.length / perPage));
-    if (catState[catId].page > totalPages) catState[catId].page = 1;
-
-    const countEl = document.querySelector(`[data-count-for="${catId}"]`);
-    if (countEl) countEl.textContent = `${sorted.length} files`;
-
-    const emptyEl = document.querySelector(`[data-empty-for="${catId}"]`);
-    if (emptyEl) emptyEl.classList.toggle('hidden', sorted.length > 0);
-
-    const start = (catState[catId].page - 1) * perPage;
-    const slice = sorted.slice(start, start + perPage);
-    const container = document.getElementById(`items-${catId}`);
-    if (container) container.innerHTML = slice.map((i) => renderDocRow(i, latestId)).join('');
-
-    const pagination = document.querySelector(`[data-pagination="${catId}"]`);
-    const wrap = document.querySelector(`[data-pagination-wrap="${catId}"]`);
-    if (wrap) wrap.style.display = sorted.length > perPage ? '' : 'none';
-    if (pagination) {
-      pagination.innerHTML = '';
-      for (let p = 1; p <= totalPages; p++) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = `page-btn ${p === catState[catId].page ? 'active' : ''}`;
-        btn.textContent = String(p);
-        btn.addEventListener('click', () => {
-          catState[catId].page = p;
-          renderCategory(catId);
-        });
-        pagination.appendChild(btn);
-      }
-    }
-    const cur = document.querySelector(`.doc-current-page[data-cat="${catId}"]`);
-    const tot = document.querySelector(`.doc-total-pages[data-cat="${catId}"]`);
-    if (cur) cur.textContent = String(catState[catId].page);
-    if (tot) tot.textContent = String(totalPages);
-
-    return sorted.length;
-  }
-
-  function renderAll() {
-    let totalVisible = 0;
-    archiveJson.forEach((c) => {
-      totalVisible += renderCategory(c.id);
+    document.querySelectorAll<HTMLElement>('.document-grid').forEach((grid) => {
+      const cards = [...grid.querySelectorAll<HTMLElement>('[data-document-card]')];
+      cards.sort((a, b) => {
+        if (sort?.value === 'title') return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+        const result = (b.dataset.date || '').localeCompare(a.dataset.date || '');
+        return sort?.value === 'oldest' ? -result : result;
+      }).forEach((card) => grid.append(card));
     });
-    if (noResults) noResults.classList.toggle('hidden', totalVisible > 0);
+
+    document.querySelector<HTMLElement>('#featured-documents')?.toggleAttribute('hidden', !document.querySelector('#featured-grid [data-document-card]:not([hidden])'));
+    document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden', !document.querySelector('#document-grid [data-document-card]:not([hidden])'));
+    if (empty) empty.hidden = visible > 0;
+    if (count) count.textContent = `${visible} document${visible === 1 ? '' : 's'}`;
   }
 
-  function updateMonthOptionsForCat(catId) {
-    const meta = archiveById[catId];
-    if (!meta?.hasMonthFilter) return;
-    const yearEl = document.getElementById(`${catId}-year-filter`);
-    const monthEl = document.getElementById(`${catId}-month-filter`);
-    if (!yearEl || !monthEl) return;
-    const year = yearEl.value;
-    const months = [
-      ...new Set(
-        meta.items
-          .filter((i) => year === 'all' || String(i.year) === year)
-          .map((i) => i.month)
-          .filter(Boolean),
-      ),
-    ].sort((a, b) => b - a);
-    const current = monthEl.value;
-    monthEl.innerHTML =
-      '<option value="all">All months</option>' +
-      months
-        .map((m) => `<option value="${m}">${monthNames[m] ?? m}</option>`)
-        .join('');
-    if ([...monthEl.options].some((o) => o.value === current)) {
-      monthEl.value = current;
-    }
-  }
-
-  document.querySelectorAll('[data-doc-cat-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const catId = btn.getAttribute('data-doc-cat-toggle');
-      const card = document.getElementById(`cat-${catId}`);
-      const body = document.getElementById(`body-${catId}`);
-      if (!card || !body) return;
-      const open = !card.classList.contains('is-open');
-      card.classList.toggle('is-open', open);
-      body.hidden = !open;
-      btn.setAttribute('aria-expanded', String(open));
-    });
+  [search, category, year].forEach((control) => control?.addEventListener(control === search ? 'input' : 'change', applyFilters));
+  sort?.addEventListener('change', applyFilters);
+  document.querySelector('#document-clear')?.addEventListener('click', () => {
+    if (search) search.value = '';
+    if (category) category.value = 'all';
+    if (year) year.value = 'all';
+    if (sort) sort.value = 'newest';
+    applyFilters();
+    search?.focus();
   });
-
-  searchInput?.addEventListener('input', () => {
-    archiveJson.forEach((c) => {
-      catState[c.id] = { page: 1 };
-    });
-    renderAll();
-  });
-  globalYear?.addEventListener('change', () => {
-    archiveJson.forEach((c) => {
-      catState[c.id] = { page: 1 };
-      updateMonthOptionsForCat(c.id);
-    });
-    renderAll();
-  });
-  globalMonth?.addEventListener('change', renderAll);
-  sortSelect?.addEventListener('change', renderAll);
-
-  archiveJson.forEach((c) => {
-    const yearEl = document.getElementById(`${c.id}-year-filter`);
-    const monthEl = document.getElementById(`${c.id}-month-filter`);
-    yearEl?.addEventListener('change', () => {
-      updateMonthOptionsForCat(c.id);
-      catState[c.id] = { page: 1 };
-      renderCategory(c.id);
-    });
-    monthEl?.addEventListener('change', () => {
-      catState[c.id] = { page: 1 };
-      renderCategory(c.id);
-    });
-    if (yearEl && yearEl.value === 'all' && yearEl.options.length > 1) {
-      yearEl.selectedIndex = 1;
-    }
-    updateMonthOptionsForCat(c.id);
-  });
-
-  renderAll();
+  applyFilters();
 </script>
+
+<style>
+  .documents-page{color:#13233a}.document-toolbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:14px;background:#fffdf8;box-shadow:0 12px 35px rgba(20,36,58,.07)}.document-search{grid-column:1/-1;display:flex;align-items:center;gap:11px;border:1px solid rgba(18,35,59,.18);border-radius:10px;padding:0 14px;background:white}.document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 3px rgba(184,149,63,.12)}.document-search svg{width:19px;height:19px;fill:none;stroke:#9a772b;stroke-width:1.7}.document-search input{width:100%;border:0;outline:0;padding:13px 0;background:transparent;color:#182941;font-family:var(--font-body,serif);font-size:.9rem}.document-filter-row{display:flex;flex-wrap:wrap;gap:10px}.document-filter-row label{display:grid;gap:5px}.document-filter-row label>span{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7b8290}.document-filter-row select{min-width:150px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px 32px 9px 10px;background:white;color:#263851;font-size:.76rem}.document-count{align-self:end;margin:0 2px 10px;color:#79808b;font-size:.72rem}.document-section{margin-top:42px}.document-section-heading{display:flex;justify-content:space-between;gap:25px;align-items:end;margin-bottom:18px}.document-section-heading span{color:#9c7628;font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.document-section-heading h2{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.55rem;color:#162840}.document-section-heading p{max-width:340px;margin:0;color:#7a818d;font-size:.75rem;text-align:right}.document-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.document-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:14px;background:#fff;box-shadow:0 7px 25px rgba(23,38,59,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.document-card:hover{transform:translateY(-3px);border-color:rgba(184,149,63,.38);box-shadow:0 15px 35px rgba(23,38,59,.12)}.document-card[hidden],.document-section[hidden],.document-empty[hidden]{display:none}.document-preview{position:relative;display:grid;place-items:center;height:180px;overflow:hidden;background:linear-gradient(145deg,#eef0f1,#faf8f1)}.document-preview iframe{width:125%;height:150%;border:0;pointer-events:none;transform:scale(.8)}.document-preview img{width:100%;height:100%;object-fit:cover}.file-mark{display:grid;place-items:center;width:76px;height:92px;border-radius:8px 8px 11px 11px;background:#fff;color:#a44e4e;box-shadow:0 8px 22px rgba(26,40,58,.12);font-size:.68rem;font-weight:800;letter-spacing:.06em}.file-docx{color:#456da4}.file-xlsx{color:#3d7d5b}.file-pptx{color:#ae603c}.file-zip{color:#84679a}.featured-ribbon{position:absolute;top:12px;right:12px;border-radius:999px;padding:5px 8px;background:#b8953f;color:#fff;font-size:.54rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.featured-card{border-color:rgba(184,149,63,.32)}.document-card-body{display:flex;flex:1;flex-direction:column;padding:17px}.document-badges{display:flex;flex-wrap:wrap;gap:6px}.document-badges span{border:1px solid rgba(184,149,63,.22);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.document-card h3{margin:12px 0 7px;color:#172941;font-family:var(--font-display,serif);font-size:1.05rem;line-height:1.3}.document-description{display:-webkit-box;min-height:3.7em;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:3}.document-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:14px;padding-top:11px;border-top:1px solid rgba(18,35,59,.08);color:#89909a;font-size:.6rem}.document-meta span+span:before{content:'·';margin-right:10px;color:#c0a568}.document-actions{display:flex;align-items:center;gap:7px;margin-top:16px}.document-actions a{border-radius:7px;padding:8px 10px;text-decoration:none;font-size:.62rem;font-weight:700}.preview-link{border:1px solid rgba(18,35,59,.15);color:#344862}.download-link{background:#b8953f;color:white;box-shadow:0 5px 12px rgba(184,149,63,.23)}.open-link{margin-left:auto;color:#8c6a27}.document-empty{display:grid;justify-items:center;padding:75px 20px;text-align:center}.empty-illustration{position:relative;width:92px;height:78px}.empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:8px;background:#fffaf0;transform:rotate(-5deg)}.empty-illustration span:after{content:'';position:absolute;left:14px;right:14px;top:20px;height:18px;border-top:2px solid rgba(184,149,63,.25);border-bottom:2px solid rgba(184,149,63,.25)}.empty-illustration i{position:absolute;right:7px;bottom:2px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#142740;color:#ddc782;font-style:normal}.document-empty h2{margin:15px 0 5px;font-family:var(--font-display,serif);color:#172941}.document-empty p{margin:0;color:#7b828d;font-size:.78rem}.document-empty button{margin-top:17px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:9px 13px;background:white;color:#253851;font-size:.7rem;font-weight:700}
+  @media(max-width:850px){.document-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
+  @media(max-width:560px){.documents-hero{padding-top:2rem;padding-bottom:2rem}.document-toolbar{padding:13px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-grid{grid-template-columns:1fr}.document-section{margin-top:32px}.document-section-heading{display:block}.document-section-heading p{margin-top:6px;text-align:left}.document-preview{height:165px}.document-actions a{padding:8px 9px}}
+</style>
