@@ -4,46 +4,77 @@
   "office_bearers": [
     {
       "role": "President",
-      "name": "Pu/Pi President Hming"
+      "name": "Pu/Pi President Hming",
+      "display_order": 0
     },
     {
       "role": "Vice President",
-      "name": "Pu/Pi VP Hming"
+      "name": "Pu/Pi VP Hming",
+      "display_order": 1
     },
     {
       "role": "Secretary",
-      "name": "Pu/Pi Secretary Hming"
+      "name": "Pu/Pi Secretary Hming",
+      "display_order": 2
     },
     {
       "role": "Treasurer",
-      "name": "Pu/Pi Treasurer Hming"
+      "name": "Pu/Pi Treasurer Hming",
+      "display_order": 3
     },
     {
       "role": "Programme Secretary",
-      "name": "Pu/Pi Prog Sec Hming"
+      "name": "Pu/Pi Prog Sec Hming",
+      "display_order": 4
     }
   ],
   "members": [
     {
       "name": "Pu/Pi Member 1",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 0
     },
     {
       "name": "Pu/Pi Member 2",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 1
     },
     {
       "name": "Pu/Pi Member 3",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 2
     },
     {
       "name": "Pu/Pi Member 4",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 3
     },
     {
       "name": "Pu/Pi Member 5",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 4
     }
   ],
-  "logo": "/images/fellowship/ktp-logo.png"
+  "logo": "/images/fellowship/ktp-logo.png",
+  "fellowship_name": "KTP",
+  "slug": "ktp",
+  "category": "Fellowship",
+  "short_description": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
+  "full_history": "KTP chu thalai te tan a awm a, Fellowship hmang hian thalai te Bible zir dan, inkhawm dan leh kohhran tan thawhlawm dan an zir a nih.\n\nKTP Inleng chu weekly-in a chhuak a, kohhran thalai leh member te tan bulletin a ni a, KTP inkhawm program leh thupui te an tarlan a nih.\n\nThalai te nungchang tha nei thei nan leh Pathian tan thawhlawm dan zir nan, fellowship hi a pawimawh hle a nih.",
+  "cover_photo": "",
+  "published": true,
+  "display_order": 0,
+  "related_galleries": [
+    "src/content/gallery/gallery-2026.md"
+  ],
+  "related_documents": [
+    "src/content/documents/other/year-book-2025.md"
+  ],
+  "motto": "",
+  "description": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
+  "banner_image": "",
+  "group_photo": "",
+  "homepage_order": 0,
+  "homepage_visible": true,
+  "status": "current"
 }
