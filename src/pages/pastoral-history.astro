@@ -1,7 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
-import MinistryArchive from '../components/MinistryArchive.astro';
-import { normalizeMinistryProfile } from '../lib/ministry-profile';
-const profiles=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'pastor')).filter((profile): profile is NonNullable<typeof profile>=>Boolean(profile));
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<MinistryArchive title="Bialtu Pastor" subtitle="Meet our current pastoral leadership and explore the history of those who have faithfully served Sihphir Presbyterian Kohhran." activePage="pastoral-history" currentLabel="Current Pastor" historyLabel="Pastor History Timeline" profiles={profiles} pastor />
+<BaseLayout title="Bialtu Pastor" activePage="pastoral-history"><main class="legacy-redirect"><h1>Bialtu Pastor has moved</h1><p>The complete pastor section is now available at its new address.</p><a href="/bialtu-pastor">Continue to Bialtu Pastor →</a></main><script is:inline>location.replace('/bialtu-pastor');</script></BaseLayout>
+<style>.legacy-redirect{display:grid;place-content:center;justify-items:center;min-height:55vh;padding:30px;text-align:center}.legacy-redirect h1{font-family:var(--font-display,serif)}.legacy-redirect p{color:#718096}.legacy-redirect a{border-radius:8px;padding:10px 13px;background:#142740;color:white;text-decoration:none}</style>

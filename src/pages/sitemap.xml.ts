@@ -5,6 +5,7 @@ import { absoluteSiteUrl } from '../lib/site';
 const staticPaths = [
   '/',
   '/committee',
+  '/bialtu-pastor',
   '/document',
   '/elders-history',
   '/fellowship',
@@ -14,7 +15,10 @@ const staticPaths = [
   '/fellowship/masihi-sangati',
   '/gallery',
   '/missionary-ministry',
+  '/missionary',
   '/pastoral-history',
+  '/probationary-pastor',
+  '/kohhran-upa',
 ];
 
 const escapeXml = (value: string) => value.replace(/[<>&'"]/g, (character) => ({

@@ -160,7 +160,7 @@ const pastoral = defineCollection({
     start_year: z.number(),
     end_year: z.number().optional(),
     notes: z.string().optional(),
-    designation: z.string().optional(), year: z.number().optional(), short_description: z.string().optional(), biography: z.string().optional(), bible_verse: z.string().optional(), pastor_message: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), enabled: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), status: z.string().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
+    designation: z.string().optional(), year: z.number().optional(), record_status: z.enum(['Current','Former']).optional(), short_description: z.string().optional(), biography: z.string().optional(), bible_verse: z.string().optional(), pastor_message: z.string().optional(), family_photo: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), enabled: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), status: z.string().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }).passthrough(),
 });
 
@@ -175,7 +175,7 @@ const missionaries = defineCollection({
     notes: z.string().optional(),
     prayer_requests: z.string().optional(),
     family_photo: z.string().optional(),
-    designation: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), short_description: z.string().optional(), biography: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
+    designation: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), record_status: z.enum(['Current','Former']).optional(), short_description: z.string().optional(), biography: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }).passthrough(),
 });
 
@@ -187,7 +187,7 @@ const elders = defineCollection({
     ordained_year: z.number(),
     status: z.string().optional(),
     notes: z.string().optional(),
-    designation: z.string().optional(), ordination_date: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), short_description: z.string().optional(), biography: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
+    designation: z.string().optional(), ordination_date: z.string().optional(), start_year: z.number().optional(), end_year: z.number().optional(), year: z.number().optional(), record_status: z.enum(['Current','Former']).optional(), short_description: z.string().optional(), biography: z.string().optional(), family_photo: z.string().optional(), featured: z.boolean().optional(), published: z.boolean().optional(), seo_title: z.string().optional(), seo_description: z.string().optional(), cover_photo: z.string().optional(), motto: z.string().optional(), contact: z.string().optional(), display_order: z.number().optional(), archived: z.boolean().optional(), gallery: z.array(z.string()).optional(), documents: z.array(z.string()).optional(), certificates: z.array(z.string()).optional(),
   }).passthrough(),
 });
 

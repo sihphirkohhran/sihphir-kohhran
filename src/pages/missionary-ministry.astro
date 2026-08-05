@@ -1,7 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
-import MinistryArchive from '../components/MinistryArchive.astro';
-import { normalizeMinistryProfile } from '../lib/ministry-profile';
-const profiles=(await getCollection('missionaries')).map(entry=>normalizeMinistryProfile(entry,'missionary')).filter((profile): profile is NonNullable<typeof profile>=>Boolean(profile));
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<MinistryArchive title="Missionary" subtitle="Honouring those sent out in mission and preserving the story of their service across every field." activePage="missionary-ministry" currentLabel="Current Missionaries" historyLabel="Former Missionaries" profiles={profiles} />
+<BaseLayout title="Missionary" activePage="missionary-ministry"><main class="legacy-redirect"><h1>Missionary has moved</h1><p>The complete Missionary section is now available at its new address.</p><a href="/missionary">Continue to Missionary →</a></main><script is:inline>location.replace('/missionary');</script></BaseLayout>
+<style>.legacy-redirect{display:grid;place-content:center;justify-items:center;min-height:55vh;padding:30px;text-align:center}.legacy-redirect h1{font-family:var(--font-display,serif)}.legacy-redirect p{color:#718096}.legacy-redirect a{border-radius:8px;padding:10px 13px;background:#142740;color:white;text-decoration:none}</style>

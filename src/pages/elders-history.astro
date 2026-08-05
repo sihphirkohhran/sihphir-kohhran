@@ -1,7 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
-import MinistryArchive from '../components/MinistryArchive.astro';
-import { normalizeMinistryProfile } from '../lib/ministry-profile';
-const profiles=(await getCollection('elders')).map(entry=>normalizeMinistryProfile(entry,'elder')).filter((profile): profile is NonNullable<typeof profile>=>Boolean(profile));
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<MinistryArchive title="Kohhran Upa" subtitle="The elders entrusted with spiritual leadership, pastoral care and faithful service in our congregation." activePage="elders-history" currentLabel="Current Upa" historyLabel="Upa History Timeline" profiles={profiles} />
+<BaseLayout title="Kohhran Upa" activePage="elders-history"><main class="legacy-redirect"><h1>Kohhran Upa has moved</h1><p>The complete Kohhran Upa section is now available at its new address.</p><a href="/kohhran-upa">Continue to Kohhran Upa →</a></main><script is:inline>location.replace('/kohhran-upa');</script></BaseLayout>
+<style>.legacy-redirect{display:grid;place-content:center;justify-items:center;min-height:55vh;padding:30px;text-align:center}.legacy-redirect h1{font-family:var(--font-display,serif)}.legacy-redirect p{color:#718096}.legacy-redirect a{border-radius:8px;padding:10px 13px;background:#142740;color:white;text-decoration:none}</style>

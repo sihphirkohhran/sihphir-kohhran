@@ -1,0 +1,6 @@
+---
+import {getCollection} from 'astro:content';import MinistryDetail from '../../components/MinistryDetail.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
+export async function getStaticPaths(){return(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'pastor')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)).map(profile=>({params:{id:profile.id},props:{profile}}))}
+const {profile}=Astro.props;
+---
+<MinistryDetail title="Bialtu Pastor" activePage="pastoral-history" basePath="/bialtu-pastor" profile={profile}/>

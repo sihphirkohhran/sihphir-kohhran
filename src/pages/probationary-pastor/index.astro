@@ -1,0 +1,5 @@
+---
+import {getCollection} from 'astro:content';import MinistrySection from '../../components/MinistrySection.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
+const profiles=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
+---
+<MinistrySection title="Probationary Pastor" subtitle="Profiles and service records of probationary pastors serving Sihphir Presbyterian Kohhran." activePage="pastoral-history" basePath="/probationary-pastor" profiles={profiles}/>
