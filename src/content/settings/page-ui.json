@@ -29,16 +29,16 @@
   },
   "fellowship": {
     "hero_caption": "",
-    "hero_title": "",
-    "hero_subtitle": "Kohhran hnuaia Fellowship hrang hrangte",
+    "hero_title": "Fellowship",
+    "hero_subtitle": "",
     "history_title": "",
     "office_bearers_title": "",
-    "members_title": "",
+    "members_title": "Committee member",
     "gallery_title": "",
     "documents_title": "",
     "search_placeholder": "",
     "empty_message": "",
-    "back_button": "",
+    "back_button": "All fellowship",
     "view_button": ""
   }
 }
