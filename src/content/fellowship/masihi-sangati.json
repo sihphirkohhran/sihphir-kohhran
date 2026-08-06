@@ -1,33 +1,56 @@
 {
-  "history_short": "Masihi Sangati chu Sihphir Presbyterian Kohhran hnuaiah a awm a, member zawng zawng pawh tel thei a nih. Pathian biak dan leh hmasawnna zawng zawng ah an inpek a nih.",
-  "history_full": "Masihi Sangati chu inkhawm dan hmang hian member te Pathian biak dan leh nungchang tha nei dan an zir a nih.\n\nKohhran tan thawhlawm dan zawng zawng ah an inpek a, tun dinhmun ah chuan hmasawnna a lo awm hle a nih.",
+  "history_short": "Masihi Sangati chu askdjaskd",
+  "history_full": "Ziah tur hi lakkhawm chu a ngai dawn a ni",
   "office_bearers": [
     {
-      "role": "President",
-      "name": "Pu/Pi President Hming"
+      "role": "Chairman",
+      "name": "Pu/Pi President Hming",
+      "display_order": 0
     },
     {
       "role": "Secretary",
-      "name": "Pu/Pi Secretary Hming"
+      "name": "Pu/Pi Secretary Hming",
+      "display_order": 1
     },
     {
       "role": "Treasurer",
-      "name": "Pu/Pi Treasurer Hming"
+      "name": "Pu/Pi Treasurer Hming",
+      "display_order": 2
     }
   ],
   "members": [
     {
       "name": "Pu/Pi Member 1",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 0
     },
     {
       "name": "Pu/Pi Member 2",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 1
     },
     {
       "name": "Pu/Pi Member 3",
-      "role": "Member"
+      "role": "Member",
+      "display_order": 2
     }
   ],
-  "logo": "/images/fellowship/sangati-logo.png"
+  "logo": "/images/fellowship/sangati-logo.png",
+  "fellowship_name": "masihi sangati",
+  "slug": "masihi-sangati",
+  "category": "Fellowship",
+  "short_description": "Masihi Sangati chu askdjaskd",
+  "full_history": "Ziah tur hi lakkhawm chu a ngai dawn a ni",
+  "cover_photo": "",
+  "published": true,
+  "display_order": 0,
+  "related_galleries": [],
+  "related_documents": [],
+  "motto": "",
+  "description": "Masihi Sangati chu askdjaskd",
+  "banner_image": "",
+  "group_photo": "",
+  "homepage_order": 0,
+  "homepage_visible": true,
+  "status": "current"
 }
