@@ -4,27 +4,33 @@
   "office_bearers": [
     {
       "role": "Chairman",
-      "name": "Pi Lalbeiseii"
+      "name": "Pi Lalbeiseii",
+      "display_order": 0
     },
     {
       "role": "Vice Chairman",
-      "name": "Pi Vice President Hming"
+      "name": "Pi Vice President Hming",
+      "display_order": 1
     },
     {
       "role": "Secretary",
-      "name": "Pi Chhingpuii"
+      "name": "Pi Chhingpuii",
+      "display_order": 2
     },
     {
       "role": "Asst. Secretary",
-      "name": "Pi Lalchhanhimi"
+      "name": "Pi Lalchhanhimi",
+      "display_order": 3
     },
     {
       "role": "Treasurer",
-      "name": "Pi Treasurer Hming"
+      "name": "Pi Treasurer Hming",
+      "display_order": 4
     },
     {
       "role": "Financial Secretary",
-      "name": "Pi Financial Secretary"
+      "name": "Pi Financial Secretary",
+      "display_order": 5
     }
   ],
   "members": [],
@@ -34,5 +40,22 @@
       "year": 2026
     }
   ],
-  "logo": "/images/fellowship/kohhran-hmeichhia-logo.png"
+  "logo": "/images/fellowship/kohhran-hmeichhia-logo.png",
+  "fellowship_name": "kohhran hmeichhia",
+  "slug": "kohhran-hmeichhia",
+  "category": "Fellowship",
+  "short_description": "Sihphir Kohhran din rualin Kohhran Hmeichhia hi a ding ve nghal em tih hriat theih ni lo mah se hruaitu hmasate hriat danin kum 1949 vel khan Kohhran Hmeichhia hi ding tawh ngeiin hriat a ni a. ",
+  "full_history": "Sihphir Kohhran din rualin Kohhran Hmeichhia hi a ding ve nghal em tih hriat theih ni lo mah se hruaitu hmasate hriat danin kum 1949 vel khan Kohhran Hmeichhia hi ding tawh ngeiin hriat a ni a. A hranin inkhawmte pawh an lo nei tawh thin a, Committee-te pawh an lo thu tawh thin a. Kohhran rawngbawlna tichaktu  pawimawh tak niin kum 2025 hian Member 771 an ni mek.",
+  "cover_photo": "",
+  "published": true,
+  "display_order": 0,
+  "related_galleries": [],
+  "related_documents": [],
+  "motto": "",
+  "description": "Sihphir Kohhran din rualin Kohhran Hmeichhia hi a ding ve nghal em tih hriat theih ni lo mah se hruaitu hmasate hriat danin kum 1949 vel khan Kohhran Hmeichhia hi ding tawh ngeiin hriat a ni a. ",
+  "banner_image": "",
+  "group_photo": "",
+  "homepage_order": 0,
+  "homepage_visible": true,
+  "status": "current"
 }
