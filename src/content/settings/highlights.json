@@ -6,20 +6,6 @@
       "style": "button",
       "enabled": true,
       "order": 0
-    },
-    {
-      "title": "Upa C. Zokunga vuina",
-      "link": "https://www.youtube.com/watch?v=Q96GvaeKnp0",
-      "style": "button",
-      "enabled": true,
-      "order": 1
-    },
-    {
-      "title": "Sunday School",
-      "link": "/sunday-school",
-      "style": "button",
-      "enabled": true,
-      "order": 2
     }
   ]
 }
