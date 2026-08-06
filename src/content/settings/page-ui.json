@@ -26,5 +26,19 @@
     "filter_label": "",
     "results_label": "",
     "back_button": ""
+  },
+  "fellowship": {
+    "hero_caption": "",
+    "hero_title": "",
+    "hero_subtitle": "Kohhran hnuaia Fellowship hrang hrangte",
+    "history_title": "",
+    "office_bearers_title": "",
+    "members_title": "",
+    "gallery_title": "",
+    "documents_title": "",
+    "search_placeholder": "",
+    "empty_message": "",
+    "back_button": "",
+    "view_button": ""
   }
 }
