@@ -101,6 +101,7 @@ const settings = defineCollection({
             id: z.string(),
             name: z.string(),
             is_main: z.boolean().optional(),
+            display_order: z.number().optional(),
           }),
         )
         .optional(),
@@ -170,6 +171,9 @@ const committee = defineCollection({
     group_photo: z.string().optional(),
     description: z.string().optional(),
     display_order: z.number().optional(),
+    published: z.boolean().optional(),
+    featured: z.boolean().optional(),
+    updated_at: z.string().optional(),
     status: z.enum(['current', 'archived']).optional(),
     chairman: z.string(),
     secretary: z.string(),
