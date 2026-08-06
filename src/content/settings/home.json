@@ -1,6 +1,8 @@
 {
   "noticeCount": 3,
   "noticeLink": "/notices",
+  "contactButtonUrl": "#contact",
+  "youtubeButtonUrl": "https://www.youtube.com/@SihphirPresbyterianKohhran",
   "galleryCategory": "",
   "galleryCount": 6,
   "galleryOrder": "latest",
