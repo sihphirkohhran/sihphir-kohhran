@@ -1,68 +1,76 @@
 {
-  "history_short": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
-  "history_full": "KTP chu thalai te tan a awm a, Fellowship hmang hian thalai te Bible zir dan, inkhawm dan leh kohhran tan thawhlawm dan an zir a nih.\n\nKTP Inleng chu weekly-in a chhuak a, kohhran thalai leh member te tan bulletin a ni a, KTP inkhawm program leh thupui te an tarlan a nih.\n\nThalai te nungchang tha nei thei nan leh Pathian tan thawhlawm dan zir nan, fellowship hi a pawimawh hle a nih.",
+  "history_short": "Hei pawh KTP chungchang ziahna",
+  "history_full": "Siihphir Branch KTP chungchang detail takin kan ziak ang",
   "office_bearers": [
     {
-      "role": "President",
-      "name": "Pu/Pi President Hming",
-      "display_order": 0,
-      "photo": "/images/1785955755617-gallery5.jpg"
+      "role": "Leader",
+      "name": "Pu Lalnunthara",
+      "display_order": 0
     },
     {
-      "role": "Vice President",
-      "name": "Pu/Pi VP Hming",
+      "role": "Asst. Leader",
+      "name": "Pu Lalchhanhima",
       "display_order": 1
     },
     {
       "role": "Secretary",
-      "name": "Pu/Pi Secretary Hming",
+      "name": "Pu Lalrinawma",
       "display_order": 2
     },
     {
-      "role": "Treasurer",
-      "name": "Pu/Pi Treasurer Hming",
+      "role": "Asst. Secretary",
+      "name": "Pu C. Lalropuia",
       "display_order": 3
     },
     {
-      "role": "Programme Secretary",
-      "name": "Pu/Pi Prog Sec Hming",
+      "role": "Treasurer",
+      "name": "Tv. Lalthachungnunga",
+      "photo": "/images/1786002521517-4-leitan-bial-pastor.jpg",
+      "phone": "",
+      "email": "",
       "display_order": 4
+    },
+    {
+      "role": "Fin. Secretary",
+      "name": "Pu R.K. Malsawmzuala",
+      "photo": "",
+      "phone": "",
+      "email": "",
+      "display_order": 5
     }
   ],
   "members": [
     {
-      "name": "Pu/Pi Member 1",
-      "role": "Member",
-      "display_order": 0,
-      "photo": "/images/1785955717688-whatsapp-image-2026-07-05-at-4.55.04-pm.jpeg"
-    },
-    {
       "name": "Pu/Pi Member 2",
-      "role": "Member",
-      "display_order": 1
+      "role": "Committee Member",
+      "display_order": 0,
+      "designation": "Committee Member"
     },
     {
       "name": "Pu/Pi Member 3",
-      "role": "Member",
-      "display_order": 2
+      "role": "Committee Member",
+      "display_order": 1,
+      "designation": "Committee Member"
     },
     {
       "name": "Pu/Pi Member 4",
-      "role": "Member",
-      "display_order": 3
+      "role": "Committee Member",
+      "display_order": 2,
+      "designation": "Committee Member"
     },
     {
       "name": "Pu/Pi Member 5",
-      "role": "Member",
-      "display_order": 4
+      "role": "Committee Member",
+      "display_order": 3,
+      "designation": "Committee Member"
     }
   ],
   "logo": "/images/fellowship/ktp-logo.png",
   "fellowship_name": "KTP",
   "slug": "ktp",
   "category": "Fellowship",
-  "short_description": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
-  "full_history": "KTP chu thalai te tan a awm a, Fellowship hmang hian thalai te Bible zir dan, inkhawm dan leh kohhran tan thawhlawm dan an zir a nih.\n\nKTP Inleng chu weekly-in a chhuak a, kohhran thalai leh member te tan bulletin a ni a, KTP inkhawm program leh thupui te an tarlan a nih.\n\nThalai te nungchang tha nei thei nan leh Pathian tan thawhlawm dan zir nan, fellowship hi a pawimawh hle a nih.",
+  "short_description": "Hei pawh KTP chungchang ziahna",
+  "full_history": "Siihphir Branch KTP chungchang detail takin kan ziak ang",
   "cover_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "published": true,
   "display_order": 0,
@@ -73,7 +81,7 @@
     "src/content/documents/other/year-book-2025.md"
   ],
   "motto": "",
-  "description": "Kristian Thalai Pawl chu Sihphir Presbyterian Kohhran thalai te tan a awm a, kohhran thalai zawng zawng an tel thei a nih. Thalai te Pathian biak dan hmasawn dan leh nungchang tha zir dan an buatsaih a nih.",
+  "description": "Hei pawh KTP chungchang ziahna",
   "banner_image": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "group_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "homepage_order": 0,
