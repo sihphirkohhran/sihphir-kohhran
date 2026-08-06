@@ -14,7 +14,7 @@
     "highlights": true,
     "notice_board": true,
     "quick_access": true,
-    "prayer_topics": true,
+    "prayer_topics": false,
     "featured_gallery": true,
     "featured_documents": false,
     "featured_committee": true,
