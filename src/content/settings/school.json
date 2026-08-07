@@ -16,16 +16,24 @@
     "email": "",
     "website": ""
   },
-  "history": "Kum 2014 atangin Presbyterian English School din-in, tunah hian Class VIII thleng hawn tawh a ni a. Zirtirtu 13-in zirlai 245 an enkawl mek a. Kohhran hma lam hun atan rawngbawltu leh kohhran mi chher chhuahna pawimawh tak a nih zui ngei kan beisei.\n\tSynod Inkhawmpuiin Kohhran te leh harsa dawmchhuah nise a tih kalpuiin Sihphir Kohhran in a enkawl chu Damdep II Branch Church a ni a. Biak In thutthleng leh Sound System te leisakin, theih ang tawkin a enkawl mek.",
-  "vision_mission": "",
+  "history": "Kum 2014 atangin Presbyterian English School din-in, tunah hian Class VIII thleng hawn tawh a ni a. Zirtirtu 13-in zirlai 245 an enkawl mek a. Kohhran hma lam hun atan rawngbawltu leh kohhran mi chher chhuahna pawimawh tak a nih zui ngei kan beisei.\n\tSynod Inkhawmpuiin Kohhran te leh harsa dawmchhuah nise a tih kalpuiin Sihphir Kohhran in a enkawl chu Damdep II Branch Church a ni a. Biak In thutthleng leh Sound System te leisakin, theih ang tawkin a enkawl mek.<div><br></div><div><h2><b><a href=\"https://www.youtube.com/@PresbyterianEnglishSchoolSihph\">PES YOUTUBE CHANNEL</a></b></h2><br></div>",
+  "vision_mission": "Test",
   "management": {
-    "chairman": "Chairman hming",
-    "secretary": "Secy hming",
+    "chairman": {
+      "name": "Chairman hming",
+      "photo": "/images/1786095298748-secy-jr.jpeg",
+      "designation": "Chairman"
+    },
+    "secretary": {
+      "name": "Secy hming",
+      "photo": "",
+      "designation": "Secretary"
+    },
     "members": [
       {
         "name": "Test",
         "designation": "Member",
-        "photo": "",
+        "photo": "/images/1786095318424-statistician.jpeg",
         "subject": "",
         "biography": "aasdas",
         "display_order": 0
@@ -33,7 +41,7 @@
     ]
   },
   "principal": {
-    "photo": "",
+    "photo": "/images/1786095290150-pu-bela-picsart-aiimageenhancer.jpg",
     "name": "Hming",
     "designation": "Headmaster / Principal",
     "biography": ""
@@ -42,7 +50,7 @@
     {
       "name": "Jerome Vanlalnghaka",
       "designation": "Teacher",
-      "photo": "",
+      "photo": "/images/1786095286825-treasurer.jpeg",
       "subject": "",
       "biography": "",
       "display_order": 0
