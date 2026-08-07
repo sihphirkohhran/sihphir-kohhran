@@ -1,0 +1,6 @@
+---
+interface Props { src?: string | null; alt?: string; class?: string; loading?: 'lazy'|'eager'; }
+const { src, alt = '', class: className, loading = 'lazy' } = Astro.props;
+const placeholder='/images/profile-placeholder.svg';
+---
+<img src={src?.trim() || placeholder} alt={src?.trim() ? alt : ''} class={className} loading={loading} data-profile-image data-empty={!src?.trim() ? 'true' : undefined} onerror={`if(this.src!==new URL('${placeholder}',location.href).href){this.src='${placeholder}';this.dataset.empty='true';this.alt='';}`} />

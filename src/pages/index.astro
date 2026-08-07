@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import QuickLinks from '../components/QuickLinks.astro';
 import Highlights from '../components/Highlights.astro';
+import ProfileImage from '../components/ProfileImage.astro';
 import { getCollection, getEntry } from 'astro:content';
 import {
   getWeeklySchedules,
@@ -256,9 +257,7 @@ const highlightItems = normalizeHighlights(
         <div class="flex gap-4 items-start relative z-10">
           <div class="flex-shrink-0">
             <div class="w-16 h-16 rounded-full border-2 border-gold/60 overflow-hidden bg-navy-light flex items-center justify-center">
-              <img src={pastor.photo ?? '/images/pastor.jpg'} alt={pastor.name ?? 'Pastor'} class="w-full h-full object-cover"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-              <span class="w-full h-full items-center justify-center hidden font-display text-gold-pale text-xl">✝</span>
+              <ProfileImage src={pastor.photo} alt={pastor.name ?? 'Pastor'} class="w-full h-full object-cover" />
             </div>
           </div>
           <div class="flex-1 min-w-0">

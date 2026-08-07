@@ -111,7 +111,6 @@ const FALLBACK_IMAGES = [
   { src: '/images/biak-in-2.jpg', alt: 'Biak In', caption: 'Biak In' },
   { src: '/images/biak-in-chhung.jpg', alt: 'Biak In chhung', caption: 'Biak In chhung' },
   { src: '/images/kohhran-hall.jpg', alt: 'Kohhran Hall', caption: 'Kohhran Hall' },
-  { src: '/images/pastor.jpg', alt: 'Pastor', caption: 'Pastor' },
 ];
 
 export function getFallbackGalleryPhotos(limit = 6): GalleryPhotoItem[] {

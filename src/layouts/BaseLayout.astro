@@ -281,6 +281,21 @@ const organizationJsonLd = JSON.stringify({
   </div>
 
   <script>
+    const EMPTY_PROFILE_IMAGE = '/images/profile-placeholder.svg';
+    document.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
+      if ((image.getAttribute('src') || '').endsWith('/images/pastor.jpg')) {
+        image.src = EMPTY_PROFILE_IMAGE;
+        image.alt = '';
+        image.dataset.empty = 'true';
+      }
+      image.addEventListener('error', () => {
+        if (!image.src.endsWith(EMPTY_PROFILE_IMAGE)) {
+          image.src = EMPTY_PROFILE_IMAGE;
+          image.alt = '';
+          image.dataset.empty = 'true';
+        }
+      }, { once: true });
+    });
     const MOBILE_NAV_MQ = window.matchMedia('(max-width: 640px)');
 
     function isMobileNav() {

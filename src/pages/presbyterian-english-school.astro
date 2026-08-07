@@ -10,7 +10,7 @@ const page=school.page,info=school.information,management=school.management,prin
 const teachers=[...(school.teachers||[])].sort((a,b)=>(a.display_order??0)-(b.display_order??0));
 const members=[...(management.members||[])].sort((a,b)=>(a.display_order??0)-(b.display_order??0));
 const gallery=[...(school.gallery||[])].sort((a,b)=>(b.year??0)-(a.year??0));
-const placeholder='/images/pastor.jpg';
+const placeholder='/images/profile-placeholder.svg';
 const leaders=[management.chairman&&{name:management.chairman,designation:'Chairman'},management.secretary&&{name:management.secretary,designation:'Secretary'}].filter(Boolean);
 ---
 <BaseLayout title={page.seo_title} description={page.seo_description} activePage="presbyterian-english-school">
