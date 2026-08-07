@@ -13,7 +13,7 @@
     "motto": "Light of the world",
     "address": "Sihphir, Mizoram",
     "contact_number": "9876543210",
-    "email": "",
+    "email": "sihphirkohhran@gmail.com",
     "website": ""
   },
   "history": "Kum 2014 atangin Presbyterian English School din-in, tunah hian Class VIII thleng hawn tawh a ni a. Zirtirtu 13-in zirlai 245 an enkawl mek a. Kohhran hma lam hun atan rawngbawltu leh kohhran mi chher chhuahna pawimawh tak a nih zui ngei kan beisei.\n\tSynod Inkhawmpuiin Kohhran te leh harsa dawmchhuah nise a tih kalpuiin Sihphir Kohhran in a enkawl chu Damdep II Branch Church a ni a. Biak In thutthleng leh Sound System te leisakin, theih ang tawkin a enkawl mek.<div><br></div><div><h2><b><a href=\"https://www.youtube.com/@PresbyterianEnglishSchoolSihph\">PES YOUTUBE CHANNEL</a></b></h2><br></div>",
@@ -44,7 +44,7 @@
     "photo": "/images/1786095290150-pu-bela-picsart-aiimageenhancer.jpg",
     "name": "Hming",
     "designation": "Headmaster / Principal",
-    "biography": ""
+    "biography": "sdfdsfds fdsfds fdsfdsfd fwefdsdsd fdsfsdf dsfdsfds fdsf dsfdsf dsf dsfdsf ds fdsfdsfds sfdfdsfsdfsdf ds"
   },
   "teachers": [
     {
@@ -52,8 +52,16 @@
       "designation": "Teacher",
       "photo": "/images/1786095286825-treasurer.jpeg",
       "subject": "",
-      "biography": "",
+      "biography": "v dsfdf dsf",
       "display_order": 0
+    },
+    {
+      "name": "Lalmalsawmi",
+      "designation": "Teacher",
+      "photo": "/images/1786095652424-secy-sr.png",
+      "subject": "",
+      "biography": "sfdsk fjdf sdf",
+      "display_order": 1
     }
   ],
   "gallery": [
@@ -64,7 +72,7 @@
       "display_order": 0
     },
     {
-      "image": "https://drive.google.com/drive/u/0/folders/13B0tjZWuErNrNchHcHc563mFXMjTe4FD",
+      "image": "/images/1786095697987-whatsapp-image-2025-09-05-at-9.00.43-pm.jpeg",
       "caption": "Test 2",
       "year": 2026,
       "display_order": 1
@@ -73,7 +81,7 @@
   "contact": {
     "address": "Sihphir, Mizoram",
     "phone": "9876543210",
-    "email": "",
+    "email": "sihphirkohhran@gmail.com",
     "google_map_link": "https://www.google.com/maps/place/Sihphir+Presbyterian+Church/@23.8171475,92.7321846,17z/data=!3m1!4b1!4m6!3m5!1s0x374debcc6e82a861:0xaffd73c2975cb46c!8m2!3d23.8171426!4d92.7347595!16s%2Fg%2F11c74x_l6w?entry=ttu&g_ep=EgoyMDI2MDgwNC4wIKXMDSoASAFQAw%3D%3D"
   }
 }
