@@ -7,6 +7,9 @@
     ['Rawngbawltute', [['pastors','Pastor','✦'],['probationary-pastors','Pro Pastor','✦'],['elders','Kohhran Upa','✦'],['missionaries','Missionary','✦']]],
     ['Settings', [['navigation','Navigation','☰'],['quick-access','Quick Access','↗'],['site-settings','Site Settings','⚙']]],
   ];
+  menuGroups[0][1].splice(5,0,['gallery-settings','Gallery Page Settings','S']);
+  menuGroups[0][1].push(['document-settings','Document Page Settings','S']);
+  menuGroups[1][1].push(['school','Presbyterian English School','S']);
   const modules = [['dashboard', 'Dashboard', '▦'], ...menuGroups.flatMap(([, entries]) => entries)];
   const labels = Object.fromEntries(modules.map(x => [x[0], x[1]]));
   const paths = { pages:'src/content/pages/', gallery:'src/content/gallery/', documents:'src/content/documents/other/', committee:'src/content/committee/', pastors:'src/content/pastoral/', missionaries:'src/content/missionaries/', elders:'src/content/elders/', fellowship:'src/content/fellowship/' };
@@ -213,5 +216,7 @@
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&current){e.preventDefault();document.querySelector('#form')?.requestSubmit();document.querySelector('#settings-form')?.requestSubmit();document.querySelector('#nav-form')?.requestSubmit();}});
   const noticeAwareRender=render;
   render=async function(){if(area==='pages'){layout();return window.SihphirPageManager.mount({api,esc,slug,notification,readUpload});}return noticeAwareRender();};
+  const schoolAwareRender=render;
+  render=async function(){if(['school','gallery-settings','document-settings'].includes(area)){layout();return window.SihphirSchoolManager.mount({area,api,esc,notification,readUpload});}return schoolAwareRender();};
   (async()=>{try{await api('/api/auth/session');render();}catch{location.replace('/admin/login');}})();
 })();

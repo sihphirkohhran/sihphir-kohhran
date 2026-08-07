@@ -25,6 +25,7 @@ export const DEFAULT_NAV: NavItem[] = [
   { label: 'Kohhran Upa', href: '/kohhran-upa', key: 'kohhran-upa', visible: true, order: 2, parent: 'rawngbawltu' },
   { label: 'Missionary', href: '/missionary', key: 'missionary', visible: true, order: 3, parent: 'rawngbawltu' },
   { label: 'Fellowship', href: '/fellowship', key: 'fellowship', visible: true, order: 20, parent: '' },
+  { label: 'Presbyterian English School', href: '/presbyterian-english-school', key: 'presbyterian-english-school', visible: true, order: 25, parent: '' },
   { label: 'Gallery', href: '/gallery', key: 'gallery', visible: true, order: 30, parent: '' },
   { label: 'Document', href: '/document', key: 'document', visible: true, order: 40, parent: '' },
 ];

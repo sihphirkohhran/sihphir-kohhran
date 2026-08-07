@@ -4,8 +4,11 @@ import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
 import { getPageSettings } from '../lib/page-settings';
-const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Kohhran Document',hero_subtitle:'Kohhran document pawimah hrang hrang dah khawmna',search_placeholder:'Search title, description, category or year…',download_button:'Download',category_label:'Category',document_label:'Document',empty_message:'No documents found'});
+import PageHero from '../components/PageHero.astro';
+const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian Kohhran',search_placeholder:'Search title, description, category or year…',download_button:'Download',category_label:'Category',document_label:'Document',empty_message:'No documents found'});
 
+const pageEntry=await getEntry('settings','document-page');
+const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const categoryRegistry = await getEntry('settings', 'document-categories');
 const registeredCategories = categoryRegistry?.data.categories ?? [];
 const entries = await getCollection('documents');
@@ -116,18 +119,11 @@ const formatDate = (value: string) => {
 const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pptx: 'PPTX', zip: 'ZIP' }[ext] || (['jpg','jpeg','png','gif','webp','avif','svg'].includes(ext) ? 'IMAGE' : ext.toUpperCase()));
 ---
 
-<BaseLayout title="Church Documents — Sihphir Presbyterian Kohhran" activePage="document">
-  <div class="documents-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.04]" style="background-image: repeating-linear-gradient(45deg, #b8953f 0px, #b8953f 1px, transparent 1px, transparent 28px);"></div>
-    <div class="relative z-10 max-w-3xl mx-auto">
-      <p class="font-body text-[0.6rem] tracking-[0.16em] uppercase text-gold-pale/55 mb-2">{ui.hero_caption}</p>
-      <h1 class="font-display text-white text-3xl sm:text-4xl font-semibold">{ui.hero_title}</h1>
-      <p class="font-body text-gold-pale/65 text-sm sm:text-base mt-3 leading-relaxed">{ui.hero_subtitle}</p>
-      <div class="w-16 h-px bg-gold/50 mx-auto mt-5"></div>
-    </div>
-  </div>
+<BaseLayout title={page.seo_title} description={page.seo_description} activePage="document">
+  <PageHero title={page.hero_title} subtitle={page.hero_subtitle} image={page.hero_background_image} eyebrow={page.hero_caption} />
 
   <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10" data-download-label={ui.download_button}>
+    {page.intro_text && <p class="page-intro reveal">{page.intro_text}</p>}
     <section class="document-toolbar reveal" aria-label="Document search and filters">
       <label class="document-search" for="document-search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>

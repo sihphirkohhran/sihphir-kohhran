@@ -3,8 +3,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { getFallbackGalleryPhotos } from '../lib/gallery';
 import { getPageSettings } from '../lib/page-settings';
-const ui=await getPageSettings('gallery',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Kohhran Gallery',hero_subtitle:'Kohhran rawngbawlna leh chet velna hrang hrang thlalak',search_placeholder:'Search albums, descriptions or categories…',view_album:'Open Gallery',empty_message:'No albums found',gallery_label:'Gallery Photos',category_label:'Category',back_button:'Back to Gallery',download_button:'Download'});
+import PageHero from '../components/PageHero.astro';
+const ui=await getPageSettings('gallery',{hero_caption:'Sihphir Presbyterian Kohhran',search_placeholder:'Search albums, descriptions or categories…',view_album:'Open Gallery',empty_message:'No albums found',gallery_label:'Gallery Photos',category_label:'Category',back_button:'Back to Gallery',download_button:'Download'});
 
+const pageEntry=await getEntry('settings','gallery-page');
+const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const registry = await getEntry('settings', 'gallery-categories');
 const registeredCategories = registry?.data.categories?.map((item) => item.name) ?? [];
 const entries = (await getCollection('gallery')).filter((entry) => entry.data.status !== 'archived');
@@ -41,13 +44,11 @@ const formatDate = (value: string) => {
 };
 ---
 
-<BaseLayout title="Gallery — Sihphir Presbyterian Kohhran" activePage="gallery">
-  <header class="gallery-hero bg-navy border-b-2 border-gold px-4 py-10 sm:py-12 text-center relative overflow-hidden">
-    <div class="absolute inset-0 opacity-[0.04]" style="background-image:repeating-linear-gradient(45deg,#b8953f 0,#b8953f 1px,transparent 1px,transparent 28px)"></div>
-    <div class="relative z-10 max-w-3xl mx-auto"><p>{ui.hero_caption}</p><h1>{ui.hero_title}</h1><div class="gallery-hero-copy">{ui.hero_subtitle}</div><div class="gallery-hero-stats"><span>{albums.length} album{albums.length === 1 ? '' : 's'}</span><i></i><span>{photoCount} photo{photoCount === 1 ? '' : 's'}</span></div></div>
-  </header>
+<BaseLayout title={page.seo_title} description={page.seo_description} activePage="gallery">
+  <PageHero title={page.hero_title} subtitle={page.hero_subtitle} image={page.hero_background_image} eyebrow={page.hero_caption} />
 
   <main class="gallery-page max-w-6xl mx-auto px-4 py-8 sm:py-10" data-view-label={ui.view_album} data-back-label={ui.back_button} data-gallery-label={ui.gallery_label} data-download-label={ui.download_button}>
+    {page.intro_text && <p class="page-intro reveal">{page.intro_text}</p>}
     <section class="gallery-toolbar reveal" aria-label="Gallery search and filters">
       <label class="gallery-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><span class="sr-only">{ui.search_placeholder}</span><input type="search" id="gallery-search" placeholder={ui.search_placeholder} autocomplete="off" /></label>
       <div class="gallery-filter-row"><label><span>Year</span><select id="gallery-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label><label><span>{ui.category_label}</span><select id="gallery-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label><label><span>Sort</span><select id="gallery-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="photos">Most Photos</option></select></label></div>

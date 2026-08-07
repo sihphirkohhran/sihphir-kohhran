@@ -73,7 +73,15 @@
       "parent": ""
     },
     {
+      "label": "Presbyterian English School",
+      "href": "/presbyterian-english-school",
+      "key": "presbyterian-english-school",
+      "visible": true,
       "order": 9,
+      "parent": ""
+    },
+    {
+      "order": 10,
       "visible": true,
       "label": "Rawngbawltu",
       "key": "Rawngbawltu",
