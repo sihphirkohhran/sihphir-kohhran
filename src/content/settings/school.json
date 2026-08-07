@@ -66,16 +66,21 @@
   ],
   "gallery": [
     {
-      "image": "",
+      "image": "/images/1786097994345-whatsapp-image-2025-09-05-at-9.00.47-pm.jpeg",
       "caption": "Test",
       "year": 2026,
-      "display_order": 0
+      "display_order": 0,
+      "album_url": "https://drive.google.com/drive/u/0/folders/13B0tjZWuErNrNchHcHc563mFXMjTe4FD",
+      "external_image_url": "",
+      "category": "Category test"
     },
     {
       "image": "/images/1786095697987-whatsapp-image-2025-09-05-at-9.00.43-pm.jpeg",
       "caption": "Test 2",
       "year": 2026,
-      "display_order": 1
+      "display_order": 1,
+      "external_image_url": "https://drive.google.com/drive/u/0/folders/13B0tjZWuErNrNchHcHc563mFXMjTe4FD",
+      "category": "Category test 2"
     }
   ],
   "contact": {
