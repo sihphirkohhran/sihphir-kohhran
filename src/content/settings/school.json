@@ -1,11 +1,65 @@
 {
-  "page": {"hero_title":"Presbyterian English School","hero_subtitle":"Presbyterian English School, Sihphir","hero_background_image":"","intro_text":"","seo_title":"Presbyterian English School, Sihphir","seo_description":"Official school page of Presbyterian English School, Sihphir."},
-  "information": {"school_name":"Presbyterian English School, Sihphir","establishment_year":"","motto":"","address":"Sihphir, Mizoram","contact_number":"","email":"","website":""},
-  "history":"",
-  "vision_mission":"",
-  "management":{"chairman":"","secretary":"","members":[]},
-  "principal":{"photo":"","name":"","designation":"Headmaster / Principal","biography":""},
-  "teachers":[],
-  "gallery":[],
-  "contact":{"address":"Sihphir, Mizoram","phone":"","email":"","google_map_link":""}
+  "page": {
+    "hero_title": "Presbyterian English School",
+    "hero_subtitle": "Presbyterian English School, Sihphir",
+    "hero_background_image": "",
+    "intro_text": "",
+    "seo_title": "Presbyterian English School, Sihphir",
+    "seo_description": "Official school page of Presbyterian English School, Sihphir."
+  },
+  "information": {
+    "school_name": "Presbyterian English School, Sihphir",
+    "establishment_year": "",
+    "motto": "",
+    "address": "Sihphir, Mizoram",
+    "contact_number": "",
+    "email": "",
+    "website": ""
+  },
+  "history": "Kum 2014 atangin Presbyterian English School din-in, tunah hian Class VIII thleng hawn tawh a ni a. Zirtirtu 13-in zirlai 245 an enkawl mek a. Kohhran hma lam hun atan rawngbawltu leh kohhran mi chher chhuahna pawimawh tak a nih zui ngei kan beisei.\n\tSynod Inkhawmpuiin Kohhran te leh harsa dawmchhuah nise a tih kalpuiin Sihphir Kohhran in a enkawl chu Damdep II Branch Church a ni a. Biak In thutthleng leh Sound System te leisakin, theih ang tawkin a enkawl mek.",
+  "vision_mission": "dhdhdf",
+  "management": {
+    "chairman": "Chairman hming",
+    "secretary": "Secy hming",
+    "members": [
+      {
+        "name": "Test",
+        "designation": "Member",
+        "photo": "",
+        "subject": "",
+        "biography": "aasdas",
+        "display_order": 0
+      }
+    ]
+  },
+  "principal": {
+    "photo": "",
+    "name": "Hming",
+    "designation": "Headmaster / Principal",
+    "biography": ""
+  },
+  "teachers": [
+    {
+      "name": "Jerome Vanlalnghaka",
+      "designation": "Teacher",
+      "photo": "",
+      "subject": "",
+      "biography": "",
+      "display_order": 0
+    }
+  ],
+  "gallery": [
+    {
+      "image": "",
+      "caption": "Test",
+      "year": 2026,
+      "display_order": 0
+    }
+  ],
+  "contact": {
+    "address": "Sihphir, Mizoram",
+    "phone": "9876543210",
+    "email": "",
+    "google_map_link": ""
+  }
 }
