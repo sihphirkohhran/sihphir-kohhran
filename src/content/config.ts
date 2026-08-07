@@ -252,6 +252,7 @@ const gallery = defineCollection({
     tags: z.array(z.string()).optional(),
     photo: z.string().optional(),
     photos: z.array(photoEntry).optional(),
+    album_url: z.string().optional(),
   }),
 });
 
