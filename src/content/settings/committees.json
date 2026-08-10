@@ -1,22 +1,95 @@
 {
   "committees": [
-    { "id": "kohhran", "name": "Kohhran Committee", "is_main": true, "display_order": 0 },
-    { "id": "hmeichhia", "name": "Kohhran Hmeichhia", "display_order": 1 },
-    { "id": "ktp", "name": "Kristian Thalai Pawl (KTP)", "display_order": 2 },
-    { "id": "kpp", "name": "Kohhran Pavalai Pawl (KPP)", "display_order": 3 },
-    { "id": "masihi", "name": "Masihi Sangati", "display_order": 4 },
-    { "id": "ramthar", "name": "Ramthar Committee", "display_order": 5 },
-    { "id": "kristian-chhungkaw", "name": "Kristian Chhungkaw Committee", "display_order": 6 },
-    { "id": "sunday-school", "name": "Sunday School Committee", "display_order": 7 },
-    { "id": "social-front", "name": "Social Front Committee", "display_order": 8 },
-    { "id": "finance", "name": "Finance Committee", "display_order": 9 },
-    { "id": "light-sound", "name": "Light & Sound Committee", "display_order": 10 },
-    { "id": "music", "name": "Music Committee", "display_order": 11 },
-    { "id": "building", "name": "Building Committee", "display_order": 12 },
-    { "id": "sanitation", "name": "Sanitation Committee", "display_order": 13 },
-    { "id": "property", "name": "Property Committee", "display_order": 14 },
-    { "id": "pes", "name": "PES Management Board", "display_order": 15 },
-    { "id": "bsi", "name": "BSI Local Committee", "display_order": 16 },
-    { "id": "archive", "name": "Archives & Documentation Committee", "display_order": 17 }
+    {
+      "id": "kohhran",
+      "name": "Kohhran Committee",
+      "is_main": true,
+      "display_order": 0
+    },
+    {
+      "id": "hmeichhia",
+      "name": "Kohhran Hmeichhia",
+      "display_order": 1
+    },
+    {
+      "id": "ktp",
+      "name": "Kristian Thalai Pawl (KTP)",
+      "display_order": 2
+    },
+    {
+      "id": "kpp",
+      "name": "Kohhran Pavalai Pawl (KPP)",
+      "display_order": 3
+    },
+    {
+      "id": "masihi",
+      "name": "Masihi Sangati",
+      "display_order": 4
+    },
+    {
+      "id": "ramthar",
+      "name": "Ramthar Committee",
+      "display_order": 5
+    },
+    {
+      "id": "kristian-chhungkaw",
+      "name": "Kristian Chhungkaw Committee",
+      "display_order": 6
+    },
+    {
+      "id": "sunday-school",
+      "name": "Sunday School Committee",
+      "display_order": 7
+    },
+    {
+      "id": "social-front",
+      "name": "Social Front Committee",
+      "display_order": 8
+    },
+    {
+      "id": "finance",
+      "name": "Finance Committee",
+      "display_order": 9
+    },
+    {
+      "id": "light-sound",
+      "name": "Light & Sound Committee",
+      "display_order": 10
+    },
+    {
+      "id": "music",
+      "name": "Music Committee",
+      "display_order": 11
+    },
+    {
+      "id": "building",
+      "name": "Building Committee",
+      "display_order": 12
+    },
+    {
+      "id": "sanitation",
+      "name": "Sanitation Committee",
+      "display_order": 13
+    },
+    {
+      "id": "property",
+      "name": "Property Committee",
+      "display_order": 14
+    },
+    {
+      "id": "pes",
+      "name": "PES Management Board",
+      "display_order": 15
+    },
+    {
+      "id": "bsi",
+      "name": "BSI Local Committee",
+      "display_order": 16
+    },
+    {
+      "id": "archive",
+      "name": "Archives & Documentation Committee",
+      "display_order": 17
+    }
   ]
 }
