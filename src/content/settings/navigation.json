@@ -21,7 +21,7 @@
       "visible": true,
       "label": "Rawngbawltu",
       "key": "Rawngbawltu",
-      "href": "/bialtu-pastor"
+      "href": ""
     },
     {
       "label": "Committee",
@@ -72,19 +72,11 @@
       "parent": ""
     },
     {
-      "label": "PES",
-      "href": "/presbyterian-english-school",
-      "key": "presbyterian-english-school",
-      "visible": true,
-      "order": 9,
-      "parent": ""
-    },
-    {
       "label": "Document",
       "href": "/document",
       "key": "document",
       "visible": true,
-      "order": 10,
+      "order": 9,
       "parent": ""
     }
   ]
