@@ -11,12 +11,6 @@
     {
       "label": "Dan zawh kim",
       "value": "1,691"
-    },
-    {
-      "label": "KTP Member",
-      "value": "1212",
-      "order": 3,
-      "enabled": true
     }
   ],
   "enabled": true,
