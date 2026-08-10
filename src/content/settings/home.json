@@ -12,7 +12,7 @@
   "visibility": {
     "hero": true,
     "highlights": true,
-    "notice_board": true,
+    "notice_board": false,
     "quick_access": true,
     "prayer_topics": false,
     "featured_gallery": true,
@@ -21,7 +21,7 @@
     "featured_fellowship": true,
     "featured_ministries": true
   },
-  "noticeVisible": true,
+  "noticeVisible": false,
   "noticeHeading": "Notice Board",
   "noticeSubtitle": "",
   "noticeButtonText": "View All Notices"
