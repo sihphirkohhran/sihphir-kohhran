@@ -11,6 +11,10 @@
     {
       "id": "test",
       "name": "Test"
+    },
+    {
+      "id": "ktp",
+      "name": "KTP"
     }
   ]
 }
