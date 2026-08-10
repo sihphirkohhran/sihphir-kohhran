@@ -40,5 +40,19 @@
     "empty_message": "",
     "back_button": "All fellowship",
     "view_button": ""
+  },
+  "pastors": {
+    "hero_caption": "SIHPHIR PASTOR BIAL",
+    "hero_title": "Pastor",
+    "hero_subtitle": "Sihphir Pastor Bial vawng mek tu leh lo vawng tawh te",
+    "current_title": "Bialtu Pastor ni lai mêk",
+    "former_title": "Pastor lo ni tawh te",
+    "search_placeholder": "",
+    "view_profile": "View Profile",
+    "empty_message": "",
+    "sort_label": "",
+    "filter_label": "",
+    "results_label": "",
+    "back_button": "Back"
   }
 }
