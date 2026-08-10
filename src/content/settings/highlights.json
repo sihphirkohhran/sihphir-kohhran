@@ -6,6 +6,13 @@
       "style": "button",
       "enabled": true,
       "order": 0
+    },
+    {
+      "title": "",
+      "link": "",
+      "style": "button",
+      "enabled": true,
+      "order": 1
     }
   ]
 }
