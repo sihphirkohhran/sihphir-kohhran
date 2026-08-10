@@ -7,6 +7,10 @@
     {
       "id": "year-book",
       "name": "Year Book"
+    },
+    {
+      "id": "ktp",
+      "name": "KTP"
     }
   ]
 }
