@@ -1,18 +1,6 @@
 {
   "categories": [
     {
-      "id": "biak-in",
-      "name": "Biak In"
-    },
-    {
-      "id": "gallery-test",
-      "name": "Gallery test"
-    },
-    {
-      "id": "test",
-      "name": "Test"
-    },
-    {
       "id": "ktp",
       "name": "KTP"
     }
