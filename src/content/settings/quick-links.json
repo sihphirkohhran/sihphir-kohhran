@@ -4,21 +4,21 @@
       "label": "Hun Ruatna",
       "href": "/#notice-board",
       "action": "tab-weekly",
-      "enabled": true,
+      "enabled": false,
       "order": 0
     },
     {
       "label": "Thlabi Mawhphurtu",
       "href": "/#notice-board",
       "action": "tab-monthly",
-      "enabled": true,
+      "enabled": false,
       "order": 1
     },
     {
       "label": "Notice Board",
       "href": "/#notice-board",
       "action": "tab-notices",
-      "enabled": true,
+      "enabled": false,
       "order": 2
     }
   ]
