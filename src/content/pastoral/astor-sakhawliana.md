@@ -1,5 +1,5 @@
 ---
-name: "astor Sakhawliana"
+name: "Pastor Sakhawliana"
 role: "pastor"
 start_year: 1959
 record_status: "Former"
