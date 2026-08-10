@@ -1,18 +1,11 @@
 {
   "items": [
     {
-      "title": "YouTube Official",
+      "title": "YouTube",
       "link": "https://www.youtube.com/@SihphirPresbyterianKohhran",
       "style": "button",
       "enabled": true,
       "order": 0
-    },
-    {
-      "title": "",
-      "link": "",
-      "style": "button",
-      "enabled": true,
-      "order": 1
     }
   ]
 }
