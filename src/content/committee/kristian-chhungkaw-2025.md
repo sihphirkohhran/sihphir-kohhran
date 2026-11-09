@@ -7,7 +7,7 @@ description: "Hmalakna te 1) Inrinni zan tawngtai rualna thupui tur pathum thawh
 display_order: 4
 published: true
 featured: false
-updated_at: "2026-11-09T04:51:06.463Z"
+updated_at: "2026-11-09T04:52:01.588Z"
 chairman: ""
 secretary: ""
 members: []
