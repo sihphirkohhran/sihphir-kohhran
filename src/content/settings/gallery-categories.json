@@ -1,8 +1,32 @@
 {
   "categories": [
     {
-      "id": "ktp",
-      "name": "KTP"
+      "id": "tumkau-ni",
+      "name": "Tumkau Ni"
+    },
+    {
+      "id": "zan-ven-inkhawm",
+      "name": "Zan ven inkhawm"
+    },
+    {
+      "id": "good-friday",
+      "name": "Good Friday"
+    },
+    {
+      "id": "easter-sunday",
+      "name": "Easter Sunday"
+    },
+    {
+      "id": "pentikos-ni",
+      "name": "Pentikos Ni"
+    },
+    {
+      "id": "thlai-thar-thawhlawm",
+      "name": "Thlai thar thawhlawm"
+    },
+    {
+      "id": "work-camp",
+      "name": "Work camp"
     }
   ]
 }
