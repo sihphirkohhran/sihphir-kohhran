@@ -1,0 +1,15 @@
+---
+committee_id: "property"
+committee_name: "Property Committee"
+year: 2025
+group_photo: "/images/1794407523621-property.jpg"
+description: "Hmalaknate: 1. Kohhran bungruate a list siama chhinchhiah a ni. 2. Biak In Vestry leh Kohhran Centenary Hall \\hutthleng thawm t hat ngaite thawm that niin, cushion cover thlak ngaite thlak&nbsp; a ni. 3. Tui pipe line siam that ngaite siam that a ni. 4. Kohhran zun in kawngka siam that ngaite siam that a ni. 5. Biak In leh Vestry darthlalang rawng inang lo chu smoke tape&nbsp;&nbsp; hmanga rawng inanga thlak a ni. 6. Biak In, Kohhran Centenary Hall leh Gospel Centenary Hall&nbsp; darthlalang chhiate thlak niin, tukverh leh kawngka siam that&nbsp; ngaite siam that a ni."
+display_order: 12
+published: true
+featured: false
+updated_at: "2026-11-11T14:34:27.959Z"
+chairman: "Upa Lalliantluanga"
+secretary: "Tv. H. Lalrindika"
+members: [{"name":"Upa Lalliantluanga","designation":"Chairman","role":"Chairman","photo":"","phone":"","email":"","address":"","bio":"","display_order":0,"notes":""},{"name":"Tv. H. Lalrindika","designation":"Secretary","role":"Secretary","photo":"","phone":"","email":"","address":"","bio":"","display_order":1,"notes":""},{"name":"Tv. H. Thangliana","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":2,"notes":""},{"name":"Tv. Kapthianga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":3,"notes":""},{"name":"u C. Kapmawia","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":4,"notes":""},{"name":"v. Malsawmtluanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":5,"notes":""},{"name":"u H. Thanthuama","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":6,"notes":""}]
+---
+<div>Hmalaknate:</div><div><span style="font-weight: normal;">1. Kohhran bungruate a list siama chhinchhiah a ni.</span></div><div><span style="font-weight: normal;">2. Biak In Vestry leh Kohhran Centenary Hall \hutthleng thawm t</span><span style="font-weight: normal;">hat ngaite thawm that niin, cushion cover thlak ngaite thlak&nbsp;</span><span style="font-weight: normal;">a ni.</span></div><div><span style="font-weight: normal;">3. Tui pipe line siam that ngaite siam that a ni.</span></div><div><span style="font-weight: normal;">4. Kohhran zun in kawngka siam that ngaite siam that a ni.</span></div><div><span style="font-weight: normal;">5. Biak In leh Vestry darthlalang rawng inang lo chu smoke tape&nbsp;&nbsp;</span><span style="font-weight: normal;">hmanga rawng inanga thlak a ni.</span></div><div><span style="font-weight: normal;">6. Biak In, Kohhran Centenary Hall leh Gospel Centenary Hall&nbsp;</span><span style="font-weight: normal;">darthlalang chhiate thlak niin, tukverh leh kawngka siam that&nbsp;</span><span style="font-weight: normal;">ngaite siam that a ni.</span></div>
