@@ -1,0 +1,15 @@
+---
+committee_id: "music"
+committee_name: "Music Committee"
+year: 2025
+group_photo: "/images/1794379891320-music.jpg"
+description: "Hmalaknate: 1. Khuang nufa leh a vuakfung, khuang stand leh headgear thar&nbsp; lei a ni. 2. Khuang lian hlui 2 kan repair a, repair-na hmanrua clamp&nbsp; (skanza) thar lei a ni. 3. Synfo Recording Studio-ah lengkhawm hla 3 record a ni. 4. Khuangpute leh Music Committee-ten hla zir hona neih a ni. 5. Kohhran Zaipawl infuih tharna hun hmanpui a ni."
+display_order: 9
+published: true
+featured: false
+updated_at: "2026-11-11T07:00:26.789Z"
+chairman: "Upa Lianzamlova"
+secretary: "Pu C. Lalropuia"
+members: [{"name":"Upa Lianzamlova","designation":"Chairman","role":"Chairman","photo":"","phone":"","email":"","address":"","bio":"","display_order":0,"notes":""},{"name":"Pu C. Lalropuia","designation":"Secretary","role":"Secretary","photo":"","phone":"","email":"","address":"","bio":"","display_order":1,"notes":""},{"name":"Upa G. Lalchhanhima","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":2,"notes":""},{"name":"v. R. Vanramnghaka","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":3,"notes":""},{"name":"Pu RK Malsawmzuala","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":4,"notes":""},{"name":"Pu H. Lalrammawia","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":5,"notes":""},{"name":"Pu Hrangthansanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":6,"notes":""},{"name":"Pu Lalbiakmawia","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":7,"notes":""},{"name":"Pu K. Zonuntluanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":8,"notes":""},{"name":"Pu Lalliantluanga ","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":9,"notes":""}]
+---
+<div>Hmalaknate:</div><div><span style="font-weight: normal;">1. Khuang nufa leh a vuakfung, khuang stand leh headgear thar&nbsp;</span><span style="font-weight: normal;">lei a ni.</span></div><div><span style="font-weight: normal;">2. Khuang lian hlui 2 kan repair a, repair-na hmanrua clamp&nbsp;</span><span style="font-weight: normal;">(skanza) thar lei a ni.</span></div><div><span style="font-weight: normal;">3. Synfo Recording Studio-ah lengkhawm hla 3 record a ni.</span></div><div><span style="font-weight: normal;">4. Khuangpute leh Music Committee-ten hla zir hona neih a ni.</span></div><div><span style="font-weight: normal;">5. Kohhran Zaipawl infuih tharna hun hmanpui a ni.</span></div>
