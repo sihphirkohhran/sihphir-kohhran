@@ -1,0 +1,15 @@
+---
+committee_id: "sanitation"
+committee_name: "Sanitation Committee"
+year: 2025
+group_photo: "/images/1794407318530-sanitation.jpg"
+description: "Hmalaknate: Biak In hmun hma tifaiin hnatlang neih a ni."
+display_order: 11
+published: true
+featured: false
+updated_at: "2026-11-11T14:31:11.321Z"
+chairman: "Upa C. Lalrinthanga"
+secretary: "Tv. Vanhmingliana"
+members: [{"name":"Upa C. Lalrinthanga","designation":"Chairman","role":"Chairman","photo":"","phone":"","email":"","address":"","bio":"","display_order":0,"notes":""},{"name":"Tv. Vanhmingliana","designation":"Secretary","role":"Secretary","photo":"","phone":"","email":"","address":"","bio":"","display_order":1,"notes":""},{"name":"Tv. Malsawmtluanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":2,"notes":""},{"name":"Pu Lalchhantluanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":3,"notes":""},{"name":"Tv. C. Lalrintluanga","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":4,"notes":""},{"name":"Tv. JS Thara","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":5,"notes":""},{"name":"Pi Lalremmawii","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":6,"notes":""},{"name":"i Challiankhumi","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":7,"notes":""},{"name":"l. Esther Lalthanpuii ","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":8,"notes":""},{"name":"Nl. HV Vanlalruati","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":9,"notes":""},{"name":"Nl. Lalchhuanmawii","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":10,"notes":""},{"name":"Nl. Lalrintlaki","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":11,"notes":""},{"name":"Nl. Lalmalsawmi Arpu","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":12,"notes":""},{"name":"Nl. C. Lalsangzeli","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":13,"notes":""},{"name":"i Lalawmpuii","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":14,"notes":""},{"name":"Pi H. Lalremruati","designation":"Member","role":"Member","photo":"","phone":"","email":"","address":"","bio":"","display_order":15,"notes":""}]
+---
+Hmalaknate:<div><span style="font-weight: normal;">Biak In hmun hma tifaiin hnatlang neih a ni.</span></div>
