@@ -16,16 +16,14 @@
       if(/^\d{4}$/.test(String(record.data.date_of_death||''))||Number(record.data.date_of_death_year)>0)return 'year_only';
       return 'unknown';
     };
-    const recordStatus=record=>{
-      if(record.data.published===false)return 'Draft';
-      if(area==='elders'){
-        const precision=elderDeathMode(record);
-        const full=precision==='full_date'&&/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_death||'');
-        const year=precision==='year_only'&&(Number(record.data.date_of_death_year)>0||/^\d{4}$/.test(String(record.data.date_of_death||'')));
-        if(full||year||/deceased|dead|passed away/i.test(record.data.status||''))return 'Former';
-      }
-      return record.data.record_status||((record.data.end_year||/former|retired|deceased/i.test(record.data.status||''))?'Former':'Current');
+    const elderRecordStatus=record=>{
+      const precision=elderDeathMode(record);
+      const full=precision==='full_date'&&/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_death||'');
+      const year=precision==='year_only'&&(Number(record.data.date_of_death_year)>0||/^\d{4}$/.test(String(record.data.date_of_death||'')));
+      if(full||year||/deceased|dead|passed away/i.test(record.data.status||''))return 'Former';
+      return record.data.record_status||((/former|retired|transferred|inactive|archived/i.test(record.data.status||''))?'Former':'Current');
     };
+    const recordStatus=record=>record.data.published===false?'Draft':area==='elders'?elderRecordStatus(record):record.data.record_status||((record.data.end_year||/former|retired|deceased/i.test(record.data.status||''))?'Former':'Current');
     const draw=()=>{const years=[...new Set(records.map(record=>record.data[cfg.year]).filter(Boolean))].sort((a,b)=>b-a),shown=records.filter(record=>(!query||`${record.data.name} ${record.data.designation||''}`.toLowerCase().includes(query.toLowerCase()))&&(year==='all'||String(record.data[cfg.year])===year)&&(status==='all'||recordStatus(record)===status));host.innerHTML=`<div class="ministry-workspace"><section class="panel ministry-library"><header><div><h2>${cfg.label}</h2><p>Current and former profiles.</p></div><button class="gold" id="ministry-new">+ New Record</button></header><div class="ministry-tools"><label class="search">⌕ <input id="ministry-search" placeholder="Search records" value="${esc(query)}"></label><div><select id="ministry-year"><option value="all">All years</option>${years.map(item=>`<option ${String(item)===year?'selected':''}>${item}</option>`).join('')}</select><select id="ministry-status"><option value="all">All statuses</option>${['Current','Former','Draft'].map(item=>`<option ${item===status?'selected':''}>${item}</option>`).join('')}</select></div><span>${shown.length} record${shown.length===1?'':'s'}</span></div><div class="ministry-records">${shown.map(record=>`<button data-record="${esc(record.path)}" class="ministry-record ${selected?.path===record.path?'selected':''}"><img src="${esc(record.data.photo||'/images/pastor.jpg')}" alt=""><span><b>${esc(record.data.name)}</b><small>${esc(record.data.designation||cfg.label)} · ${esc(record.data[cfg.year]||'')}</small><em>${recordStatus(record)}</em></span></button>`).join('')||'<p class="ministry-library-empty">No matching records.</p>'}</div></section><section class="panel ministry-editor" id="ministry-editor">${selected?editorMarkup():`<div class="ministry-welcome"><i>✦</i><h2>Select a profile</h2><p>Choose a record or create a new one.</p></div>`}</section></div><div id="ministry-preview-root"></div>`;bind();};
     const field=(name,label,type='text')=>`<label><span>${label}</span><input name="${name}" type="${type}" value="${esc(selected.data[name]??'')}"></label>`;
     const checks=()=>`<label class="ministry-check"><input type="checkbox" name="published" ${selected.data.published!==false?'checked':''}> Published</label>`;
@@ -45,7 +43,7 @@
         ${field('date_of_birth','Date of Birth','date')}
         ${field('ordained_year','Ordination Year','number')}
         ${field('nemnghettu_presbytery','Nemnghettu Presbytery')}
-        <label><span>Current / Former</span><select name="record_status"><option value="Current" ${recordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${recordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
+        <label><span>Current / Former</span><select name="record_status"><option value="Current" ${elderRecordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${elderRecordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
         <label><span>Date of Death</span><select name="date_of_death_precision" data-death-mode>
           <option value="unknown" ${elderDeathMode(selected)==='unknown'?'selected':''}>Unknown / Not Recorded</option>
           <option value="full_date" ${elderDeathMode(selected)==='full_date'?'selected':''}>Full Date</option>
