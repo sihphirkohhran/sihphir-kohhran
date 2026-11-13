@@ -21,7 +21,7 @@
       if(area==='elders'){
         const precision=elderDeathMode(record);
         const full=precision==='full_date'&&/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_death||'');
-        const year=precision==='year_only'&&(Number(record.data.date_of_death_year)>0||/^\\d{4}$/.test(String(record.data.date_of_death||'')));
+        const year=precision==='year_only'&&(Number(record.data.date_of_death_year)>0||/^\d{4}$/.test(String(record.data.date_of_death||'')));
         if(full||year||/deceased|dead|passed away/i.test(record.data.status||''))return 'Former';
       }
       return record.data.record_status||((record.data.end_year||/former|retired|deceased/i.test(record.data.status||''))?'Former':'Current');
