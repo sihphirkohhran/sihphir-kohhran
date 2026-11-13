@@ -7,4 +7,5 @@ record_status: "Former"
 designation: "."
 published: true
 display_order: 7
+photo: "/images/1794551254444-8.jpg"
 ---
