@@ -20,10 +20,14 @@ const escapeAttribute = (value: string) => value
 
 function safeHref(value: string): string {
   const href = value.trim().replace(/[\u0000-\u0020\u007f]/g, '');
+  const decoded = href
+    .replace(/&#x([0-9a-f]+);?/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
+    .replace(/&#([0-9]+);?/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&colon;/gi, ':').replace(/&tab;/gi, '\t').replace(/&newline;/gi, '\n');
   if (!href || href.startsWith('//') || href.startsWith('\\\\')) return '';
-  if (/^(https?:|mailto:)/i.test(href)) return href;
-  if (/^(?:[/?#]|\.\.?\/)/.test(href)) return href;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return '';
+  if (/^(https?:|mailto:)/i.test(decoded)) return href;
+  if (/^(?:[/?#]|\.\.?\/)/.test(decoded) && !decoded.startsWith('//')) return href;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(decoded)) return '';
   return href;
 }
 
