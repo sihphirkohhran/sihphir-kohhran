@@ -1066,7 +1066,12 @@ section[id] { scroll-margin-top: 56px; }
 .content-page-body :global(ol) {
   margin: 0 0 1rem 1.25rem;
   padding: 0;
+  list-style-position: outside;
 }
+.content-page-body :global(ul) { list-style-type: disc; }
+.content-page-body :global(ol) { list-style-type: decimal; }
+.content-page-body :global(ul ul) { list-style-type: circle; }
+.content-page-body :global(ol ol) { list-style-type: lower-alpha; }
 .content-page-body :global(li) {
   margin-bottom: 0.35rem;
 }

@@ -74,7 +74,7 @@
     const sync=form=>{
       new FormData(form).forEach((value,key)=>selected.data[key]=/year|order/.test(key)&&value!==''?Number(value):value);
       form.querySelectorAll('input[type=checkbox]').forEach(input=>selected.data[input.name]=input.checked);
-      form.querySelectorAll('[data-rich]').forEach(editor=>{if(editor.dataset.rich==='biography'){selected.data.biography=editor.innerHTML;selected.body=area==='elders'?'':editor.innerHTML}else selected.data[editor.dataset.rich]=editor.innerHTML});
+      form.querySelectorAll('[data-rich]').forEach(editor=>{const safe=window.SihphirRichTextEditor?.sanitizeHtml(editor.innerHTML,{media:false})??editor.innerHTML;if(editor.dataset.rich==='biography'){selected.data.biography=safe;selected.body=area==='elders'?'':safe}else selected.data[editor.dataset.rich]=safe});
       if(area==='elders'){
         const birthMode=form.querySelector('[name="date_of_birth_precision"]')?.value||'unknown';
         selected.data.date_of_birth_precision=birthMode;
@@ -88,7 +88,7 @@
         else{selected.data.date_of_death='';selected.data.date_of_death_year='';}
       }
     };
-    const bind=()=>{document.querySelector('#ministry-search').oninput=event=>{query=event.target.value;draw()};document.querySelector('#ministry-year').onchange=event=>{year=event.target.value;draw()};document.querySelector('#ministry-status').onchange=event=>{status=event.target.value;draw()};document.querySelector('#ministry-new').onclick=()=>{selected={path:'',data:{...cfg.defaults,photo:'',gallery:[],documents:[],short_description:'',biography:'',published:true,display_order:records.length,slug:''},body:''};dirty=true;draw()};document.querySelectorAll('[data-record]').forEach(button=>button.onclick=()=>{selected=records.find(record=>record.path===button.dataset.record);dirty=false;draw()});if(!selected)return;const form=document.querySelector('#ministry-form');form.addEventListener('input',()=>{dirty=true;document.querySelector('#ministry-save-state').textContent='Unsaved changes'});form.onsubmit=save;
+    const bind=()=>{document.querySelector('#ministry-search').oninput=event=>{query=event.target.value;draw()};document.querySelector('#ministry-year').onchange=event=>{year=event.target.value;draw()};document.querySelector('#ministry-status').onchange=event=>{status=event.target.value;draw()};document.querySelector('#ministry-new').onclick=()=>{selected={path:'',data:{...cfg.defaults,photo:'',gallery:[],documents:[],short_description:'',biography:'',published:true,display_order:records.length,slug:''},body:''};dirty=true;draw()};document.querySelectorAll('[data-record]').forEach(button=>button.onclick=()=>{selected=records.find(record=>record.path===button.dataset.record);dirty=false;draw()});if(!selected)return;const form=document.querySelector('#ministry-form');form.querySelectorAll('[data-rich]').forEach(editor=>window.SihphirRichTextEditor?.bindPaste(editor,{media:false}));form.addEventListener('input',()=>{dirty=true;document.querySelector('#ministry-save-state').textContent='Unsaved changes'});form.onsubmit=save;
       if(area==='elders'){
         const birthMode=form.querySelector('[data-birth-mode]'),birthFull=form.querySelector('[data-birth-full]'),birthYear=form.querySelector('[data-birth-year]');
         const updateBirthFields=()=>{birthFull.hidden=birthMode.value!=='full_date';birthYear.hidden=birthMode.value!=='year_only';};
