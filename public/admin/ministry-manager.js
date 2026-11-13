@@ -53,7 +53,6 @@
         </select></label>
         <label data-death-full><span>Date of Death</span><input name="date_of_death" type="date" value="${esc(selected.data.date_of_death||'')}"></label>
         <label data-death-year><span>Death Year</span><input name="date_of_death_year" type="number" min="1000" max="2100" step="1" value="${esc(selected.data.date_of_death_year||'')}"></label>
-        <div class="wide ministry-checks">${checks()}</div>
       </div>
       ${assetEditor('photo','Profile Photo',false)}
       ${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||selected.data.notes||''))}
