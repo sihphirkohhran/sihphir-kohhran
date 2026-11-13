@@ -41,7 +41,7 @@
       <div class="ministry-fields elder-cms-fields">
         ${field('name','Full Name')}
         ${field('date_of_birth','Date of Birth','date')}
-        ${field('ordained_year','Ordination Year','number')}
+        ${field('ordained_year','Nemngheh Kum','number')}
         ${field('nemnghettu_presbytery','Nemnghettu Presbytery')}
         <label><span>Current / Former</span><select name="record_status"><option value="Current" ${elderRecordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${elderRecordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
         <label><span>Date of Death</span><select name="date_of_death_precision" data-death-mode>
