@@ -5,7 +5,7 @@ export type ElderProfile = {
   id: string; name: string; photo: string; dateOfBirth: string; birthYear: number;
   dateOfDeath: string; deathYear: number; deathPrecision: 'full_date' | 'year_only' | 'unknown';
   lifespan: string; ordinationYear: number; presbytery: string; current: boolean;
-  biographyHtml: string; order: number;
+  biographyHtml: string; searchText: string; order: number;
 };
 
 const yearFrom = (value: unknown): number => {
@@ -55,6 +55,9 @@ export function normalizeElderProfile(entry: any): ElderProfile | null {
     ? birthYear + '–' + deathYear
     : '';
 
+  const searchText = [data.name, data.designation, data.short_description, data.notes, data.nemnghettu_presbytery, data.biography, entry.body]
+    .filter(Boolean).join(' ').toLowerCase();
+
   return {
     id: String(entry.id || '').replace(/\.(md|json)$/i, '').replace(/[^a-z0-9]+/gi, '-'),
     name: String(data.name || 'Unnamed elder'),
@@ -64,6 +67,7 @@ export function normalizeElderProfile(entry: any): ElderProfile | null {
     presbytery: String(data.nemnghettu_presbytery || ''),
     current,
     biographyHtml: renderSafeRichText(data.biography || entry.body || data.notes),
+    searchText,
     order: Number(data.display_order || 0),
   };
 }
