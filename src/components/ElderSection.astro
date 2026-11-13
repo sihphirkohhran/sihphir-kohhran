@@ -4,11 +4,23 @@ import type { ElderProfile } from '../lib/elder-profile';
 import { getPageSettings } from '../lib/page-settings';
 interface Props { profiles: ElderProfile[] }
 const { profiles } = Astro.props;
-const sortOldest = (a: ElderProfile, b: ElderProfile) =>
-  (a.ordinationYear || Number.POSITIVE_INFINITY) - (b.ordinationYear || Number.POSITIVE_INFINITY) ||
-  a.name.localeCompare(b.name) || a.order - b.order;
-const currentProfiles = profiles.filter((profile) => profile.current).sort(sortOldest);
-const formerProfiles = profiles.filter((profile) => !profile.current).sort(sortOldest);
+const compareBirthThenName = (a: ElderProfile, b: ElderProfile) => {
+  const aBirth = a.birthYear > 0 ? a.birthYear : Number.POSITIVE_INFINITY;
+  const bBirth = b.birthYear > 0 ? b.birthYear : Number.POSITIVE_INFINITY;
+  return aBirth - bBirth || a.name.localeCompare(b.name) || a.order - b.order;
+};
+const compareOrdination = (direction: 'asc' | 'desc') => (a: ElderProfile, b: ElderProfile) => {
+  const aKnown = a.ordinationYear > 0, bKnown = b.ordinationYear > 0;
+  if (aKnown !== bKnown) return aKnown ? -1 : 1;
+  if (aKnown && bKnown && a.ordinationYear !== b.ordinationYear) {
+    return direction === 'asc'
+      ? a.ordinationYear - b.ordinationYear
+      : b.ordinationYear - a.ordinationYear;
+  }
+  return compareBirthThenName(a, b);
+};
+const currentProfiles = profiles.filter((profile) => profile.current).sort(compareOrdination('asc'));
+const formerProfiles = profiles.filter((profile) => !profile.current).sort(compareOrdination('desc'));
 const years = [...new Set(profiles.map((profile) => profile.ordinationYear).filter((year) => year > 0))].sort((a, b) => a - b);
 const ui = await getPageSettings('elders', {
   hero_caption: 'SIHPHIR PRESBYTERIAN KOHHRAN', hero_title: 'Kohhran Upa', hero_subtitle: '',
@@ -35,7 +47,7 @@ const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
         <option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}
       </select></label>
       <label><span>{ui.sort_label || 'Sort by ordination year'}</span><select id="elder-sort">
-        <option value="oldest">Oldest First</option><option value="newest">Newest First</option>
+        <option value="section-default">Section default</option><option value="oldest">Oldest First</option><option value="newest">Newest First</option>
       </select></label>
       <p id="elder-count">{profiles.length} {ui.results_label || 'elder'}{profiles.length === 1 ? '' : 's'}</p>
     </section>
@@ -43,11 +55,11 @@ const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
     <section class="elder-section" data-elder-section>
       <header><h2>{currentTitle}</h2></header>
       <div class="elder-grid" data-elder-grid>
-        {currentProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={profile.searchText} data-year={profile.ordinationYear || ''}>
+        {currentProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={profile.searchText} data-year={profile.ordinationYear || ''} data-birth-year={profile.birthYear || ''}>
           <a class="elder-photo" href={'/kohhran-upa/' + profile.id}><img src={profile.photo} alt={profile.name} loading="lazy" /></a>
           <div class="elder-card-body">
             <h3>{profile.name}</h3>
-            {profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
+            {!profile.current && profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
             {profile.ordinationYear > 0 && <p class="elder-ordination">Nemngheh Kum: {profile.ordinationYear}</p>}
             <a class="elder-view" href={'/kohhran-upa/' + profile.id}>{ui.view_profile || 'View Profile'} <span>→</span></a>
           </div>
@@ -81,17 +93,28 @@ const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
   const count = document.querySelector('#elder-count');
   const noResults = document.querySelector('#elder-no-results');
   const sections = [...document.querySelectorAll('[data-elder-section]')];
-  function compareCards(a, b) {
+  function compareCards(a, b, sectionIndex) {
     const ay = Number(a.dataset.year) || 0, by = Number(b.dataset.year) || 0;
-    if (!ay && by) return 1;
-    if (ay && !by) return -1;
-    if (ay && by && ay !== by) return sort.value === 'newest' ? by - ay : ay - by;
+    const direction = sort.value === 'section-default'
+      ? (sectionIndex === 0 ? 'oldest' : 'newest')
+      : sort.value;
+    if (ay !== by) {
+      if (!ay) return 1;
+      if (!by) return -1;
+      return direction === 'newest' ? by - ay : ay - by;
+    }
+    const ab = Number(a.dataset.birthYear) || 0, bb = Number(b.dataset.birthYear) || 0;
+    if (ab !== bb) {
+      if (!ab) return 1;
+      if (!bb) return -1;
+      return ab - bb;
+    }
     return (a.dataset.name || '').localeCompare(b.dataset.name || '');
   }
   function filterAndSort() {
     const query = search.value.trim().toLowerCase(), selectedYear = year.value;
     let visible = 0;
-    sections.forEach((section) => {
+    sections.forEach((section, sectionIndex) => {
       const grid = section.querySelector('[data-elder-grid]');
       const cards = [...grid.querySelectorAll('[data-elder-card]')];
       cards.forEach((card) => {
@@ -100,7 +123,7 @@ const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
         card.hidden = !matches;
         if (matches) visible += 1;
       });
-      cards.sort(compareCards).forEach((card) => grid.append(card));
+      cards.sort((a, b) => compareCards(a, b, sectionIndex)).forEach((card) => grid.append(card));
       const hasVisible = cards.some((card) => !card.hidden);
       section.hidden = cards.length > 0 && !hasVisible;
       const empty = section.querySelector('[data-section-empty]');
