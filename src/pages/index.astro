@@ -606,11 +606,17 @@ const highlightItems = normalizeHighlights(
   document.querySelectorAll('[data-quick-action]').forEach((link) => {
     link.addEventListener('click', (e) => {
       const action = (link as HTMLElement).dataset.quickAction;
-      if (action === 'tab-weekly' || action === 'tab-monthly') {
+      const tabTargets: Record<string, string> = {
+        'tab-weekly': 'weekly',
+        'tab-monthly': 'monthly',
+        'tab-notices': 'notices',
+      };
+      const target = action ? tabTargets[action] : undefined;
+      if (target) {
         e.preventDefault();
         const board = document.getElementById('notice-board');
         board?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(() => activateNoticeTab(action === 'tab-weekly' ? 'weekly' : 'monthly'), 400);
+        setTimeout(() => activateNoticeTab(target), 400);
       }
     });
   });
