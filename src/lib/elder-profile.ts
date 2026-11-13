@@ -40,7 +40,7 @@ export function normalizeElderProfile(entry: any): ElderProfile | null {
 
   const ordinationYear = Number(
     data.ordained_year || data.legacy_ordained_year || data.ordination_year ||
-    yearFrom(data.ordination_date) || data.start_year || data.year || 0
+    yearFrom(data.ordination_date) || 0
   );
   const status = String(data.status || '').toLowerCase();
   const hasDeathRecord = deathPrecision === 'full_date'
