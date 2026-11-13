@@ -3,3 +3,15 @@
 @media(max-width:1150px){.committee-workspace{grid-template-columns:290px minmax(0,1fr)}.committee-members{grid-template-columns:1fr}.committee-details{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){.committee-workspace{grid-template-columns:1fr}.committee-library,.committee-editor-panel{min-height:0}.committee-list{max-height:350px}.committee-editor-head,.committee-members-section>header{display:grid}.committee-editor-actions{justify-content:flex-start}.committee-details{grid-template-columns:1fr}.committee-photo-field{grid-column:auto}.committee-members-section header>div:last-child{flex-wrap:wrap}.committee-member-drop{flex-wrap:wrap}}
 @media(max-width:520px){.committee-library-tools>div,.committee-member{grid-template-columns:1fr}.committee-member-photo{min-height:190px}.committee-member-fields{grid-template-columns:1fr}.member-bio{grid-column:auto}}
+
+/* Tailwind preflight clears list markers; restore them only in this editor. */
+.committee-rich article ul,.committee-rich article ol{display:block!important;margin:.65em 0 1em!important;padding-inline-start:1.8rem!important;list-style-position:outside!important}
+.committee-rich article ul{list-style-type:disc!important}
+.committee-rich article ol{list-style-type:decimal!important}
+.committee-rich article ul ul{list-style-type:circle!important}
+.committee-rich article ol ol{list-style-type:lower-alpha!important}
+.committee-rich article li{display:list-item!important;margin:.25em 0!important}
+.committee-rich article h2,.committee-rich article h3{font-weight:700;line-height:1.3;margin:.9em 0 .45em}
+.committee-rich article p{margin:.55em 0}
+.committee-rich article a{color:#8d6721;text-decoration:underline}
+.committee-rich article blockquote{margin:1em 0;padding:.6em 1em;border-left:3px solid #b8953f;background:#f8f4e9}
