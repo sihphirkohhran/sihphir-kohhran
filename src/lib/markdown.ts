@@ -10,7 +10,7 @@ export function renderMarkdown(text: string | undefined | null): string {
 
 const allowedTags = new Set([
   'p', 'br', 'hr', 'strong', 'em', 'b', 'i', 'u', 'del',
-  'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+  'ul', 'ol', 'li', 'div', 'blockquote', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
   'a', 'code', 'pre',
 ]);
 const voidTags = new Set(['br', 'hr']);
