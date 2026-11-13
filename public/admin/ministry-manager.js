@@ -12,8 +12,8 @@
     const elderDeathMode=record=>{
       const precision=record.data.date_of_death_precision;
       if(precision==='full_date'||precision==='year_only'||precision==='unknown')return precision;
-      if(/^\\d{4}-\\d{2}-\\d{2}$/.test(record.data.date_of_death||''))return 'full_date';
-      if(/^\\d{4}$/.test(String(record.data.date_of_death||''))||Number(record.data.date_of_death_year)>0)return 'year_only';
+      if(/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_death||''))return 'full_date';
+      if(/^\d{4}$/.test(String(record.data.date_of_death||''))||Number(record.data.date_of_death_year)>0)return 'year_only';
       return 'unknown';
     };
     const recordStatus=record=>{
