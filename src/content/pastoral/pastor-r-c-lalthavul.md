@@ -1,5 +1,5 @@
 ---
-name: "Pastor R.C. Lalthavul"
+name: "Pastor R.C. Lalthavula"
 role: "pastor"
 start_year: 2026
 record_status: "Current"
