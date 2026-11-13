@@ -1,0 +1,13 @@
+---
+name: "Upa R. Lalremruata"
+ordained_year: 2013
+record_status: "Current"
+designation: "Kohhran Upa"
+status: "Active"
+biography: ""
+published: true
+display_order: 36
+date_of_birth_precision: "unknown"
+nemnghettu_presbytery: "Aizawl Hmar Presbytery"
+date_of_death_precision: "unknown"
+---
