@@ -21,8 +21,14 @@ const escapeAttribute = (value: string) => value
 function safeHref(value: string): string {
   const href = value.trim().replace(/[\u0000-\u0020\u007f]/g, '');
   const decoded = href
-    .replace(/&#x([0-9a-f]+);?/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
-    .replace(/&#([0-9]+);?/g, (_, code) => String.fromCodePoint(Number(code)))
+    .replace(/&#x([0-9a-f]+);?/gi, (_, code) => {
+      const point = parseInt(code, 16);
+      return point >= 0 && point <= 0x10ffff ? String.fromCodePoint(point) : '';
+    })
+    .replace(/&#([0-9]+);?/g, (_, code) => {
+      const point = Number(code);
+      return Number.isSafeInteger(point) && point >= 0 && point <= 0x10ffff ? String.fromCodePoint(point) : '';
+    })
     .replace(/&colon;/gi, ':').replace(/&tab;/gi, '\t').replace(/&newline;/gi, '\n');
   const normalized = decoded.replace(/[\u0000-\u0020\u007f]/g, '');
   if (!href || href.startsWith('//') || href.startsWith('\\\\')) return '';
