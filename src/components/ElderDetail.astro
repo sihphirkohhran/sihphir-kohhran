@@ -27,7 +27,7 @@ const deathDisplay = profile.deathPrecision === 'full_date'
         <dl>
           {profile.dateOfBirth && <div><dt>Date of Birth</dt><dd><time datetime={profile.dateOfBirth}>{formatDate(profile.dateOfBirth)}</time></dd></div>}
           {deathDisplay && <div><dt>Date of Death</dt><dd><time datetime={profile.dateOfDeath || undefined}>{deathDisplay}</time></dd></div>}
-          {profile.ordinationYear > 0 && <div><dt>Ordination Year</dt><dd>{profile.ordinationYear}</dd></div>}
+          {profile.ordinationYear > 0 && <div><dt>Nemngheh Kum</dt><dd>{profile.ordinationYear}</dd></div>}
           {profile.presbytery && <div><dt>Nemnghettu Presbytery</dt><dd>{profile.presbytery}</dd></div>}
         </dl>
       </div>
