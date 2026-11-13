@@ -12,10 +12,10 @@ const ui=await getPageSettings(settingsKey,{hero_caption:'Sihphir Presbyterian K
 ---
 <BaseLayout title={`${title} — Sihphir Presbyterian Kohhran`} activePage={activePage}>
   <header class="section-hero"><div><p>{ui.hero_caption}</p><h1>{ui.hero_title}</h1><span>{ui.hero_subtitle}</span></div></header>
-  <main class="section-page max-w-6xl mx-auto px-4 py-8 sm:py-10">
+  <main class:list={["section-page", activePage === "bialtu-pastor" ? "max-w-7xl" : "max-w-6xl", "mx-auto", "px-4", "py-8", "sm:py-10", activePage === "bialtu-pastor" && "pastor-archive"]}>
     <section class="archive-toolbar" data-results-label={ui.results_label}><label><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input id="profile-search" type="search" placeholder={ui.search_placeholder} aria-label={ui.search_placeholder} /></label><label><span>{ui.filter_label}</span><select id="profile-year"><option value="all">All years</option>{Array.from(new Set(sorted.map(profile=>profile.year))).sort((a,b)=>b-a).map(year=><option value={year}>{year}</option>)}</select></label><label><span>{ui.sort_label}</span><select id="profile-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option></select></label><p id="profile-count">{profiles.length} {ui.results_label}{profiles.length===1?'':'s'}</p></section>
-    <section class="profile-section current-section"><header><div><span>Serving today</span><h2>{ui.current_title}</h2></div></header>{currentProfiles.length?<div class="profile-grid" data-profile-grid>{currentProfiles.map(profile=><article class="profile-card" data-profile data-name={`${profile.name} ${profile.designation} ${profile.description}`.toLowerCase()} data-year={profile.year}><a class="card-photo" href={`${basePath}/${profile.id}`}><img src={profile.photo||'/images/profile-placeholder.svg'} alt={profile.photo?profile.name:''} loading="lazy" /></a><div><h3>{profile.name}</h3><p>{profile.designation}</p>{profile.period&&<span class="service-years">{profile.period}</span>}<a href={`${basePath}/${profile.id}`}>{ui.view_profile} <span>→</span></a></div></article>)}</div>:<div class="no-current"><h3>{ui.empty_message}</h3><p>The former archive remains available below.</p></div>}</section>
-    <section class="profile-section former-section"><header><div><span>Service archive</span><h2>{ui.former_title}</h2></div><p>Preserving a record of faithful service.</p></header>{former.length===0&&<div class="no-current"><h3>{ui.empty_message}</h3><p>Historical records will appear here when available.</p></div>}<div class="profile-grid" id="profile-grid">{former.map(profile=><article class="profile-card" data-profile data-name={`${profile.name} ${profile.designation} ${profile.description}`.toLowerCase()} data-year={profile.year}><a class="card-photo" href={`${basePath}/${profile.id}`}><img src={profile.photo||'/images/profile-placeholder.svg'} alt={profile.photo?profile.name:''} loading="lazy" /></a><div><h3>{profile.name}</h3><p>{profile.designation}</p>{profile.period&&<span class="service-years">{profile.period}</span>}<a href={`${basePath}/${profile.id}`}>{ui.view_profile} <span>→</span></a></div></article>)}</div></section>
+    <section class="profile-section current-section"><header><div><h2>{ui.current_title}</h2></div></header>{currentProfiles.length?<div class="profile-grid" data-profile-grid>{currentProfiles.map(profile=><article class="profile-card" data-profile data-name={`${profile.name} ${profile.designation} ${profile.description}`.toLowerCase()} data-year={profile.year}><a class="card-photo" href={`${basePath}/${profile.id}`}><img src={profile.photo||'/images/profile-placeholder.svg'} alt={profile.photo?profile.name:''} loading="lazy" /></a><div><h3>{profile.name}</h3><p>{profile.designation}</p>{profile.period&&<span class="service-years">{profile.period}</span>}<a href={`${basePath}/${profile.id}`}>{ui.view_profile} <span>→</span></a></div></article>)}</div>:<div class="no-current"><h3>{ui.empty_message}</h3><p>The former archive remains available below.</p></div>}</section>
+    <section class="profile-section former-section"><header><div><h2>{ui.former_title}</h2></div></header>{former.length===0&&<div class="no-current"><h3>{ui.empty_message}</h3><p>Historical records will appear here when available.</p></div>}<div class="profile-grid" id="profile-grid">{former.map(profile=><article class="profile-card" data-profile data-name={`${profile.name} ${profile.designation} ${profile.description}`.toLowerCase()} data-year={profile.year}><a class="card-photo" href={`${basePath}/${profile.id}`}><img src={profile.photo||'/images/profile-placeholder.svg'} alt={profile.photo?profile.name:''} loading="lazy" /></a><div><h3>{profile.name}</h3><p>{profile.designation}</p>{profile.period&&<span class="service-years">{profile.period}</span>}<a href={`${basePath}/${profile.id}`}>{ui.view_profile} <span>→</span></a></div></article>)}</div></section>
     <section class="archive-empty" id="archive-empty" hidden><h2>{ui.empty_message}</h2><p>Try another search or clear the year filter.</p><button id="archive-clear">Clear filters</button></section>
   </main>
 </BaseLayout>
@@ -30,4 +30,23 @@ const ui=await getPageSettings(settingsKey,{hero_caption:'Sihphir Presbyterian K
   @media(min-width:1400px){.profile-grid{grid-template-columns:repeat(5,minmax(0,180px))}}
   @media(max-width:1023px){.profile-grid{grid-template-columns:repeat(3,minmax(0,180px))}}
   @media(max-width:650px){.archive-toolbar{grid-template-columns:1fr 1fr}.archive-toolbar>label:first-child{grid-column:1/-1}.archive-toolbar>p{grid-column:1/-1}.profile-grid{grid-template-columns:repeat(2,minmax(0,180px));gap:16px}.profile-card h3{font-size:.8rem}.profile-card>div>a{width:100%;justify-self:stretch;text-align:center}.card-photo{height:auto;aspect-ratio:4/5}}
+
+  /* Pastor archive: use the available page width and let portraits lead. */
+  .pastor-archive{width:min(100%,1440px)}
+  .pastor-archive .profile-grid{grid-template-columns:repeat(5,minmax(0,1fr));justify-content:stretch;gap:clamp(14px,1.5vw,22px)}
+  .pastor-archive .profile-card{max-width:none;min-height:100%}
+  .pastor-archive .card-photo{height:auto;aspect-ratio:4/5}
+  .pastor-archive .card-photo img{width:100%;height:100%;object-fit:cover;object-position:center top}
+  .pastor-archive .profile-card>div{padding:clamp(12px,1.25vw,18px)}
+  .pastor-archive .profile-card h3{font-size:clamp(.9rem,1vw,1.08rem);line-height:1.3}
+  .pastor-archive .profile-card>div>p{font-size:.68rem;line-height:1.4}
+  .pastor-archive .service-years{font-size:.62rem;line-height:1.4}
+  .pastor-archive .profile-card>div>a{font-size:.62rem;padding:7px 10px}
+  .pastor-archive .current-section .profile-grid{grid-template-columns:minmax(0,min(100%,360px))}
+  .pastor-archive .current-section .card-photo{aspect-ratio:4/5}
+  @media(max-width:1100px){.pastor-archive .profile-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media(max-width:850px){.pastor-archive .profile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:600px){.pastor-archive .profile-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.pastor-archive .card-photo{aspect-ratio:4/5}}
+  @media(max-width:360px){.pastor-archive .profile-grid{grid-template-columns:1fr}}
+
 </style>
