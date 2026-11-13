@@ -6,6 +6,13 @@
 /* Kohhran Upa's focused historical-record editor. */
 .elder-cms-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
 .elder-cms-fields label{min-width:0}
-.elder-cms-fields [data-death-full][hidden],.elder-cms-fields [data-death-year][hidden]{display:none!important}
+.elder-cms-fields [data-death-full][hidden],.elder-cms-fields [data-death-year][hidden],.elder-cms-fields [data-birth-full][hidden],.elder-cms-fields [data-birth-year][hidden]{display:none!important}
+.elder-cms-fields select{width:100%;min-width:0;border:1px solid #dbe1e9;border-radius:7px;padding:9px;color:#26364d;background:#fff;font-size:12px;text-transform:none}
+.elder-biography-editor>article ul,.elder-biography-editor>article ol{display:block!important;margin:.6em 0 1em!important;padding-left:2rem!important;list-style-position:outside!important}
+.elder-biography-editor>article ul{list-style-type:disc!important}
+.elder-biography-editor>article ol{list-style-type:decimal!important}
+.elder-biography-editor>article ul ul{list-style-type:circle!important}
+.elder-biography-editor>article ol ol{list-style-type:lower-alpha!important}
+.elder-biography-editor>article li{display:list-item!important;margin:.25em 0!important;padding-left:.15em}
 .elder-cms-fields input[type=date],.elder-cms-fields input[type=number]{min-width:0}
 @media(max-width:800px){.elder-cms-fields{grid-template-columns:1fr}}

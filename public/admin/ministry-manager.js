@@ -9,6 +9,13 @@
     window.__sihphirMinistryCleanup?.();const cfg=config[area],host=document.querySelector('#view');document.querySelector('.top h1')?.replaceChildren(cfg.label);let records=[],selected=null,query='',year='all',status='all',dirty=false,uploading=0;
     const before=event=>{if(dirty){event.preventDefault();event.returnValue=''}};addEventListener('beforeunload',before);window.__sihphirMinistryCleanup=()=>removeEventListener('beforeunload',before);
     const load=async()=>{const list=(await api('/api/admin/content?area='+cfg.apiArea)).items;records=[];for(const item of list){try{const file=await api('/api/admin/content?path='+encodeURIComponent(item.path)),parsed=parse(file.content);if(cfg.role&&((parsed.data.role||'pastor')!==cfg.role))continue;parsed.data.photo=parsed.data.photo||parsed.data.profile_photo||parsed.data.profile_image||parsed.data.cover_photo||'';if(area==='elders')parsed.data.ordained_year=parsed.data.ordained_year||parsed.data.legacy_ordained_year||parsed.data.ordination_year||Number(String(parsed.data.ordination_date||'').slice(0,4))||'';parsed.data.family_photo=parsed.data.family_photo||parsed.data.family_image||'';records.push({path:item.path,...parsed});}catch{}}records.sort((a,b)=>Number(b.data[cfg.year]||0)-Number(a.data[cfg.year]||0));draw();};
+    const elderBirthMode=record=>{
+      const precision=record.data.date_of_birth_precision;
+      if(precision==='full_date'||precision==='year_only'||precision==='unknown')return precision;
+      if(/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_birth||''))return 'full_date';
+      if(/^\d{4}$/.test(String(record.data.date_of_birth||''))||Number(record.data.date_of_birth_year)>0)return 'year_only';
+      return 'unknown';
+    };
     const elderDeathMode=record=>{
       const precision=record.data.date_of_death_precision;
       if(precision==='full_date'||precision==='year_only'||precision==='unknown')return precision;
@@ -40,7 +47,13 @@
     const elderEditorMarkup=()=>`<form id="ministry-form"><header class="ministry-editor-head"><div><span id="ministry-save-state">${dirty?'Unsaved changes':'Profile editor'}</span><h2>${esc(selected.data.name)}</h2></div><div><button type="button" id="ministry-preview">Preview</button><button type="button" class="danger" id="ministry-delete">Delete</button><button class="gold" id="ministry-save">Save</button></div></header>
       <div class="ministry-fields elder-cms-fields">
         ${field('name','Full Name')}
-        ${field('date_of_birth','Date of Birth','date')}
+        <label><span>Pian Ni</span><select name="date_of_birth_precision" data-birth-mode>
+          <option value="full_date" ${elderBirthMode(selected)==='full_date'?'selected':''}>Full Date</option>
+          <option value="year_only" ${elderBirthMode(selected)==='year_only'?'selected':''}>Year Only</option>
+          <option value="unknown" ${elderBirthMode(selected)==='unknown'?'selected':''}>Unknown / Not Recorded</option>
+        </select></label>
+        <label data-birth-full ${elderBirthMode(selected)==='full_date'?'':'hidden'}><span>Pian Ni</span><input name="date_of_birth" type="date" value="${esc(/^\d{4}-\d{2}-\d{2}$/.test(String(selected.data.date_of_birth||''))?selected.data.date_of_birth:'')}"></label>
+        <label data-birth-year ${elderBirthMode(selected)==='year_only'?'':'hidden'}><span>Birth Year</span><input name="date_of_birth_year" type="number" min="1" max="${new Date().getFullYear()}" step="1" value="${esc(selected.data.date_of_birth_year||(/^\d{4}$/.test(String(selected.data.date_of_birth||''))?selected.data.date_of_birth:''))}" placeholder="YYYY"></label>
         ${field('ordained_year','Nemngheh Kum','number')}
         ${field('nemnghettu_presbytery','Nemnghettu Presbytery')}
         <label><span>Current / Former</span><select name="record_status"><option value="Current" ${elderRecordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${elderRecordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
@@ -57,12 +70,17 @@
     </form>`;
     const editorMarkup=()=>area==='elders'?elderEditorMarkup():existingEditorMarkup();
     const assetEditor=(key,label,multiple,documents=false)=>{const values=!multiple?[selected.data[key]].filter(Boolean):Array.isArray(selected.data[key])?selected.data[key]:[];return`<section class="ministry-assets" data-assets="${key}"><header><div><h3>${label}</h3><p>${multiple?'Drag to reorder or remove uploaded files.':'Choose, preview, replace or delete this image.'}</p></div><button type="button" data-upload="${key}">${values.length?'Replace':'Choose File'}</button></header><input type="file" data-picker="${key}" ${multiple?'multiple':''} accept="${documents?'.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip':'image/*'}" hidden><div class="ministry-drop" data-drop="${key}">Drop ${documents?'documents':'images'} here or choose Upload</div><div class="ministry-asset-list">${values.map((url,index)=>`<article draggable="${multiple}" data-asset-index="${index}">${documents?'<i>FILE</i>':`<img src="${esc(url)}" alt="">`}<span>${esc(url.split('/').pop())}</span>${!documents&&multiple&&index===0?'<b>Featured image</b>':''}<button type="button" data-remove-asset="${key}:${index}">${multiple?'Remove':'Delete'}</button></article>`).join('')||'<p>No files attached.</p>'}</div></section>`};
-    const richEditor=(key,label,value)=>`<section class="ministry-rich" data-rich-section="${key}"><header><h3>${label}</h3></header><div class="ministry-rich-toolbar">${[['bold','Bold'],['italic','Italic'],['underline','Underline'],['h2','H2'],['h3','H3'],['insertUnorderedList','List'],['insertOrderedList','Numbered'],['blockquote','Quote'],['createLink','Link'],['undo','Undo'],['redo','Redo']].map(([cmd,text])=>`<button type="button" data-command="${cmd}">${text}</button>`).join('')}</div><article contenteditable="true" data-rich="${key}" data-placeholder="Write ${label.toLowerCase()}…">${value}</article></section>`;
+    const richEditor=(key,label,value)=>`<section class="ministry-rich${area==='elders'&&key==='biography'?' elder-biography-editor':''}" data-rich-section="${key}"><header><h3>${label}</h3></header><div class="ministry-rich-toolbar">${[['bold','Bold'],['italic','Italic'],['underline','Underline'],['h2','H2'],['h3','H3'],['insertUnorderedList','List'],['insertOrderedList','Numbered'],['blockquote','Quote'],['createLink','Link'],['undo','Undo'],['redo','Redo']].map(([cmd,text])=>`<button type="button" data-command="${cmd}">${text}</button>`).join('')}</div><article contenteditable="true" data-rich="${key}" data-placeholder="Write ${label.toLowerCase()}…">${value}</article></section>`;
     const sync=form=>{
       new FormData(form).forEach((value,key)=>selected.data[key]=/year|order/.test(key)&&value!==''?Number(value):value);
       form.querySelectorAll('input[type=checkbox]').forEach(input=>selected.data[input.name]=input.checked);
       form.querySelectorAll('[data-rich]').forEach(editor=>{if(editor.dataset.rich==='biography'){selected.data.biography=editor.innerHTML;selected.body=area==='elders'?'':editor.innerHTML}else selected.data[editor.dataset.rich]=editor.innerHTML});
       if(area==='elders'){
+        const birthMode=form.querySelector('[name="date_of_birth_precision"]')?.value||'unknown';
+        selected.data.date_of_birth_precision=birthMode;
+        if(birthMode==='full_date'){selected.data.date_of_birth=form.elements.date_of_birth.value;selected.data.date_of_birth_year='';}
+        else if(birthMode==='year_only'){selected.data.date_of_birth='';selected.data.date_of_birth_year=Number(form.elements.date_of_birth_year.value||0);}
+        else{selected.data.date_of_birth='';selected.data.date_of_birth_year='';}
         const mode=form.querySelector('[name="date_of_death_precision"]')?.value||'unknown';
         selected.data.date_of_death_precision=mode;
         if(mode==='full_date')selected.data.date_of_death_year='';
@@ -72,6 +90,10 @@
     };
     const bind=()=>{document.querySelector('#ministry-search').oninput=event=>{query=event.target.value;draw()};document.querySelector('#ministry-year').onchange=event=>{year=event.target.value;draw()};document.querySelector('#ministry-status').onchange=event=>{status=event.target.value;draw()};document.querySelector('#ministry-new').onclick=()=>{selected={path:'',data:{...cfg.defaults,photo:'',gallery:[],documents:[],short_description:'',biography:'',published:true,display_order:records.length,slug:''},body:''};dirty=true;draw()};document.querySelectorAll('[data-record]').forEach(button=>button.onclick=()=>{selected=records.find(record=>record.path===button.dataset.record);dirty=false;draw()});if(!selected)return;const form=document.querySelector('#ministry-form');form.addEventListener('input',()=>{dirty=true;document.querySelector('#ministry-save-state').textContent='Unsaved changes'});form.onsubmit=save;
       if(area==='elders'){
+        const birthMode=form.querySelector('[data-birth-mode]'),birthFull=form.querySelector('[data-birth-full]'),birthYear=form.querySelector('[data-birth-year]');
+        const updateBirthFields=()=>{birthFull.hidden=birthMode.value!=='full_date';birthYear.hidden=birthMode.value!=='year_only';};
+        updateBirthFields();
+        birthMode.addEventListener('change',()=>{form.elements.date_of_birth.value='';form.elements.date_of_birth_year.value='';updateBirthFields();dirty=true;document.querySelector('#ministry-save-state').textContent='Unsaved changes'});
         const mode=form.querySelector('[data-death-mode]'),full=form.querySelector('[data-death-full]'),yearField=form.querySelector('[data-death-year]');
         const updateDeathFields=()=>{full.hidden=mode.value!=='full_date';yearField.hidden=mode.value!=='year_only';};
         updateDeathFields();
@@ -85,14 +107,30 @@
       sync(event.currentTarget);
       if(!selected.data.name)return notification('Full name is required.','error');
       if(area==='elders'){
-        const mode=selected.data.date_of_death_precision||'unknown',birth=selected.data.date_of_birth||'',death=selected.data.date_of_death||'',deathYear=Number(selected.data.date_of_death_year||0),birthYear=Number((birth.match(/^(\d{4})/)||[])[1]||0);
+        const birthMode=selected.data.date_of_birth_precision||'unknown';
+        const birth=selected.data.date_of_birth||'';
+        let birthYear=Number(selected.data.date_of_birth_year||0);
+        if(birthMode==='full_date'){
+          if(!/^(\d{4})-(\d{2})-(\d{2})$/.test(birth)||Number.isNaN(Date.parse(birth))||new Date(birth).toISOString().slice(0,10)!==birth)return notification('Enter a valid full date of birth.','error');
+          if(birth>new Date().toISOString().slice(0,10))return notification('Date of birth cannot be in the future.','error');
+          birthYear=Number(birth.slice(0,4));
+          selected.data.date_of_birth_year='';
+        }else if(birthMode==='year_only'){
+          if(!Number.isInteger(birthYear)||birthYear<1||birthYear>new Date().getFullYear())return notification('Enter a valid birth year.','error');
+          selected.data.date_of_birth='';
+        }else{
+          selected.data.date_of_birth='';selected.data.date_of_birth_year='';selected.data.date_of_birth_precision='unknown';birthYear=0;
+        }
+        const mode=selected.data.date_of_death_precision||'unknown',death=selected.data.date_of_death||'',deathYear=Number(selected.data.date_of_death_year||0);
         if(mode==='full_date'){
           if(!/^(\d{4})-(\d{2})-(\d{2})$/.test(death)||Number.isNaN(Date.parse(death))||new Date(death).toISOString().slice(0,10)!==death)return notification('Enter a valid full date of death.','error');
-          if(birth&&death<birth)return notification('Date of death cannot be earlier than date of birth.','error');
+          if(death>new Date().toISOString().slice(0,10))return notification('Date of death cannot be in the future.','error');
+          if(birthYear&&Number(death.slice(0,4))<birthYear)return notification('Date of death cannot be earlier than date of birth.','error');
+          if(birthMode==='full_date'&&birth&&death<birth)return notification('Date of death cannot be earlier than date of birth.','error');
           selected.data.date_of_death_year='';
           selected.data.record_status='Former';
         }else if(mode==='year_only'){
-          if(!Number.isInteger(deathYear)||deathYear<1000||deathYear>2100)return notification('Enter a valid death year.','error');
+          if(!Number.isInteger(deathYear)||deathYear<1000||deathYear>new Date().getFullYear())return notification('Enter a valid death year.','error');
           if(birthYear&&deathYear<birthYear)return notification('Death year cannot be earlier than birth year.','error');
           selected.data.date_of_death='';
           selected.data.record_status='Former';
