@@ -10,6 +10,11 @@ const formatDate = (value: string) => {
   return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
     .format(new Date(value + 'T00:00:00Z'));
 };
+const birthDisplay = profile.birthPrecision === 'full_date'
+  ? formatDate(profile.dateOfBirth)
+  : profile.birthPrecision === 'year_only' && profile.birthYear
+    ? String(profile.birthYear)
+    : '';
 const deathDisplay = profile.deathPrecision === 'full_date'
   ? formatDate(profile.dateOfDeath)
   : profile.deathPrecision === 'year_only' && profile.deathYear
@@ -25,8 +30,8 @@ const deathDisplay = profile.deathPrecision === 'full_date'
         <h1>{profile.name}</h1>
         {profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
         <dl>
-          {profile.dateOfBirth && <div><dt>Date of Birth</dt><dd><time datetime={profile.dateOfBirth}>{formatDate(profile.dateOfBirth)}</time></dd></div>}
-          {deathDisplay && <div><dt>Date of Death</dt><dd><time datetime={profile.dateOfDeath || undefined}>{deathDisplay}</time></dd></div>}
+          {birthDisplay && <div><dt>Pian Ni</dt><dd><time datetime={profile.dateOfBirth || String(profile.birthYear)}>{birthDisplay}</time></dd></div>}
+          {deathDisplay && <div><dt>Thih Ni</dt><dd><time datetime={profile.dateOfDeath || String(profile.deathYear)}>{deathDisplay}</time></dd></div>}
           {profile.ordinationYear > 0 && <div><dt>Nemngheh Kum</dt><dd>{profile.ordinationYear}</dd></div>}
           {profile.presbytery && <div><dt>Nemnghettu Presbytery</dt><dd>{profile.presbytery}</dd></div>}
         </dl>
@@ -56,7 +61,7 @@ const deathDisplay = profile.deathPrecision === 'full_date'
   .elder-prose{color:#4d5b6e;font-size:.9rem;line-height:1.85;overflow-wrap:anywhere}
   .elder-prose :global(p),.elder-prose :global(div){margin:0 0 1em}
   .elder-prose :global(h2),.elder-prose :global(h3),.elder-prose :global(h4){margin:1.5em 0 .55em;color:#172941;font-family:var(--font-display,serif);line-height:1.3}
-  .elder-prose :global(ul),.elder-prose :global(ol){margin:.6em 0 1em;padding-left:1.5em}
+  .elder-prose :global(ul),.elder-prose :global(ol){margin:.6em 0 1em;padding-left:1.5em}.elder-prose :global(ul){list-style:disc}.elder-prose :global(ol){list-style:decimal}.elder-prose :global(ul ul){list-style:circle}.elder-prose :global(ol ol){list-style:lower-alpha}
   .elder-prose :global(li){margin:.25em 0}
   .elder-prose :global(blockquote){margin:1em 0;padding:10px 16px;border-left:3px solid #b8953f;background:#f8f4e9;color:#58657a}
   .elder-prose :global(a){color:#8d6721;text-decoration:underline;overflow-wrap:anywhere}
