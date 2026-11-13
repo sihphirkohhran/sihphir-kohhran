@@ -7,4 +7,5 @@ designation: "."
 published: true
 display_order: 8
 end_year: 1977
+photo: "/images/1794551216880-7.jpg"
 ---
