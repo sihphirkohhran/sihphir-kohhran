@@ -24,9 +24,10 @@ function safeHref(value: string): string {
     .replace(/&#x([0-9a-f]+);?/gi, (_, code) => String.fromCodePoint(parseInt(code, 16)))
     .replace(/&#([0-9]+);?/g, (_, code) => String.fromCodePoint(Number(code)))
     .replace(/&colon;/gi, ':').replace(/&tab;/gi, '\t').replace(/&newline;/gi, '\n');
+  const normalized = decoded.replace(/[\u0000-\u0020\u007f]/g, '');
   if (!href || href.startsWith('//') || href.startsWith('\\\\')) return '';
-  if (/^(https?:|mailto:)/i.test(decoded)) return href;
-  if (/^(?:[/?#]|\.\.?\/)/.test(decoded) && !decoded.startsWith('//')) return href;
+  if (/^(https?:|mailto:)/i.test(normalized)) return href;
+  if (/^(?:[/?#]|\.\.?\/)/.test(decoded) && !normalized.startsWith('//')) return href;
   if (/^[a-z][a-z0-9+.-]*:/i.test(decoded)) return '';
   return href;
 }
