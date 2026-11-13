@@ -57,6 +57,7 @@ export function normalizeElderProfile(entry: any): ElderProfile | null {
 
   const searchText = [data.name, data.designation, data.short_description, data.notes, data.nemnghettu_presbytery, data.biography, entry.body]
     .filter(Boolean).join(' ').toLowerCase();
+  const biographySource = data.biography !== undefined ? data.biography : entry.body || data.notes;
 
   return {
     id: String(entry.id || '').replace(/\.(md|json)$/i, '').replace(/[^a-z0-9]+/gi, '-'),
@@ -66,7 +67,7 @@ export function normalizeElderProfile(entry: any): ElderProfile | null {
     ordinationYear: Number.isFinite(ordinationYear) && ordinationYear > 0 ? ordinationYear : 0,
     presbytery: String(data.nemnghettu_presbytery || ''),
     current,
-    biographyHtml: renderSafeRichText(data.biography || entry.body || data.notes),
+    biographyHtml: renderSafeRichText(biographySource),
     searchText,
     order: Number(data.display_order || 0),
   };
