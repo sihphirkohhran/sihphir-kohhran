@@ -59,7 +59,7 @@ const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
     <section class="elder-section former-section" data-elder-section>
       <header><h2>{formerTitle}</h2></header>
       <div class="elder-grid" data-elder-grid>
-        {formerProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={(profile.name + ' ' + profile.presbytery).toLowerCase()} data-year={profile.ordinationYear || ''}>
+        {formerProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={profile.searchText} data-year={profile.ordinationYear || ''}>
           <a class="elder-photo" href={'/kohhran-upa/' + profile.id}><img src={profile.photo} alt={profile.name} loading="lazy" /></a>
           <div class="elder-card-body">
             <h3>{profile.name}</h3>
