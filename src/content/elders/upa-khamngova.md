@@ -7,4 +7,5 @@ status: "Active"
 published: true
 display_order: 1
 ordination_year: 1912
+short_description: "1. Bial chairman 1913"
 ---
