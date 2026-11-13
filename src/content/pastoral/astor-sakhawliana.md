@@ -7,4 +7,5 @@ designation: "."
 published: true
 display_order: 11
 end_year: 1959
+photo: "/images/1794551108338-4.jpg"
 ---
