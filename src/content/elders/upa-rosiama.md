@@ -1,5 +1,5 @@
 ---
-name: "Upa Rosiama\t"
+name: "Upa Rosiama"
 ordained_year: 1963
 record_status: "Former"
 designation: "Kohhran Upa"
