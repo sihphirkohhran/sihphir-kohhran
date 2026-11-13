@@ -4,7 +4,7 @@ ordained_year: 1980
 record_status: "Former"
 designation: "Kohhran Upa"
 status: "Active"
-biography: ""
+biography: "Sihphir Venglai Kohhran a In danpui"
 published: true
 display_order: 21
 date_of_birth_precision: "year_only"
