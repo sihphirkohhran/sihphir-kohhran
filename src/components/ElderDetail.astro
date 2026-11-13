@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { ElderProfile } from '../lib/elder-profile';
+interface Props { profile: ElderProfile }
+const { profile } = Astro.props;
+const formatDate = (value: string) => {
+  if (/^\d{4}$/.test(value)) return value;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return value;
+  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' })
+    .format(new Date(value + 'T00:00:00Z'));
+};
+const deathDisplay = profile.deathPrecision === 'full_date'
+  ? formatDate(profile.dateOfDeath)
+  : profile.deathPrecision === 'year_only' && profile.deathYear
+    ? String(profile.deathYear)
+    : '';
+---
+<BaseLayout title={profile.name + ' — Kohhran Upa'} activePage="kohhran-upa">
+  <main class="elder-detail max-w-7xl mx-auto px-4 py-7 sm:py-10">
+    <a class="elder-back" href="/kohhran-upa">← Back to Kohhran Upa</a>
+    <section class="elder-profile">
+      <div class="elder-portrait"><img src={profile.photo} alt={profile.name} /></div>
+      <div class="elder-facts">
+        <h1>{profile.name}</h1>
+        {profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
+        <dl>
+          {profile.dateOfBirth && <div><dt>Date of Birth</dt><dd><time datetime={profile.dateOfBirth}>{formatDate(profile.dateOfBirth)}</time></dd></div>}
+          {deathDisplay && <div><dt>Date of Death</dt><dd><time datetime={profile.dateOfDeath || undefined}>{deathDisplay}</time></dd></div>}
+          {profile.ordinationYear > 0 && <div><dt>Nemngheh Kum</dt><dd>{profile.ordinationYear}</dd></div>}
+          {profile.presbytery && <div><dt>Nemnghettu Presbytery</dt><dd>{profile.presbytery}</dd></div>}
+        </dl>
+      </div>
+    </section>
+    {profile.biographyHtml && <section class="elder-biography">
+      <header><h2>Biography</h2></header>
+      <div class="elder-prose" set:html={profile.biographyHtml}></div>
+    </section>}
+  </main>
+</BaseLayout>
+<style>
+  .elder-detail{width:min(100%,1280px);color:#172941}
+  .elder-back{display:inline-block;margin-bottom:18px;border:1px solid #14274024;border-radius:8px;padding:9px 12px;background:#fffdf8;color:#31445e;text-decoration:none;font-size:.72rem;font-weight:700}
+  .elder-profile{display:grid;grid-template-columns:minmax(260px,.72fr) minmax(0,1.28fr);overflow:hidden;border:1px solid #b8953f45;border-radius:17px;background:#142740;color:#fff;box-shadow:0 16px 42px #1122381c}
+  .elder-portrait{min-width:0;aspect-ratio:4/5;max-height:620px;background:#e9ecee}
+  .elder-portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top}
+  .elder-facts{display:flex;flex-direction:column;justify-content:center;padding:clamp(24px,4vw,52px)}
+  .elder-facts h1{margin:0;color:#fff;font-family:var(--font-display,serif);font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.15}
+  .elder-lifespan{margin:8px 0 0;color:#e5d6aa;font-size:.9rem}
+  .elder-facts dl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:28px 0 0}
+  .elder-facts dl>div{min-width:0;padding-top:12px;border-top:1px solid #ffffff26}
+  .elder-facts dt{color:#aab7c9;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em}
+  .elder-facts dd{margin:5px 0 0;color:#f1e8d2;font-size:.88rem;line-height:1.5;overflow-wrap:anywhere}
+  .elder-biography{max-width:900px;margin:38px auto 0;padding:clamp(20px,3vw,34px);border:1px solid #14274017;border-radius:14px;background:#fffdf8}
+  .elder-biography h2{margin:0 0 18px;font-family:var(--font-display,serif);font-size:1.6rem}
+  .elder-prose{color:#4d5b6e;font-size:.9rem;line-height:1.85;overflow-wrap:anywhere}
+  .elder-prose :global(p),.elder-prose :global(div){margin:0 0 1em}
+  .elder-prose :global(h2),.elder-prose :global(h3),.elder-prose :global(h4){margin:1.5em 0 .55em;color:#172941;font-family:var(--font-display,serif);line-height:1.3}
+  .elder-prose :global(ul),.elder-prose :global(ol){margin:.6em 0 1em;padding-left:1.5em}
+  .elder-prose :global(li){margin:.25em 0}
+  .elder-prose :global(blockquote){margin:1em 0;padding:10px 16px;border-left:3px solid #b8953f;background:#f8f4e9;color:#58657a}
+  .elder-prose :global(a){color:#8d6721;text-decoration:underline;overflow-wrap:anywhere}
+  @media(max-width:760px){.elder-profile{grid-template-columns:1fr}.elder-portrait{width:min(100%,430px);max-height:none;margin:auto}.elder-facts{padding:25px}.elder-facts dl{gap:12px}}
+  @media(max-width:440px){.elder-facts dl{grid-template-columns:1fr}.elder-biography{margin-top:24px}}
+</style>

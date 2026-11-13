@@ -2,3 +2,10 @@
 @media(max-width:1100px){.ministry-workspace{grid-template-columns:290px minmax(0,1fr)}.ministry-fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:800px){.ministry-workspace{grid-template-columns:1fr}.ministry-library,.ministry-editor{min-height:0}.ministry-records{max-height:360px}.ministry-fields{grid-template-columns:1fr}.ministry-fields .wide{grid-column:auto}.ministry-editor-head{display:grid}.ministry-editor-head>div:last-child{justify-content:flex-start}.ministry-preview>section{grid-template-columns:1fr}.ministry-preview img{height:280px}}
 @media(max-width:520px){.ministry-library>header{display:grid}.ministry-tools>div{grid-template-columns:1fr}.ministry-assets,.ministry-rich{margin-right:12px;margin-left:12px}.ministry-asset-list{grid-template-columns:1fr}}
+
+/* Kohhran Upa's focused historical-record editor. */
+.elder-cms-fields{grid-template-columns:repeat(2,minmax(0,1fr))}
+.elder-cms-fields label{min-width:0}
+.elder-cms-fields [data-death-full][hidden],.elder-cms-fields [data-death-year][hidden]{display:none!important}
+.elder-cms-fields input[type=date],.elder-cms-fields input[type=number]{min-width:0}
+@media(max-width:800px){.elder-cms-fields{grid-template-columns:1fr}}
