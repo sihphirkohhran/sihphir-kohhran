@@ -27,8 +27,8 @@ function safeHref(value: string): string {
   const normalized = decoded.replace(/[\u0000-\u0020\u007f]/g, '');
   if (!href || href.startsWith('//') || href.startsWith('\\\\')) return '';
   if (/^(https?:|mailto:)/i.test(normalized)) return href;
-  if (/^(?:[/?#]|\.\.?\/)/.test(decoded) && !normalized.startsWith('//')) return href;
-  if (/^[a-z][a-z0-9+.-]*:/i.test(decoded)) return '';
+  if (/^(?:[/?#]|\.\.?\/)/.test(normalized) && !normalized.startsWith('//')) return href;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(normalized)) return '';
   return href;
 }
 
