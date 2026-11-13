@@ -8,11 +8,18 @@
   window.SihphirMinistryManager={async mount({area,api,esc,slug,notification,readUpload}){
     window.__sihphirMinistryCleanup?.();const cfg=config[area],host=document.querySelector('#view');document.querySelector('.top h1')?.replaceChildren(cfg.label);let records=[],selected=null,query='',year='all',status='all',dirty=false,uploading=0;
     const before=event=>{if(dirty){event.preventDefault();event.returnValue=''}};addEventListener('beforeunload',before);window.__sihphirMinistryCleanup=()=>removeEventListener('beforeunload',before);
-    const load=async()=>{const list=(await api('/api/admin/content?area='+cfg.apiArea)).items;records=[];for(const item of list){try{const file=await api('/api/admin/content?path='+encodeURIComponent(item.path)),parsed=parse(file.content);if(cfg.role&&((parsed.data.role||'pastor')!==cfg.role))continue;parsed.data.photo=parsed.data.photo||parsed.data.profile_photo||parsed.data.profile_image||parsed.data.cover_photo||'';parsed.data.family_photo=parsed.data.family_photo||parsed.data.family_image||'';records.push({path:item.path,...parsed});}catch{}}records.sort((a,b)=>Number(b.data[cfg.year]||0)-Number(a.data[cfg.year]||0));draw();};
+    const load=async()=>{const list=(await api('/api/admin/content?area='+cfg.apiArea)).items;records=[];for(const item of list){try{const file=await api('/api/admin/content?path='+encodeURIComponent(item.path)),parsed=parse(file.content);if(cfg.role&&((parsed.data.role||'pastor')!==cfg.role))continue;parsed.data.photo=parsed.data.photo||parsed.data.profile_photo||parsed.data.profile_image||parsed.data.cover_photo||'';if(area==='elders')parsed.data.ordained_year=parsed.data.ordained_year||parsed.data.legacy_ordained_year||parsed.data.ordination_year||Number(String(parsed.data.ordination_date||'').slice(0,4))||'';parsed.data.family_photo=parsed.data.family_photo||parsed.data.family_image||'';records.push({path:item.path,...parsed});}catch{}}records.sort((a,b)=>Number(b.data[cfg.year]||0)-Number(a.data[cfg.year]||0));draw();};
+    const elderDeathMode=record=>{
+      const precision=record.data.date_of_death_precision;
+      if(precision==='full_date'||precision==='year_only'||precision==='unknown')return precision;
+      if(/^\\d{4}-\\d{2}-\\d{2}$/.test(record.data.date_of_death||''))return 'full_date';
+      if(/^\\d{4}$/.test(String(record.data.date_of_death||''))||Number(record.data.date_of_death_year)>0)return 'year_only';
+      return 'unknown';
+    };
     const recordStatus=record=>{
       if(record.data.published===false)return 'Draft';
       if(area==='elders'){
-        const precision=record.data.date_of_death_precision;
+        const precision=elderDeathMode(record);
         const full=precision==='full_date'&&/^\d{4}-\d{2}-\d{2}$/.test(record.data.date_of_death||'');
         const year=precision==='year_only'&&Number(record.data.date_of_death_year)>0;
         if(full||year||/deceased|dead|passed away/i.test(record.data.status||''))return 'Former';
@@ -32,25 +39,25 @@
       }));
       return template.innerHTML;
     };
-    const elderEditorMarkup=()=>\`<form id="ministry-form"><header class="ministry-editor-head"><div><span id="ministry-save-state">\${dirty?'Unsaved changes':'Profile editor'}</span><h2>\${esc(selected.data.name)}</h2></div><div><button type="button" id="ministry-preview">Preview</button><button type="button" class="danger" id="ministry-delete">Delete</button><button class="gold" id="ministry-save">Save</button></div></header>
+    const elderEditorMarkup=()=>`<form id="ministry-form"><header class="ministry-editor-head"><div><span id="ministry-save-state">${dirty?'Unsaved changes':'Profile editor'}</span><h2>${esc(selected.data.name)}</h2></div><div><button type="button" id="ministry-preview">Preview</button><button type="button" class="danger" id="ministry-delete">Delete</button><button class="gold" id="ministry-save">Save</button></div></header>
       <div class="ministry-fields elder-cms-fields">
-        \${field('name','Full Name')}
-        \${field('date_of_birth','Date of Birth','date')}
-        \${field('ordained_year','Ordination Year','number')}
-        \${field('nemnghettu_presbytery','Nemnghettu Presbytery')}
-        <label><span>Current / Former</span><select name="record_status"><option value="Current" \${recordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" \${recordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
+        ${field('name','Full Name')}
+        ${field('date_of_birth','Date of Birth','date')}
+        ${field('ordained_year','Ordination Year','number')}
+        ${field('nemnghettu_presbytery','Nemnghettu Presbytery')}
+        <label><span>Current / Former</span><select name="record_status"><option value="Current" ${recordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${recordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
         <label><span>Date of Death</span><select name="date_of_death_precision" data-death-mode>
-          <option value="unknown" \${(selected.data.date_of_death_precision||'unknown')==='unknown'?'selected':''}>Unknown / Not Recorded</option>
-          <option value="full_date" \${selected.data.date_of_death_precision==='full_date'?'selected':''}>Full Date</option>
-          <option value="year_only" \${selected.data.date_of_death_precision==='year_only'?'selected':''}>Year Only</option>
+          <option value="unknown" ${elderDeathMode(selected)==='unknown'?'selected':''}>Unknown / Not Recorded</option>
+          <option value="full_date" ${elderDeathMode(selected)==='full_date'?'selected':''}>Full Date</option>
+          <option value="year_only" ${elderDeathMode(selected)==='year_only'?'selected':''}>Year Only</option>
         </select></label>
-        <label data-death-full><span>Date of Death</span><input name="date_of_death" type="date" value="\${esc(selected.data.date_of_death||'')}"></label>
-        <label data-death-year><span>Death Year</span><input name="date_of_death_year" type="number" min="1000" max="2100" step="1" value="\${esc(selected.data.date_of_death_year||'')}"></label>
-        <div class="wide ministry-checks">\${checks()}</div>
+        <label data-death-full><span>Date of Death</span><input name="date_of_death" type="date" value="${esc(selected.data.date_of_death||'')}"></label>
+        <label data-death-year><span>Death Year</span><input name="date_of_death_year" type="number" min="1000" max="2100" step="1" value="${esc(selected.data.date_of_death_year||'')}"></label>
+        <div class="wide ministry-checks">${checks()}</div>
       </div>
-      \${assetEditor('photo','Profile Photo',false)}
-      \${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||selected.data.notes||''))}
-    </form>\`;
+      ${assetEditor('photo','Profile Photo',false)}
+      ${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||selected.data.notes||''))}
+    </form>`;
     const editorMarkup=()=>area==='elders'?elderEditorMarkup():existingEditorMarkup();
     const assetEditor=(key,label,multiple,documents=false)=>{const values=!multiple?[selected.data[key]].filter(Boolean):Array.isArray(selected.data[key])?selected.data[key]:[];return`<section class="ministry-assets" data-assets="${key}"><header><div><h3>${label}</h3><p>${multiple?'Drag to reorder or remove uploaded files.':'Choose, preview, replace or delete this image.'}</p></div><button type="button" data-upload="${key}">${values.length?'Replace':'Choose File'}</button></header><input type="file" data-picker="${key}" ${multiple?'multiple':''} accept="${documents?'.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip':'image/*'}" hidden><div class="ministry-drop" data-drop="${key}">Drop ${documents?'documents':'images'} here or choose Upload</div><div class="ministry-asset-list">${values.map((url,index)=>`<article draggable="${multiple}" data-asset-index="${index}">${documents?'<i>FILE</i>':`<img src="${esc(url)}" alt="">`}<span>${esc(url.split('/').pop())}</span>${!documents&&multiple&&index===0?'<b>Featured image</b>':''}<button type="button" data-remove-asset="${key}:${index}">${multiple?'Remove':'Delete'}</button></article>`).join('')||'<p>No files attached.</p>'}</div></section>`};
     const richEditor=(key,label,value)=>`<section class="ministry-rich" data-rich-section="${key}"><header><h3>${label}</h3></header><div class="ministry-rich-toolbar">${[['bold','Bold'],['italic','Italic'],['underline','Underline'],['h2','H2'],['h3','H3'],['insertUnorderedList','List'],['insertOrderedList','Numbered'],['blockquote','Quote'],['createLink','Link'],['undo','Undo'],['redo','Redo']].map(([cmd,text])=>`<button type="button" data-command="${cmd}">${text}</button>`).join('')}</div><article contenteditable="true" data-rich="${key}" data-placeholder="Write ${label.toLowerCase()}…">${value}</article></section>`;
