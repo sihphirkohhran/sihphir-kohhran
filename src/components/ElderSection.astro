@@ -1,0 +1,154 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { ElderProfile } from '../lib/elder-profile';
+import { getPageSettings } from '../lib/page-settings';
+interface Props { profiles: ElderProfile[] }
+const { profiles } = Astro.props;
+const sortOldest = (a: ElderProfile, b: ElderProfile) =>
+  (a.ordinationYear || Number.POSITIVE_INFINITY) - (b.ordinationYear || Number.POSITIVE_INFINITY) ||
+  a.name.localeCompare(b.name) || a.order - b.order;
+const currentProfiles = profiles.filter((profile) => profile.current).sort(sortOldest);
+const formerProfiles = profiles.filter((profile) => !profile.current).sort(sortOldest);
+const years = [...new Set(profiles.map((profile) => profile.ordinationYear).filter((year) => year > 0))].sort((a, b) => a - b);
+const ui = await getPageSettings('elders', {
+  hero_caption: 'SIHPHIR PRESBYTERIAN KOHHRAN', hero_title: 'Kohhran Upa', hero_subtitle: '',
+  current_title: 'Kohhran Upa ni lai mek te', former_title: 'Kohhran Upa lo ni tawh te',
+  search_placeholder: 'Search elders…', view_profile: 'View Profile', empty_message: 'No elders found.',
+  sort_label: 'Sort by ordination year', filter_label: 'Ordination year', results_label: 'elder',
+});
+const currentTitle = ui.current_title || 'Kohhran Upa ni lai mek te';
+const formerTitle = ui.former_title || 'Kohhran Upa lo ni tawh te';
+---
+<BaseLayout title="Kohhran Upa — Sihphir Presbyterian Kohhran" activePage="kohhran-upa">
+  <header class="elder-hero"><div>
+    <p>{ui.hero_caption || 'SIHPHIR PRESBYTERIAN KOHHRAN'}</p>
+    <h1>{ui.hero_title || 'Kohhran Upa'}</h1>
+    {ui.hero_subtitle && <span>{ui.hero_subtitle}</span>}
+  </div></header>
+  <main class="elder-page max-w-7xl mx-auto px-4 py-8 sm:py-10">
+    <section class="elder-toolbar" aria-label="Search and filter elders">
+      <label class="elder-search"><span class="sr-only">Search elders</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
+        <input id="elder-search" type="search" placeholder={ui.search_placeholder || 'Search elders…'} />
+      </label>
+      <label><span>{ui.filter_label || 'Ordination year'}</span><select id="elder-year">
+        <option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}
+      </select></label>
+      <label><span>{ui.sort_label || 'Sort by ordination year'}</span><select id="elder-sort">
+        <option value="oldest">Oldest First</option><option value="newest">Newest First</option>
+      </select></label>
+      <p id="elder-count">{profiles.length} {ui.results_label || 'elder'}{profiles.length === 1 ? '' : 's'}</p>
+    </section>
+
+    <section class="elder-section" data-elder-section>
+      <header><h2>{currentTitle}</h2></header>
+      <div class="elder-grid" data-elder-grid>
+        {currentProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={(profile.name + ' ' + profile.presbytery).toLowerCase()} data-year={profile.ordinationYear || ''}>
+          <a class="elder-photo" href={'/kohhran-upa/' + profile.id}><img src={profile.photo} alt={profile.name} loading="lazy" /></a>
+          <div class="elder-card-body">
+            <h3>{profile.name}</h3>
+            {profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
+            {profile.ordinationYear > 0 && <p class="elder-ordination">Nemngheh: {profile.ordinationYear}</p>}
+            <a class="elder-view" href={'/kohhran-upa/' + profile.id}>{ui.view_profile || 'View Profile'} <span>→</span></a>
+          </div>
+        </article>)}
+      </div>
+      <p class="elder-empty" data-section-empty hidden>{ui.empty_message || 'No elders found.'}</p>
+    </section>
+
+    <section class="elder-section former-section" data-elder-section>
+      <header><h2>{formerTitle}</h2></header>
+      <div class="elder-grid" data-elder-grid>
+        {formerProfiles.map((profile) => <article class="elder-card" data-elder-card data-name={(profile.name + ' ' + profile.presbytery).toLowerCase()} data-year={profile.ordinationYear || ''}>
+          <a class="elder-photo" href={'/kohhran-upa/' + profile.id}><img src={profile.photo} alt={profile.name} loading="lazy" /></a>
+          <div class="elder-card-body">
+            <h3>{profile.name}</h3>
+            {profile.lifespan && <p class="elder-lifespan">({profile.lifespan})</p>}
+            {profile.ordinationYear > 0 && <p class="elder-ordination">Nemngheh: {profile.ordinationYear}</p>}
+            <a class="elder-view" href={'/kohhran-upa/' + profile.id}>{ui.view_profile || 'View Profile'} <span>→</span></a>
+          </div>
+        </article>)}
+      </div>
+      <p class="elder-empty" data-section-empty hidden>{ui.empty_message || 'No elders found.'}</p>
+    </section>
+    <p class="elder-no-results" id="elder-no-results" hidden>{ui.empty_message || 'No elders found.'} Try another search or clear the year filter.</p>
+  </main>
+</BaseLayout>
+<script>
+  const search = document.querySelector('#elder-search');
+  const year = document.querySelector('#elder-year');
+  const sort = document.querySelector('#elder-sort');
+  const count = document.querySelector('#elder-count');
+  const noResults = document.querySelector('#elder-no-results');
+  const sections = [...document.querySelectorAll('[data-elder-section]')];
+  function compareCards(a, b) {
+    const ay = Number(a.dataset.year) || 0, by = Number(b.dataset.year) || 0;
+    if (!ay && by) return 1;
+    if (ay && !by) return -1;
+    if (ay && by && ay !== by) return sort.value === 'newest' ? by - ay : ay - by;
+    return (a.dataset.name || '').localeCompare(b.dataset.name || '');
+  }
+  function filterAndSort() {
+    const query = search.value.trim().toLowerCase(), selectedYear = year.value;
+    let visible = 0;
+    sections.forEach((section) => {
+      const grid = section.querySelector('[data-elder-grid]');
+      const cards = [...grid.querySelectorAll('[data-elder-card]')];
+      cards.forEach((card) => {
+        const matches = (!query || card.dataset.name.includes(query)) &&
+          (selectedYear === 'all' || card.dataset.year === selectedYear);
+        card.hidden = !matches;
+        if (matches) visible += 1;
+      });
+      cards.sort(compareCards).forEach((card) => grid.append(card));
+      const hasVisible = cards.some((card) => !card.hidden);
+      section.hidden = cards.length > 0 && !hasVisible;
+      const empty = section.querySelector('[data-section-empty]');
+      if (empty) empty.hidden = cards.length > 0;
+    });
+    if (count) count.textContent = visible + ' ' + (visible === 1 ? 'elder' : 'elders');
+    if (noResults) noResults.hidden = visible > 0;
+  }
+  search?.addEventListener('input', filterAndSort);
+  year?.addEventListener('change', filterAndSort);
+  sort?.addEventListener('change', filterAndSort);
+  filterAndSort();
+</script>
+<style>
+  .elder-hero{padding:42px 16px;border-bottom:2px solid #b8953f;background:#142740;color:#fff;text-align:center}
+  .elder-hero>div{max-width:760px;margin:auto}
+  .elder-hero p{margin:0 0 8px;color:#d9c78f;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase}
+  .elder-hero h1{margin:0;font-family:var(--font-display,serif);font-size:clamp(2rem,5vw,2.6rem)}
+  .elder-hero span{display:block;margin-top:12px;color:#d8ccaa;font-size:.85rem;line-height:1.6}
+  .elder-page{width:min(100%,1440px);color:#172941}
+  .elder-toolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,auto) minmax(170px,auto);gap:12px;align-items:end;padding:16px;border:1px solid #1427401c;border-radius:14px;background:#fffdf8;box-shadow:0 12px 35px #14243a12}
+  .elder-toolbar label{display:grid;gap:5px;min-width:0}
+  .elder-toolbar label>span{color:#7c8390;font-size:.58rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+  .elder-toolbar input,.elder-toolbar select{width:100%;min-width:0;border:1px solid #1427402b;border-radius:9px;padding:11px 12px;background:#fff;color:#172941;font:inherit;font-size:.78rem}
+  .elder-search{display:flex!important;align-items:center;gap:9px;border:1px solid #1427402b;border-radius:9px;padding:0 11px;background:#fff}
+  .elder-search svg{width:18px;fill:none;stroke:#9a772b;stroke-width:1.7}
+  .elder-search input{border:0;outline:0;padding:11px 0}
+  .elder-toolbar>p{grid-column:1/-1;margin:0;color:#7e8590;font-size:.68rem}
+  .elder-section{margin-top:36px}
+  .elder-section>header{margin-bottom:17px}
+  .elder-section h2{margin:0;color:#172941;font-family:var(--font-display,serif);font-size:clamp(1.35rem,2.3vw,1.7rem)}
+  .elder-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:clamp(14px,1.5vw,22px)}
+  .elder-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid #14274017;border-radius:13px;background:#fff;box-shadow:0 6px 21px #17263b10;transition:transform .2s,border-color .2s,box-shadow .2s}
+  .elder-card:hover{transform:translateY(-3px);border-color:#b8953f61;box-shadow:0 13px 28px #17263b18}
+  .elder-card[hidden]{display:none}
+  .elder-photo{display:block;overflow:hidden;aspect-ratio:4/5;background:#e9ecee}
+  .elder-photo img{display:block;width:100%;height:100%;object-fit:cover;object-position:center top;transition:transform .4s}
+  .elder-card:hover .elder-photo img{transform:scale(1.04)}
+  .elder-card-body{display:flex;flex:1;flex-direction:column;padding:clamp(12px,1.25vw,18px)}
+  .elder-card h3{margin:0;color:#172941;font-family:var(--font-display,serif);font-size:clamp(.9rem,1vw,1.08rem);line-height:1.35}
+  .elder-lifespan{margin:4px 0 0;color:#68758a;font-size:.72rem}
+  .elder-ordination{margin:7px 0 0;color:#8c6a27;font-size:.7rem;font-weight:700}
+  .elder-view{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:auto;padding:9px 0 0;color:#142740;text-decoration:none;font-size:.68rem;font-weight:750}
+  .elder-view span{color:#b8953f}
+  .elder-empty,.elder-no-results{margin:0;padding:20px;border:1px solid #14274017;border-radius:11px;background:#fffdf8;color:#6f7a8b;font-size:.78rem}
+  .elder-no-results{margin-top:28px;text-align:center}
+  @media(max-width:1100px){.elder-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+  @media(max-width:900px){.elder-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:650px){.elder-toolbar{grid-template-columns:1fr 1fr}.elder-search{grid-column:1/-1}.elder-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.elder-card-body{padding:12px}}
+  @media(max-width:360px){.elder-grid{grid-template-columns:1fr}}
+</style>
