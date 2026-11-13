@@ -1,7 +1,7 @@
 ---
 name: "Upa Khamngova"
 ordained_year: 1912
-record_status: "Current"
+record_status: "Former"
 designation: "Kohhran Upa"
 status: "Active"
 published: true
