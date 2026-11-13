@@ -63,7 +63,7 @@
     const sync=form=>{
       new FormData(form).forEach((value,key)=>selected.data[key]=/year|order/.test(key)&&value!==''?Number(value):value);
       form.querySelectorAll('input[type=checkbox]').forEach(input=>selected.data[input.name]=input.checked);
-      form.querySelectorAll('[data-rich]').forEach(editor=>{if(editor.dataset.rich==='biography'){selected.data.biography=editor.innerHTML;selected.body=editor.innerHTML}else selected.data[editor.dataset.rich]=editor.innerHTML});
+      form.querySelectorAll('[data-rich]').forEach(editor=>{if(editor.dataset.rich==='biography'){selected.data.biography=editor.innerHTML;selected.body=area==='elders'?'':editor.innerHTML}else selected.data[editor.dataset.rich]=editor.innerHTML});
       if(area==='elders'){
         const mode=form.querySelector('[name="date_of_death_precision"]')?.value||'unknown';
         selected.data.date_of_death_precision=mode;
