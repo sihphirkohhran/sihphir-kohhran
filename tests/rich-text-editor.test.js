@@ -12,6 +12,7 @@ const pages = read('../public/admin/page-manager.js');
 const home = read('../public/admin/app.js');
 const ministry = read('../public/admin/ministry-manager.js');
 const notice = read('../public/admin/notice-manager.js');
+const helper = read('../public/admin/rich-text-editor.js');
 const publicCommittee = read('../src/pages/committee.astro');
 const sanitizer = read('../src/lib/markdown.ts');
 
@@ -46,6 +47,11 @@ test('active editors have scoped visible list markers', () => {
   assert.match(pages, /id="page-rich" contenteditable="true"/);
   assert.match(home, /data-home-rich data-target=/);
   assert.match(notice, /id="notice-rich" contenteditable="true"/);
+  for (const source of [committee, fellowship, pages, notice, ministry]) assert.match(source, /bindPaste\(/);
+  assert.match(home, /sanitizeHtml\(html/);
+  assert.match(helper, /const sanitizeHtml/);
+  assert.match(helper, /www.youtube-nocookie.com/);
+  assert.match(helper, /script,style,meta,link,object,embed,svg,math/);
   assert.match(ministry, /contenteditable="true" data-rich=/);
 });
 
