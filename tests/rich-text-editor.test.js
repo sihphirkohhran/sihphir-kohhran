@@ -11,6 +11,7 @@ const fellowship = read('../public/admin/fellowship-manager.js');
 const pages = read('../public/admin/page-manager.js');
 const home = read('../public/admin/app.js');
 const ministry = read('../public/admin/ministry-manager.js');
+const notice = read('../public/admin/notice-manager.js');
 const publicCommittee = read('../src/pages/committee.astro');
 const sanitizer = read('../src/lib/markdown.ts');
 
@@ -36,7 +37,7 @@ test('Committee toolbar prevents focus theft and rejects unsafe link schemes', (
 });
 
 test('active editors have scoped visible list markers', () => {
-  for (const selector of ['.committee-rich article', '#fellowship-history', '#page-rich', '.home-rich-editor', '.ministry-rich article']) {
+  for (const selector of ['.committee-rich article', '#fellowship-history', '#page-rich', '#notice-rich', '.home-rich-editor', '.ministry-rich article']) {
     assert.ok(sharedCss.includes(selector), `missing style scope ${selector}`);
   }
   assert.match(sharedCss, /list-style-type:disc/);
@@ -44,6 +45,7 @@ test('active editors have scoped visible list markers', () => {
   assert.match(fellowship, /contenteditable="true"/);
   assert.match(pages, /id="page-rich" contenteditable="true"/);
   assert.match(home, /data-home-rich data-target=/);
+  assert.match(notice, /id="notice-rich" contenteditable="true"/);
   assert.match(ministry, /contenteditable="true" data-rich=/);
 });
 
