@@ -26,7 +26,7 @@ test('rich-text fixture covers headings, paragraphs, inline marks, nested lists 
 
 test('Committee editor preserves empty content and serializes semantic editor HTML', () => {
   assert.match(committee, /id="committee-rich-editor" contenteditable="true"/);
-  assert.match(committee, /selected\.body=document\.querySelector\('#committee-rich-editor'\)\.innerHTML/);
+  assert.match(committee, /sanitizeHtml\(richEditor\.innerHTML,\{media:false\}\)/);
   assert.match(committee, /selected\.body\|\|\(selected\.isNew\?''/);
   assert.match(committeeCss, /\.committee-rich article ul[\s\S]*list-style-type:disc/);
   assert.match(committeeCss, /\.committee-rich article ol[\s\S]*list-style-type:decimal/);
