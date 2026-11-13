@@ -10,10 +10,14 @@ const compareBirthThenName = (a: ElderProfile, b: ElderProfile) => {
   return aBirth - bBirth || a.name.localeCompare(b.name) || a.order - b.order;
 };
 const compareOrdination = (direction: 'asc' | 'desc') => (a: ElderProfile, b: ElderProfile) => {
-  const aYear = a.ordinationYear > 0 ? a.ordinationYear : Number.POSITIVE_INFINITY;
-  const bYear = b.ordinationYear > 0 ? b.ordinationYear : Number.POSITIVE_INFINITY;
-  const ordination = direction === 'asc' ? aYear - bYear : bYear - aYear;
-  return ordination || compareBirthThenName(a, b);
+  const aKnown = a.ordinationYear > 0, bKnown = b.ordinationYear > 0;
+  if (aKnown !== bKnown) return aKnown ? -1 : 1;
+  if (aKnown && bKnown && a.ordinationYear !== b.ordinationYear) {
+    return direction === 'asc'
+      ? a.ordinationYear - b.ordinationYear
+      : b.ordinationYear - a.ordinationYear;
+  }
+  return compareBirthThenName(a, b);
 };
 const currentProfiles = profiles.filter((profile) => profile.current).sort(compareOrdination('asc'));
 const formerProfiles = profiles.filter((profile) => !profile.current).sort(compareOrdination('desc'));
