@@ -11,5 +11,5 @@ date_of_birth: "1917-01-30"
 nemnghettu_presbytery: "Sakawrhmuituai"
 date_of_death_precision: "year_only"
 date_of_death_year: 1933
-biography: "<b>Test</b><div><ol><li>sdd</li><li>fsdf</li><li>dsf</li><li>sdf</li><li>dsf</li><li>dsfds</li></ol></div>"
+biography: "<h2><b>Test</b></h2><blockquote><blockquote><ul><li>sdd</li></ul><ul><li>fsdf</li></ul><ul><li>dsf</li></ul><ul><li>sdf</li></ul><ul><li>dsf</li></ul><ul><li>dsfds</li></ul></blockquote></blockquote>"
 ---
