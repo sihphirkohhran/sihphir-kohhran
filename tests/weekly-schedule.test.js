@@ -60,9 +60,9 @@ test('archive filtering hides flex cards and combines search with year', () => {
 
 test('archive detail wraps long duty labels and values without widening cards', () => {
   assert.ok(detail.includes('.day-card{background:#fff;border:1px solid rgba(184,149,63,.2);border-left:3px solid #b8953f;padding:1rem 1.15rem;min-width:0;max-width:100%;box-sizing:border-box}'));
-  assert.ok(detail.includes('.duty{min-width:0;'));
-  assert.ok(detail.includes('.duty-label{') && detail.includes('overflow-wrap:anywhere'));
-  assert.ok(detail.includes('.duty p{') && detail.includes('overflow-wrap:anywhere'));
+  assert.ok(detail.includes('.duty{min-width:0;border-bottom:1px solid rgba(15,31,61,.08);padding-bottom:.5rem;overflow-wrap:anywhere}'));
+  assert.ok(detail.includes('.duty-label{font-size:.75rem;color:#7a6a4c;font-weight:600;overflow-wrap:anywhere}'));
+  assert.ok(detail.includes('.duty p{font-size:.9rem;line-height:1.5;color:#26344b;margin:.15rem 0;overflow-wrap:anywhere}'));
 });
 
 test('all three Notice Board tabs remain present and manually activatable', () => {
