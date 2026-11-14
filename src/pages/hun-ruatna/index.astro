@@ -103,6 +103,8 @@ const dateLabel = (schedule: typeof schedules[number]) => {
   .filters input,.filters select{min-width:0;width:100%;border:1px solid rgba(15,31,61,.18);background:#fff;border-radius:3px;padding:.65rem .75rem;color:#0f1f3d;font:inherit}
   .schedule-list{display:grid;gap:.65rem}
   .schedule-card{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:#fff;border:1px solid rgba(184,149,63,.2);border-left:3px solid #b8953f;padding:.9rem 1rem}
+  .schedule-card[hidden],.empty[hidden]{display:none!important}
+  .schedule-card>div{min-width:0;overflow-wrap:anywhere}
   .schedule-card time{font-weight:600;color:#0f1f3d;font-size:.95rem}
   .schedule-card p{font-size:.75rem;color:#6b7280;margin:.2rem 0 0}
   .schedule-card a{flex-shrink:0;color:#0f1f3d;font-size:.8rem;text-decoration:none;border-bottom:1px solid rgba(15,31,61,.3)}
