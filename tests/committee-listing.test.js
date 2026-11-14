@@ -47,3 +47,10 @@ test('committee search, year filtering, counts, and detail rendering remain in p
   assert.match(page, /set:html=\{committee\.descriptionHtml\}/);
   assert.match(page, /data-committee-year-switch/);
 });
+test('committee card anchors are never replaced with plain text by listing JavaScript', () => {
+  assert.doesNotMatch(page, /querySelectorAll(?:<[^>]+>)?\(['"]\[data-view-committee\]['"]\)[\s\S]{0,300}?\.textContent\s*=/);
+  assert.doesNotMatch(page, /viewLabel[\s\S]{0,160}?button\.textContent\s*=/);
+  assert.match(page, /data-view-committee=\{committee\.id\}/);
+  assert.match(page, /View Details <span aria-hidden="true">→<\/span>/);
+  assert.match(page, /committee-card-link[\s\S]*?<article class="committee-card/);
+});
