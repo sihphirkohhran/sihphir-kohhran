@@ -62,7 +62,8 @@ const galleryPhotos = home.galleryOrder === 'oldest'
       .slice(0, galleryCount)
   : pickHomeGalleryPhotos(gallerySource, galleryCount);
 
-const currentWeekly = (await getWeeklySchedules()).filter((schedule) => schedule.status === 'current')[0];
+// Duplicate current records resolve to the newest week, then stable ID order, in getWeeklySchedules().
+const currentWeekly = (await getWeeklySchedules()).find((schedule) => schedule.status === 'current');
 const weeklySchedule = currentWeekly
   ? {
       date: [currentWeekly.week_start, currentWeekly.week_end].filter(Boolean).join(' — '),
