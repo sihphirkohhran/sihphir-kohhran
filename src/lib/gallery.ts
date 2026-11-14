@@ -24,6 +24,9 @@ export type GalleryPhotoItem = {
   category: string;
   year: number;
   sortKey: string;
+  order: number;
+  albumUrl?: string;
+  albumTitle: string;
 };
 
 function entrySortKey(year: number, date?: string, id?: string): string {
@@ -37,21 +40,34 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
   const photos: GalleryPhotoItem[] = [];
 
   for (const entry of entries) {
-    const urls = getEntryPhotoUrls(entry.data);
-    const sortKey = entrySortKey(entry.data.year, entry.data.date, entry.id);
-    urls.forEach((src) => {
+    const data = entry.data;
+    const rawPhotos: (string | { photo?: string; src?: string; alt?: string; caption?: string })[] = [...(data.photos ?? [])];
+    if (data.photo && !rawPhotos.some((photo) =>
+      String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim() === data.photo,
+    )) rawPhotos.unshift(data.photo);
+    const sortKey = entrySortKey(data.year, data.date, entry.id);
+    rawPhotos.forEach((photo) => {
+      const src = String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim();
+      if (!src) return;
+      const photoAlt = typeof photo === 'string' ? '' : photo.alt ?? '';
+      const photoCaption = typeof photo === 'string' ? '' : photo.caption ?? '';
       photos.push({
         src,
-        alt: entry.data.caption,
-        caption: entry.data.caption,
-        category: entry.data.category,
-        year: entry.data.year,
+        alt: photoAlt.trim() || data.caption,
+        caption: photoCaption.trim() || data.caption,
+        category: data.category,
+        year: data.year,
         sortKey,
+        order: data.display_order ?? Number.MAX_SAFE_INTEGER,
+        albumUrl: data.album_url,
+        albumTitle: data.caption,
       });
     });
   }
 
-  return photos.sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+  return photos.sort((a, b) =>
+    b.year - a.year || a.order - b.order || b.sortKey.localeCompare(a.sortKey),
+  );
 }
 
 /**
@@ -122,5 +138,7 @@ export function getFallbackGalleryPhotos(limit = 6): GalleryPhotoItem[] {
     category: 'Gallery',
     year,
     sortKey: `${year}-${i}`,
+    order: i,
+    albumTitle: img.caption,
   }));
 }

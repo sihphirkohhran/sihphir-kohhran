@@ -475,26 +475,45 @@ body {
 .gallery-item:hover img { transform: scale(1.04); }
 
 /* â”€â”€ HOME GALLERY MASONRY (no grid gaps) â”€â”€ */
-.home-gallery-masonry {
-  column-count: 3;
-  column-gap: 0.5rem;
+.home-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 .home-gallery-item {
-  break-inside: avoid;
-  margin-bottom: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(184, 149, 63, 0.24);
+  border-radius: 5px;
   background: var(--ivory-dark, #f5f0e6);
-  display: block;
 }
-.home-gallery-item img {
+.home-gallery-photo {
+  display: block;
   width: 100%;
-  height: auto;
-  display: block;
-  vertical-align: top;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  cursor: pointer;
 }
-@media (max-width: 640px) {
-  .home-gallery-masonry {
-    column-count: 2;
-  }
+.home-gallery-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.2s ease;
+}
+.home-gallery-photo:hover img { transform: scale(1.025); }
+.home-gallery-photo:focus-visible {
+  outline: 2px solid var(--gold, #b8953f);
+  outline-offset: -3px;
+}
+@media (max-width: 767px) {
+  .home-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .home-gallery-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* â”€â”€ LIGHTBOX â”€â”€ */
