@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs';
 const page = readFileSync(new URL('../src/pages/gallery.astro', import.meta.url), 'utf8');
 
 test('album titles use Poppins Bold at 18px and wrap naturally', () => {
-  assert.equal((page.match(/<h3 class="album-title">\{album\.title\}<\/h3>/g) || []).length, 2);
+  assert.equal((page.match(/<h3 class="album-title" style="[^"]*">\{album\.title\}<\/h3>/g) || []).length, 2);
   assert.match(page, /\.featured-copy h3\.album-title,\.album-body h3\.album-title\{[^}]*font-family:'Poppins',sans-serif;[^}]*font-size:18px;font-weight:700/);
   assert.match(page, /style="font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:#172941/);
   assert.match(page, /overflow-wrap:anywhere/);
