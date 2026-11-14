@@ -47,7 +47,8 @@ export async function getWeeklySchedules() {
     .sort((a, b) => {
       const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
       if (statusDifference) return statusDifference;
-      return weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
+      const dateDifference = weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
+      return dateDifference || a.id.localeCompare(b.id);
     });
 }
 
