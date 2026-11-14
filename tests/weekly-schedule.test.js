@@ -20,7 +20,7 @@ test('weekly schedule ordering is deterministic for duplicate status/date record
   assert.match(cms, /weeklyStatusPriority\(a\.status\) - weeklyStatusPriority\(b\.status\)/);
   assert.match(cms, /weeklyStartTimestamp\(b\.week_start, b\.id\) - weeklyStartTimestamp\(a\.week_start, a\.id\)/);
   assert.match(cms, /dateDifference \|\| a\.id\.localeCompare\(b\.id\)/);
-  assert.match(cms, /replace\(\/\\.md\$\/,' '\)/);
+  assert.ok(cms.includes("replace(/\\.md$/, '')"));
 });
 
 test('archive contains archived records only and supports search and year filters', () => {
