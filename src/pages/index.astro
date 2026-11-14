@@ -53,9 +53,12 @@ const positiveCount = (value: unknown, fallback: number) => {
 const allGalleryPhotos = await loadGalleryPhotos();
 const galleryCount = Math.min(6, positiveCount(home.galleryCount, 6));
 const galleryCategory = String(home.galleryCategory ?? '').trim();
-const gallerySource = allGalleryPhotos.filter((photo) =>
-  photo.src && (galleryCategory ? photo.category === galleryCategory : true),
-);
+const gallerySeen = new Set<string>();
+const gallerySource = allGalleryPhotos.filter((photo) => {
+  if (!photo.src || (galleryCategory && photo.category !== galleryCategory) || gallerySeen.has(photo.src)) return false;
+  gallerySeen.add(photo.src);
+  return true;
+});
 const galleryPhotos = home.galleryOrder === 'oldest'
   ? [...gallerySource]
       .sort((a, b) => a.sortKey.localeCompare(b.sortKey) || a.order - b.order)
