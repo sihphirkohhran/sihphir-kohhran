@@ -50,3 +50,27 @@ test('history toggle supports accessible expansion, collapse and existing destin
   assert.ok(home.includes('btn.dataset.destination'));
   assert.ok(home.includes('window.location.href = btn.dataset.destination'));
 });
+
+
+test('expanded history includes a keyboard-accessible bottom Show Less control', () => {
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  assert.ok(section.includes('id="history-collapse-bottom"'));
+  assert.ok(section.includes('Show Less ↑'));
+  assert.ok(section.includes('aria-controls="history-full"'));
+  assert.ok(section.includes('focus-visible:outline'));
+  assert.ok(section.indexOf('id="history-collapse-bottom"') > section.indexOf('<Fragment set:html={historyFullHtml} />'));
+});
+
+test('either history control collapses the same content and bottom collapse respects reduced motion', () => {
+  assert.ok(home.includes('function setHistoryExpanded(nextExpanded: boolean)'));
+  assert.ok(home.includes("full?.classList.toggle('hidden', !expanded)"));
+  assert.ok(home.includes("btn?.setAttribute('aria-expanded', String(expanded))"));
+  assert.ok(home.includes("bottomCollapse?.setAttribute('aria-expanded', String(expanded))"));
+  assert.ok(home.includes("bottomCollapse?.addEventListener('click'"));
+  assert.ok(home.includes('setHistoryExpanded(false)'));
+  assert.ok(home.includes("window.matchMedia('(prefers-reduced-motion: reduce)').matches"));
+  assert.ok(home.includes("behavior: prefersReducedMotion ? 'auto' : 'smooth'"));
+  assert.ok(home.includes("historyHeading?.scrollIntoView"));
+  assert.ok(home.includes('btn.dataset.destination'));
+  assert.ok(home.includes('window.location.href = btn.dataset.destination'));
+});
