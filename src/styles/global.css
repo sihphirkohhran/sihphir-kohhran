@@ -512,9 +512,6 @@ body {
 @media (max-width: 767px) {
   .home-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 480px) {
-  .home-gallery-grid { grid-template-columns: minmax(0, 1fr); }
-}
 
 /* â”€â”€ LIGHTBOX â”€â”€ */
 #lightbox {

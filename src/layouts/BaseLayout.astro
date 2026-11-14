@@ -361,7 +361,7 @@ const organizationJsonLd = JSON.stringify({
 
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-    type LightboxSlide = { src: string; caption: string };
+    type LightboxSlide = { src: string; caption: string; alt: string };
 
     function getLightboxTriggers(): HTMLElement[] {
       return [...document.querySelectorAll<HTMLElement>('[data-lightbox-src]')].filter((el) => {
@@ -375,6 +375,7 @@ const organizationJsonLd = JSON.stringify({
       return getLightboxTriggers().map((el) => ({
         src: el.getAttribute('data-lightbox-src') || (el as HTMLImageElement).src || '',
         caption: el.getAttribute('data-lightbox-caption') || el.getAttribute('alt') || '',
+        alt: el.getAttribute('data-lightbox-alt') || el.getAttribute('alt') || '',
       })).filter((s) => s.src);
     }
 
@@ -390,7 +391,7 @@ const organizationJsonLd = JSON.stringify({
       const slide = slides[currentIndex];
       if (lbImg) {
         lbImg.src = slide.src;
-        lbImg.alt = slide.caption || 'Gallery image';
+        lbImg.alt = slide.alt || slide.caption || 'Gallery image';
       }
       if (caption) {
         caption.textContent = slide.caption;
