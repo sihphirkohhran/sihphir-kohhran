@@ -6,7 +6,7 @@ const page = readFileSync(new URL('../src/pages/gallery.astro', import.meta.url)
 
 test('album titles use Poppins SemiBold and wrap naturally', () => {
   assert.equal((page.match(/<h3 class="album-title">\{album\.title\}<\/h3>/g) || []).length, 2);
-  assert.match(page, /\.album-title\{[^}]*font-family:'Poppins',sans-serif;[^}]*font-size:15\.5px;font-weight:600/);
+  assert.match(page, /\.featured-copy \.album-title,\.album-body \.album-title\{[^}]*font-family:'Poppins',sans-serif;[^}]*font-size:15\.5px;font-weight:600/);
   assert.match(page, /overflow-wrap:anywhere/);
 });
 
