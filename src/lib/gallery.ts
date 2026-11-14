@@ -138,5 +138,7 @@ export function getFallbackGalleryPhotos(limit = 6): GalleryPhotoItem[] {
     category: 'Gallery',
     year,
     sortKey: `${year}-${i}`,
+    order: i,
+    albumTitle: img.caption,
   }));
 }
