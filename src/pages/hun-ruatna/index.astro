@@ -9,6 +9,14 @@ const schedules = (await getWeeklySchedules())
     const dateB = Date.parse(String(b.week_start || b.id)) || 0;
     return dateB - dateA || String(a.id).localeCompare(String(b.id));
   });
+const scheduleTimestamp = (schedule: typeof schedules[number]) => {
+  const value = String(schedule.week_start || '').trim();
+  const legacy = value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  const normalized = legacy ? `${legacy[3]}-${legacy[2].padStart(2, '0')}-${legacy[1].padStart(2, '0')}` : value || String(schedule.id);
+  const timestamp = Date.parse(normalized);
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+schedules.sort((a, b) => scheduleTimestamp(b) - scheduleTimestamp(a) || String(a.id).localeCompare(String(b.id)));
 const years = [...new Set(schedules.map((schedule) => String(schedule.week_start || schedule.id).match(/\d{4}/)?.[0]).filter(Boolean))].sort().reverse();
 const dateLabel = (schedule: typeof schedules[number]) => {
   const start = String(schedule.week_start || '').trim();
