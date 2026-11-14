@@ -40,7 +40,7 @@ export async function getWeeklySchedules() {
   return entries
     .filter((e) => e.id.startsWith('weekly/'))
     .map((e) => ({
-      id: e.id.replace(/^weekly\//, ''),
+      id: e.id.replace(/^weekly\//, '').replace(/\.md$/, ''),
       ...e.data,
       body: e.body,
     }))
