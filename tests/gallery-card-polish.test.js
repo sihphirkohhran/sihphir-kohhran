@@ -23,7 +23,7 @@ test('only the album action opens the existing internal detail view', () => {
   assert.match(page, /querySelectorAll<HTMLElement>\('\[data-open-album\]'\)/);
   assert.match(page, /event\.preventDefault\(\)/);
   assert.match(page, /#album-\$\{button\.dataset\.openAlbum\}/);
-  assert.match(page, /<article class=\{\x60album-card/);
+  assert.match(page, /<div class="album-cover"><img/);\n  assert.doesNotMatch(page, /<button[^>]*class="album-cover"[^>]*data-open-album/);\n  assert.match(page, /<article class=\{\x60album-card/);
   assert.doesNotMatch(page, /album-card[^\n]*addEventListener\(['"]click/);
 });
 
