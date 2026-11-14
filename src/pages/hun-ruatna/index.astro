@@ -2,13 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getWeeklySchedules } from '../../lib/cms';
 
-const schedules = (await getWeeklySchedules())
-  .filter((schedule) => schedule.status === 'archived')
-  .sort((a, b) => {
-    const dateA = Date.parse(String(a.week_start || a.id)) || 0;
-    const dateB = Date.parse(String(b.week_start || b.id)) || 0;
-    return dateB - dateA || String(a.id).localeCompare(String(b.id));
-  });
+const schedules = (await getWeeklySchedules()).filter((schedule) => schedule.status === 'archived');
 const scheduleTimestamp = (schedule: typeof schedules[number]) => {
   const value = String(schedule.week_start || '').trim();
   const legacy = value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
