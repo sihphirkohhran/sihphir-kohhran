@@ -8,7 +8,7 @@ test('committee listing cards preserve CMS group photos and image fallback behav
   assert.match(page, /photo: resolveCommitteePhoto\(data\.group_photo\)/);
   assert.match(page, /src=\{committee\.photo \|\| defaultCommitteePhoto\}/);
   assert.match(page, /data-fallback=\{defaultCommitteePhoto\}/);
-  assert.match(page, /object-fit:contain/);
+  assert.match(page, /object-fit:cover;object-position:center 35%/);
   assert.match(page, /height:190px;flex:0 0 190px/);
 });
 
@@ -53,4 +53,10 @@ test('committee card anchors are never replaced with plain text by listing JavaS
   assert.match(page, /data-view-committee=\{committee\.id\}/);
   assert.match(page, /View Details <span aria-hidden="true">→<\/span>/);
   assert.match(page, /committee-card-link[\s\S]*?<article class="committee-card/);
+});
+
+test('committee card typography uses Poppins Bold names and EB Garamond details indicators', () => {
+  assert.match(page, /\.committee-card h3\{[^}]*font-family:'Poppins',sans-serif;[^}]*font-size:15\.5px;font-weight:700/);
+  assert.match(page, /\.committee-card footer>span\{font-family:'EB Garamond',serif;[^}]*font-size:\.9rem/);
+  assert.match(page, /View Details <span aria-hidden="true">→<\/span>/);
 });
