@@ -13,14 +13,17 @@ test('committee listing cards preserve CMS group photos and image fallback behav
 });
 
 test('featured and archive cards show year, member count, and committee name without excerpts', () => {
-  const listing = page.slice(page.indexOf('{featured.length > 0'), page.indexOf('<section class="committee-empty"'));
-  assert.equal((listing.match(/committee-meta/g) || []).length, 2);
-  assert.equal((listing.match(/committee\.year/g) || []).length >= 2, true);
-  assert.equal((listing.match(/committee\.memberCount/g) || []).length, 2);
-  assert.equal((listing.match(/<h3>\{committee\.name\}<\/h3>/g) || []).length, 2);
-  assert.doesNotMatch(listing, /committee\.description|<p>/);
-  assert.doesNotMatch(listing, /View Committee member list|View Committee/);
-  assert.match(listing, /View Details/);
+  const cards = [...page.matchAll(/<a class="committee-card-link"[^>]*>[\\s\\S]*?<\\/a>/g)].map(([card]) => card);
+  assert.equal(cards.length, 2);
+  for (const card of cards) {
+    assert.match(card, /committee-meta/);
+    assert.match(card, /\\{committee\\.year\\}/);
+    assert.match(card, /\\{committee\\.memberCount\\} members/);
+    assert.match(card, /<h3>\\{committee\\.name\\}<\\/h3>/);
+    assert.doesNotMatch(card, /committee\\.description|<p>/);
+    assert.doesNotMatch(card, /View Committee member list|View Committee/);
+    assert.match(card, /View Details/);
+  }
 });
 
 test('each entire card is a semantic link to its existing inline details section', () => {
