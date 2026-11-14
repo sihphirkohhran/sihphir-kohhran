@@ -46,7 +46,7 @@ test('history toggle supports accessible expansion, collapse and existing destin
   assert.ok(section.includes("data-destination={history.destination ?? ''}"));
   assert.ok(section.includes('data-collapse-label="Show Less"'));
   assert.ok(home.includes("full?.classList.toggle('hidden', !expanded)"));
-  assert.ok(home.includes("btn.setAttribute('aria-expanded', String(expanded))"));
+  assert.ok(home.includes("btn?.setAttribute('aria-expanded', String(expanded))"));
   assert.ok(home.includes('btn.dataset.destination'));
   assert.ok(home.includes('window.location.href = btn.dataset.destination'));
 });
