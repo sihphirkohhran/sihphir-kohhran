@@ -19,8 +19,12 @@ test('homepage church history preserves CMS text, image, visibility and read-mor
   assert.match(section, /history\.enabled === false/);
   assert.match(section, /history\.building_photo \?\? '\/images\/church-building\.jpg'/);
   assert.match(section, /\{history\.short\}/);
-  assert.match(section, /renderMarkdown\(history\.full \?\? ''\)/);
+  assert.match(section, /<Fragment set:html=\{historyFullHtml\} \/>/);
   assert.match(section, /data-destination=\{history\.destination \?\? ''\}/);
   assert.match(section, /history\.read_more_text \?\? 'Read More →'/);
   assert.match(section, /id="history-toggle"/);
+});
+
+test('homepage church history derives rendered full text from the CMS history.full field', () => {
+  assert.match(home, /const historyFullHtml = renderMarkdown\(history\.full \?\? ''\);/);
 });
