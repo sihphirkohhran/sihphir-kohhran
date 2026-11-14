@@ -12,6 +12,8 @@ test('homepage church history uses a responsive side-by-side heritage layout', (
   assert.match(section, /aspect-\[4\/3\]/);
   assert.match(section, /rounded-md overflow-hidden/);
   assert.match(section, /Established 1910/);
+  assert.match(section, /text-gold-deep uppercase mb-2/);
+  assert.match(section, /text-base text-gray-700 leading-relaxed mb-3/);
 });
 
 test('homepage church history preserves CMS text, image, visibility and read-more destination', () => {

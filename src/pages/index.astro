@@ -242,15 +242,17 @@ const highlightItems = normalizeHighlights(
           </div>
         ))}
       </div>
-      <a
-        href={lookerUrl}
-        target={statsSettings.looker_new_tab === false ? undefined : '_blank'}
-        rel="noopener"
-        class="reveal flex items-center justify-center gap-2 font-body text-xs text-navy border border-navy/20 hover:border-navy/50 hover:bg-navy hover:text-gold-pale py-2.5 px-4 rounded transition-all tracking-wide"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        {statsSettings.dashboard_text ?? 'Detailed Dashboard — Looker Studio →'}
-      </a>
+      <div class="flex justify-center">
+        <a
+          href={lookerUrl}
+          target={statsSettings.looker_new_tab === false ? undefined : '_blank'}
+          rel="noopener"
+          class="reveal inline-flex items-center justify-center gap-2 rounded bg-navy px-4 py-2.5 font-body text-sm font-semibold tracking-wide text-gold-pale transition-colors hover:bg-navy-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          {statsSettings.dashboard_text ?? 'Detailed Dashboard — Looker Studio →'}
+        </a>
+      </div>
     </div>
   </section>
 
@@ -300,8 +302,8 @@ const highlightItems = normalizeHighlights(
           />
         </div>
         <div class="min-w-0 py-1 md:py-3">
-          <div class="font-body text-[0.65rem] font-semibold tracking-[0.16em] text-gold uppercase mb-2">Established 1910</div>
-          <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
+          <div class="font-body text-xs font-semibold tracking-[0.14em] text-gold-deep uppercase mb-2">Established 1910</div>
+          <div class="font-body text-base text-gray-700 leading-relaxed mb-3" id="history-short">
             {history.short}
           </div>
           <button
