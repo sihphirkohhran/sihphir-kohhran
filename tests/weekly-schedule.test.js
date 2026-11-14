@@ -48,6 +48,22 @@ test('homepage monthly and weekly duty rows use wrapping two-column layouts', ()
   assert.doesNotMatch(home, /<div class="bg-navy border border-gold\/15 rounded overflow-hidden">/);
 });
 
+test('archive filtering hides flex cards and combines search with year', () => {
+  assert.match(archive, /card\\.dataset\\.search\\?\\.includes\\(search\\.value\\.toLowerCase\\(\\)\\)/);
+  assert.match(archive, /card\\.dataset\\.year === year\\.value/);
+  assert.match(archive, /cards\\.forEach\\(\\(card\\) => \\{ card\\.hidden = !matches\\.includes\\(card\\); \\}\\)/);
+  assert.match(archive, /schedule-card\\[hidden\\],\\.empty\\[hidden\\]\\{display:none!important\\}/);
+  assert.match(archive, /empty\\.hidden = matches\\.length > 0/);
+  assert.match(archive, /count\\.textContent = `\\$\\{matches\\.length\\}/);
+});
+
+test('archive detail wraps long duty labels and values without widening cards', () => {
+  assert.match(detail, /\\.day-card\\{[^}]*min-width:0;max-width:100%;box-sizing:border-box/);
+  assert.match(detail, /\\.duty\\{[^}]*overflow-wrap:anywhere/);
+  assert.match(detail, /\\.duty-label\\{[^}]*overflow-wrap:anywhere/);
+  assert.match(detail, /\\.duty p\\{[^}]*overflow-wrap:anywhere/);
+});
+
 test('all three Notice Board tabs remain present and manually activatable', () => {
   for (const tab of ['weekly', 'monthly', 'notices']) {
     assert.match(home, new RegExp(`data-target="${tab}"`));
