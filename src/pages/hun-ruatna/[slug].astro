@@ -1,0 +1,66 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWeeklySchedules } from '../../lib/cms';
+
+export async function getStaticPaths() {
+  const schedules = (await getWeeklySchedules()).filter((schedule) => schedule.status === 'archived');
+  return schedules.map((schedule) => ({
+    params: { slug: String(schedule.id) },
+    props: { schedule },
+  }));
+}
+
+const { schedule } = Astro.props;
+const dateLabel = [schedule.week_start, schedule.week_end].filter(Boolean).join(' — ') || String(schedule.id);
+---
+
+<BaseLayout title={`Hun Ruatna — ${dateLabel}`} description={`Archived weekly worship schedule for ${dateLabel}`} activePage="notices">
+  <main class="weekly-detail">
+    <header class="detail-hero">
+      <div class="detail-wrap">
+        <a href="/hun-ruatna" class="back-link">← Hun Ruatna Archive</a>
+        <h1>Hun Ruatna</h1>
+        <p>{dateLabel}</p>
+      </div>
+    </header>
+    <section class="detail-wrap programme">
+      {(schedule.days ?? []).map((day: any) => (
+        <article class="day-card">
+          <h2>{day.day}</h2>
+          <div class="duty-list">
+            {(day.duties ?? []).map((duty: any) => (
+              <div class="duty">
+                {(duty.time || duty.role || duty.title) && <div class="duty-label">{[duty.time, duty.title || duty.role].filter(Boolean).join(' · ')}</div>}
+                {duty.name && <p>{duty.name}</p>}
+                {duty.person_responsible && duty.person_responsible !== duty.name && <p>{duty.person_responsible}</p>}
+                {duty.speaker && <p><strong>Speaker:</strong> {duty.speaker}</p>}
+                {duty.bible_text && <p><strong>Bible text:</strong> {duty.bible_text}</p>}
+                {duty.notes && <p>{duty.notes}</p>}
+                {!duty.name && !duty.person_responsible && !duty.speaker && !duty.bible_text && !duty.notes && !duty.title && !duty.role && !duty.time && <p class="muted">—</p>}
+              </div>
+            ))}
+          </div>
+        </article>
+      ))}
+    </section>
+  </main>
+</BaseLayout>
+
+<style>
+  .weekly-detail{min-height:70vh;background:#f5f2eb;color:#17271f}
+  .detail-wrap{width:min(850px,calc(100% - 2rem));margin:auto}
+  .detail-hero{background:#0f1f3d;color:#f7f1e4;border-bottom:2px solid #b8953f;padding:3rem 0 2.5rem}
+  .back-link{color:#e4d5aa;text-decoration:none;font-size:.85rem}
+  .detail-hero h1{font-family:'EB Garamond',serif;font-size:clamp(2.2rem,6vw,3.5rem);margin:.7rem 0 .2rem;color:#f7f1e4}
+  .detail-hero p{margin:0;color:#e4d5aa;font-size:.95rem}
+  .programme{padding:2rem 0 4rem;display:grid;gap:1rem}
+  .day-card{background:#fff;border:1px solid rgba(184,149,63,.2);border-left:3px solid #b8953f;padding:1rem 1.15rem;min-width:0}
+  .day-card h2{font-family:'EB Garamond',serif;color:#0f1f3d;font-size:1.25rem;margin:0 0 .7rem}
+  .duty-list{display:grid;gap:.55rem}
+  .duty{min-width:0;border-bottom:1px solid rgba(15,31,61,.08);padding-bottom:.5rem;overflow-wrap:anywhere}
+  .duty:last-child{border-bottom:0;padding-bottom:0}
+  .duty-label{font-size:.75rem;color:#7a6a4c;font-weight:600}
+  .duty p{font-size:.9rem;line-height:1.5;color:#26344b;margin:.15rem 0}
+  .duty strong{color:#0f1f3d}
+  .muted{color:#9ca3af!important}
+</style>
