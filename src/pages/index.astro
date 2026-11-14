@@ -324,6 +324,17 @@ const highlightItems = normalizeHighlights(
         aria-labelledby="history-toggle"
       >
         <Fragment set:html={historyFullHtml} />
+        <div class="mt-6 flex justify-end">
+          <button
+            id="history-collapse-bottom"
+            type="button"
+            aria-controls="history-full"
+            aria-expanded="true"
+            class="inline-flex font-body text-xs font-semibold tracking-wide text-navy border-b border-gold/70 hover:border-gold transition-colors pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+          >
+            Show Less ↑
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -614,20 +625,38 @@ const highlightItems = normalizeHighlights(
 
   // ── HISTORY READ MORE ──
   const btn = document.getElementById('history-toggle');
-  const short = document.getElementById('history-short');
   const full = document.getElementById('history-full');
+  const bottomCollapse = document.getElementById('history-collapse-bottom');
   let expanded = false;
+
+  function setHistoryExpanded(nextExpanded: boolean) {
+    expanded = nextExpanded;
+    full?.classList.toggle('hidden', !expanded);
+    btn?.setAttribute('aria-expanded', String(expanded));
+    if (btn instanceof HTMLButtonElement) {
+      btn.textContent = expanded
+        ? (btn.dataset.collapseLabel || 'Show Less')
+        : (btn.dataset.expandLabel || 'Read More →');
+    }
+    bottomCollapse?.setAttribute('aria-expanded', String(expanded));
+  }
+
   btn?.addEventListener('click', () => {
-    if (btn instanceof HTMLButtonElement && btn.dataset.destination) {
+    if (!expanded && btn instanceof HTMLButtonElement && btn.dataset.destination) {
       window.location.href = btn.dataset.destination;
       return;
     }
-    expanded = !expanded;
-    full?.classList.toggle('hidden', !expanded);
-    btn.setAttribute('aria-expanded', String(expanded));
-    btn.textContent = expanded
-      ? (btn.dataset.collapseLabel || 'Show Less')
-      : (btn.dataset.expandLabel || 'Read More →');
+    setHistoryExpanded(!expanded);
+  });
+
+  bottomCollapse?.addEventListener('click', () => {
+    setHistoryExpanded(false);
+    const historyHeading = document.querySelector('#history .gold-divider');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    historyHeading?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    });
   });
 
   // ── NOTICE TAB FIX (ensure first panel shows) ──
