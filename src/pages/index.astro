@@ -304,17 +304,26 @@ const highlightItems = normalizeHighlights(
           <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
             {history.short}
           </div>
-          <div class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
-            <Fragment set:html={historyFullHtml} />
-          </div>
           <button
             id="history-toggle"
+            type="button"
             data-destination={history.destination ?? ''}
+            aria-expanded="false"
+            aria-controls="history-full"
+            data-expand-label={history.read_more_text ?? 'Read More →'}
+            data-collapse-label="Show Less"
             class="inline-flex font-body text-xs font-semibold tracking-wide text-navy border-b border-gold/70 hover:border-gold transition-colors pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
           >
             {history.read_more_text ?? 'Read More →'}
           </button>
         </div>
+      </div>
+      <div
+        class="content-page-body hidden mt-6 mx-auto max-w-3xl font-body text-sm text-gray-700 leading-8 [&_p]:mb-4 [&_ul]:my-4 [&_ol]:my-4 [&_li]:mb-2"
+        id="history-full"
+        aria-labelledby="history-toggle"
+      >
+        <Fragment set:html={historyFullHtml} />
       </div>
     </div>
   </section>
@@ -614,9 +623,11 @@ const highlightItems = normalizeHighlights(
       return;
     }
     expanded = !expanded;
-    short!.classList.toggle('hidden', expanded);
-    full!.classList.toggle('hidden', !expanded);
-    btn!.textContent = expanded ? '← Read Less' : 'Read More →';
+    full?.classList.toggle('hidden', !expanded);
+    btn.setAttribute('aria-expanded', String(expanded));
+    btn.textContent = expanded
+      ? (btn.dataset.collapseLabel || 'Show Less')
+      : (btn.dataset.expandLabel || 'Read More →');
   });
 
   // ── NOTICE TAB FIX (ensure first panel shows) ──
