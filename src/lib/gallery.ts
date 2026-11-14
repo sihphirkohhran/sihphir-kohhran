@@ -41,7 +41,10 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
 
   for (const entry of entries) {
     const data = entry.data;
-    const rawPhotos = data.photos?.length ? data.photos : data.photo ? [data.photo] : [];
+    const rawPhotos: (string | { photo?: string; src?: string; alt?: string; caption?: string })[] = [...(data.photos ?? [])];
+    if (data.photo && !rawPhotos.some((photo) =>
+      String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim() === data.photo,
+    )) rawPhotos.unshift(data.photo);
     const sortKey = entrySortKey(data.year, data.date, entry.id);
     rawPhotos.forEach((photo) => {
       const src = String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim();
