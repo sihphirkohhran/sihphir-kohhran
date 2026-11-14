@@ -28,3 +28,23 @@ test('homepage church history preserves CMS text, image, visibility and read-mor
 test('homepage church history derives rendered full text from the CMS history.full field', () => {
   assert.match(home, /const historyFullHtml = renderMarkdown\(history\.full \?\? ''\);/);
 });
+
+test('expanded homepage history renders in a full-width reading area below the intro row', () => {
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  assert.match(section, /grid grid-cols-1 md:grid-cols-2 items-center/);
+  assert.match(section, /id="history-full"[\\s\\S]*?max-w-3xl[\\s\\S]*?leading-8/);
+  assert.ok(section.indexOf('id="history-full"') > section.indexOf('grid grid-cols-1 md:grid-cols-2'));
+  assert.match(section, /<Fragment set:html=\\{historyFullHtml\\} \\/>/);
+});
+
+test('history toggle supports accessible expansion, collapse and existing destination navigation', () => {
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  assert.match(section, /aria-expanded="false"/);
+  assert.match(section, /aria-controls="history-full"/);
+  assert.match(section, /data-destination=\\{history.destination \\?\\? ''\\}/);
+  assert.match(section, /data-collapse-label="Show Less"/);
+  assert.match(home, /full\\?\.classList\.toggle\('hidden', !expanded\)/);
+  assert.match(home, /btn\.setAttribute\('aria-expanded', String\(expanded\)\)/);
+  assert.match(home, /btn\.dataset\.destination/);
+  assert.match(home, /window\.location\.href = btn\.dataset\.destination/);
+});
