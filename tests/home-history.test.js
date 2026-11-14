@@ -30,7 +30,7 @@ test('homepage church history derives rendered full text from the CMS history.fu
 });
 
 test('expanded homepage history renders in a full-width reading area below the intro row', () => {
-  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\s\S]*?<\/section>/)?.[0] ?? '';
   assert.match(section, /grid grid-cols-1 md:grid-cols-2 items-center/);
   assert.ok(section.includes('id="history-full"'));
   assert.ok(section.includes('max-w-3xl'));
@@ -40,7 +40,7 @@ test('expanded homepage history renders in a full-width reading area below the i
 });
 
 test('history toggle supports accessible expansion, collapse and existing destination navigation', () => {
-  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\s\S]*?<\/section>/)?.[0] ?? '';
   assert.ok(section.includes('aria-expanded="false"'));
   assert.ok(section.includes('aria-controls="history-full"'));
   assert.ok(section.includes("data-destination={history.destination ?? ''}"));
@@ -53,7 +53,7 @@ test('history toggle supports accessible expansion, collapse and existing destin
 
 
 test('expanded history includes a keyboard-accessible bottom Show Less control', () => {
-  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
+  const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\s\S]*?<\/section>/)?.[0] ?? '';
   assert.ok(section.includes('id="history-collapse-bottom"'));
   assert.ok(section.includes('Show Less ↑'));
   assert.ok(section.includes('aria-controls="history-full"'));
