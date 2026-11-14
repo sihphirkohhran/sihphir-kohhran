@@ -10,7 +10,7 @@ const archive = read('../src/pages/hun-ruatna/index.astro');
 const detail = read('../src/pages/hun-ruatna/[slug].astro');
 
 test('homepage selects only a current weekly schedule and has an empty state', () => {
-  assert.match(home, /getWeeklySchedules\(\)\)\.filter\(\(schedule\) => schedule\.status === 'current'\)\[0\]/);
+  assert.match(home, /getWeeklySchedules\(\)\)\.find\(\(schedule\) => schedule\.status === 'current'\)/);
   assert.match(home, /No current weekly schedule is available/);
   assert.match(home, /href="\/hun-ruatna"/);
   assert.doesNotMatch(home, /<div class="pagination mt-4">/);
@@ -26,7 +26,7 @@ test('archive contains archived records only and supports search and year filter
   assert.match(archive, /filter\(\(schedule\) => schedule\.status === 'archived'\)/);
   assert.match(archive, /id="schedule-search"/);
   assert.match(archive, /id="schedule-year"/);
-  assert.match(archive, /schedule\.sort\(\(a, b\) => scheduleTimestamp\(b\) - scheduleTimestamp\(a\)/);
+  assert.match(archive, /schedules\.sort\(\(a, b\) => scheduleTimestamp\(b\) - scheduleTimestamp\(a\)/);
   assert.doesNotMatch(archive, /status === 'upcoming'/);
 });
 
