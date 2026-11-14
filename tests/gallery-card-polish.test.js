@@ -26,8 +26,7 @@ test('only the album action opens the existing internal detail view', () => {
   assert.match(page, /<div class="album-cover"><img/);
   assert.doesNotMatch(page, /<button[^>]*class="album-cover"[^>]*data-open-album/);
   assert.match(page, /<article class=\{\x60album-card/);
-  assert.doesNotMatch(page, /album-card[^
-]*addEventListener\(['"]click/);
+  assert.doesNotMatch(page, /<article class=.*data-open-album/);
 });
 
 test('CMS album fields, covers, descriptions, badges and photo counts remain intact', () => {
