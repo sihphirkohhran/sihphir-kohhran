@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getWeeklySchedules } from '../../lib/cms';
+
+const schedules = (await getWeeklySchedules())
+  .filter((schedule) => schedule.status === 'archived')
+  .sort((a, b) => {
+    const dateA = Date.parse(String(a.week_start || a.id)) || 0;
+    const dateB = Date.parse(String(b.week_start || b.id)) || 0;
+    return dateB - dateA || String(a.id).localeCompare(String(b.id));
+  });
+const years = [...new Set(schedules.map((schedule) => String(schedule.week_start || schedule.id).match(/\d{4}/)?.[0]).filter(Boolean))].sort().reverse();
+const dateLabel = (schedule: typeof schedules[number]) => {
+  const start = String(schedule.week_start || '').trim();
+  const end = String(schedule.week_end || '').trim();
+  return [start, end].filter(Boolean).join(' — ') || String(schedule.id);
+};
+---
+
+<BaseLayout title="Hun Ruatna Archive" description="Archived weekly worship schedules of Sihphir Presbyterian Kohhran" activePage="notices">
+  <main class="weekly-archive">
+    <header class="archive-hero">
+      <div class="archive-wrap">
+        <a class="back-link" href="/#notice-board">← Notice Board</a>
+        <h1>Hun Ruatna</h1>
+      </div>
+    </header>
+    <section class="archive-wrap archive-content" aria-labelledby="archive-title">
+      <div class="archive-heading">
+        <h2 id="archive-title">Hun Ruatna Archive</h2>
+        <span id="schedule-count">{schedules.length} {schedules.length === 1 ? 'schedule' : 'schedules'}</span>
+      </div>
+      <div class="filters">
+        <label>Search schedules
+          <input id="schedule-search" type="search" placeholder="Search date, day or duty…" />
+        </label>
+        <label>Year
+          <select id="schedule-year">
+            <option value="">All years</option>
+            {years.map((year) => <option value={year}>{year}</option>)}
+          </select>
+        </label>
+      </div>
+      <div class="schedule-list" id="schedule-list">
+        {schedules.map((schedule) => {
+          const label = dateLabel(schedule);
+          const year = label.match(/\d{4}/)?.[0] ?? '';
+          const summary = (schedule.days ?? []).flatMap((day: any) => [
+            day.day,
+            ...(day.duties ?? []).flatMap((duty: any) => [duty.role, duty.title, duty.name, duty.person_responsible, duty.speaker, duty.bible_text, duty.notes]),
+          ]).filter(Boolean).join(' ');
+          return (
+            <article class="schedule-card" data-search={`${label} ${summary}`.toLowerCase()} data-year={year}>
+              <div>
+                <time>{label}</time>
+                <p>{(schedule.days ?? []).length} programme sections</p>
+              </div>
+              <a href={`/hun-ruatna/${encodeURIComponent(String(schedule.id))}`}>Read schedule →</a>
+            </article>
+          );
+        })}
+      </div>
+      <p class="empty" id="schedule-empty" hidden>No archived schedules match your search.</p>
+    </section>
+  </main>
+</BaseLayout>
+
+<script>
+  const search = document.querySelector<HTMLInputElement>('#schedule-search');
+  const year = document.querySelector<HTMLSelectElement>('#schedule-year');
+  const list = document.querySelector<HTMLElement>('#schedule-list');
+  const empty = document.querySelector<HTMLElement>('#schedule-empty');
+  const count = document.querySelector<HTMLElement>('#schedule-count');
+  const apply = () => {
+    const cards = [...(list?.querySelectorAll<HTMLElement>('.schedule-card') ?? [])];
+    const matches = cards.filter((card) =>
+      (!search?.value || card.dataset.search?.includes(search.value.toLowerCase())) &&
+      (!year?.value || card.dataset.year === year.value)
+    );
+    cards.forEach((card) => { card.hidden = !matches.includes(card); });
+    if (empty) empty.hidden = matches.length > 0;
+    if (count) count.textContent = `${matches.length} ${matches.length === 1 ? 'schedule' : 'schedules'}`;
+  };
+  search?.addEventListener('input', apply);
+  year?.addEventListener('change', apply);
+  apply();
+</script>
+
+<style>
+  .weekly-archive{min-height:70vh;background:#f5f2eb;color:#17271f}
+  .archive-wrap{width:min(850px,calc(100% - 2rem));margin:auto}
+  .archive-hero{background:#0f1f3d;color:#f7f1e4;border-bottom:2px solid #b8953f;padding:3rem 0 2.5rem}
+  .back-link{color:#e4d5aa;text-decoration:none;font-size:.85rem}
+  .archive-hero h1{font-family:'EB Garamond',serif;font-size:clamp(2.2rem,6vw,3.5rem);margin:.7rem 0 0;color:#f7f1e4}
+  .archive-content{padding:2rem 0 4rem}
+  .archive-heading{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin-bottom:1rem}
+  .archive-heading h2{font-family:'EB Garamond',serif;color:#0f1f3d;font-size:1.6rem;margin:0}
+  .archive-heading span{font-size:.8rem;color:#6b7280}
+  .filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(140px,1fr);gap:.8rem;margin-bottom:1.2rem}
+  .filters label{display:grid;gap:.35rem;font-size:.75rem;color:#4b5563}
+  .filters input,.filters select{min-width:0;width:100%;border:1px solid rgba(15,31,61,.18);background:#fff;border-radius:3px;padding:.65rem .75rem;color:#0f1f3d;font:inherit}
+  .schedule-list{display:grid;gap:.65rem}
+  .schedule-card{display:flex;justify-content:space-between;align-items:center;gap:1rem;background:#fff;border:1px solid rgba(184,149,63,.2);border-left:3px solid #b8953f;padding:.9rem 1rem}
+  .schedule-card time{font-weight:600;color:#0f1f3d;font-size:.95rem}
+  .schedule-card p{font-size:.75rem;color:#6b7280;margin:.2rem 0 0}
+  .schedule-card a{flex-shrink:0;color:#0f1f3d;font-size:.8rem;text-decoration:none;border-bottom:1px solid rgba(15,31,61,.3)}
+  .schedule-card a:hover{border-color:#b8953f}
+  .empty{padding:1.2rem;text-align:center;color:#6b7280;background:#fff;border:1px solid rgba(184,149,63,.2)}
+  @media(max-width:560px){.archive-heading{align-items:flex-start;flex-direction:column}.filters{grid-template-columns:1fr}.schedule-card{align-items:flex-start;flex-direction:column;gap:.55rem}}
+</style>
