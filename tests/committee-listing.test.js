@@ -13,14 +13,14 @@ test('committee listing cards preserve CMS group photos and image fallback behav
 });
 
 test('featured and archive cards show year, member count, and committee name without excerpts', () => {
-  const cards = [...page.matchAll(/<a class="committee-card-link"[^>]*>[\\s\\S]*?<\\/a>/g)].map(([card]) => card);
+  const cards = [...page.matchAll(/<a class="committee-card-link"[^>]*>[\s\S]*?<\/a>/g)].map(([card]) => card);
   assert.equal(cards.length, 2);
   for (const card of cards) {
     assert.match(card, /committee-meta/);
-    assert.match(card, /\\{committee\\.year\\}/);
-    assert.match(card, /\\{committee\\.memberCount\\} members/);
-    assert.match(card, /<h3>\\{committee\\.name\\}<\\/h3>/);
-    assert.doesNotMatch(card, /committee\\.description|<p>/);
+    assert.match(card, /\{committee\.year\}/);
+    assert.match(card, /\{committee\.memberCount\} members/);
+    assert.match(card, /<h3>\{committee\.name\}<\/h3>/);
+    assert.doesNotMatch(card, /committee\.description|<p>/);
     assert.doesNotMatch(card, /View Committee member list|View Committee/);
     assert.match(card, /View Details/);
   }
