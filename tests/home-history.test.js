@@ -32,19 +32,21 @@ test('homepage church history derives rendered full text from the CMS history.fu
 test('expanded homepage history renders in a full-width reading area below the intro row', () => {
   const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
   assert.match(section, /grid grid-cols-1 md:grid-cols-2 items-center/);
-  assert.match(section, /id="history-full"[\\s\\S]*?max-w-3xl[\\s\\S]*?leading-8/);
+  assert.ok(section.includes('id="history-full"'));
+  assert.ok(section.includes('max-w-3xl'));
+  assert.ok(section.includes('leading-8'));
   assert.ok(section.indexOf('id="history-full"') > section.indexOf('grid grid-cols-1 md:grid-cols-2'));
-  assert.match(section, /<Fragment set:html=\\{historyFullHtml\\} \\/>/);
+  assert.ok(section.includes('<Fragment set:html={historyFullHtml} />'));
 });
 
 test('history toggle supports accessible expansion, collapse and existing destination navigation', () => {
   const section = home.match(/<section class="bg-cream py-8 px-4" id="history"[\\s\\S]*?<\\/section>/)?.[0] ?? '';
-  assert.match(section, /aria-expanded="false"/);
-  assert.match(section, /aria-controls="history-full"/);
-  assert.match(section, /data-destination=\\{history.destination \\?\\? ''\\}/);
-  assert.match(section, /data-collapse-label="Show Less"/);
-  assert.match(home, /full\\?\.classList\.toggle\('hidden', !expanded\)/);
-  assert.match(home, /btn\.setAttribute\('aria-expanded', String\(expanded\)\)/);
-  assert.match(home, /btn\.dataset\.destination/);
-  assert.match(home, /window\.location\.href = btn\.dataset\.destination/);
+  assert.ok(section.includes('aria-expanded="false"'));
+  assert.ok(section.includes('aria-controls="history-full"'));
+  assert.ok(section.includes("data-destination={history.destination ?? ''}"));
+  assert.ok(section.includes('data-collapse-label="Show Less"'));
+  assert.ok(home.includes("full?.classList.toggle('hidden', !expanded)"));
+  assert.ok(home.includes("btn.setAttribute('aria-expanded', String(expanded))"));
+  assert.ok(home.includes('btn.dataset.destination'));
+  assert.ok(home.includes('window.location.href = btn.dataset.destination'));
 });
