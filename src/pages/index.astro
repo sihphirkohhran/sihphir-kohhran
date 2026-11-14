@@ -285,32 +285,36 @@ const highlightItems = normalizeHighlights(
 
   <!-- ══════════════════════════════ CHURCH HISTORY ══════════════════════════════ -->
   <section class="bg-cream py-8 px-4" id="history" style={history.enabled === false ? 'display:none' : undefined}>
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       <div class="gold-divider reveal">
         <h2>{history.section_title ?? 'Sihphir Kohhran Chanchin'}</h2>
       </div>
-      <div class="reveal border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
-        <!-- Church building photo -->
-        <div class="w-full aspect-video rounded overflow-hidden mb-4 bg-ivory-dark border border-gold/20 flex items-center justify-center">
-          <img src={history.building_photo ?? '/images/church-building.jpg'} alt="Sihphir Presbyterian Kohhran Building"
+      <div class="reveal grid grid-cols-1 md:grid-cols-2 items-center gap-5 md:gap-8">
+        <div class="w-full aspect-[4/3] rounded-md overflow-hidden bg-ivory-dark border border-gold/20">
+          <img
+            src={history.building_photo ?? '/images/church-building.jpg'}
+            alt="Sihphir Presbyterian Kohhran Building"
             class="w-full h-full object-cover"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'" />
-          <span class="hidden font-body text-xs text-gold/40 tracking-wide">Church Building Photo</span>
+            loading="lazy"
+            decoding="async"
+          />
         </div>
-
-        <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
-          {history.short}
+        <div class="min-w-0 py-1 md:py-3">
+          <div class="font-body text-[0.65rem] font-semibold tracking-[0.16em] text-gold uppercase mb-2">Established 1910</div>
+          <div class="font-body text-sm text-gray-700 leading-relaxed mb-3" id="history-short">
+            {history.short}
+          </div>
+          <div class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
+            <Fragment set:html={historyFullHtml} />
+          </div>
+          <button
+            id="history-toggle"
+            data-destination={history.destination ?? ''}
+            class="inline-flex font-body text-xs font-semibold tracking-wide text-navy border-b border-gold/70 hover:border-gold transition-colors pb-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold"
+          >
+            {history.read_more_text ?? 'Read More →'}
+          </button>
         </div>
-        <div class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-4 hidden" id="history-full">
-          <Fragment set:html={historyFullHtml} />
-        </div>
-        <button
-          id="history-toggle"
-          data-destination={history.destination ?? ''}
-          class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/50 hover:border-navy transition-colors pb-0.5"
-        >
-          {history.read_more_text ?? 'Read More →'}
-        </button>
       </div>
     </div>
   </section>
