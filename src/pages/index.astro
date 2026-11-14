@@ -325,44 +325,26 @@ const highlightItems = normalizeHighlights(
         <div class="home-gallery-grid mb-4">
           {galleryPhotos.map((photo, i) => (
             <div class={`home-gallery-item reveal reveal-delay-${(i % 3) + 1}`}>
-              {photo.albumUrl ? (
-                <a
-                  href={photo.albumUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="home-gallery-photo block"
-                  aria-label={`Open ${photo.albumTitle} photo album`}
-                >
-                  <img
-                    src={photo.src}
-                    alt={photo.alt}
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.closest('.home-gallery-item')?.remove()"
-                  />
-                </a>
-              ) : (
-                <button
-                  type="button"
-                  class="home-gallery-photo block w-full"
-                  data-lightbox
-                  data-lightbox-src={photo.src}
-                  data-lightbox-caption={photo.caption}
-                  aria-label={`View ${photo.alt}`}
-                >
-                  <img
-                    src={photo.src}
-                    alt={photo.alt}
-                    class="w-full h-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.closest('.home-gallery-item')?.remove()"
-                  />
-                </button>
-              )}
+              <button
+                type="button"
+                class="home-gallery-photo block w-full"
+                data-lightbox
+                data-lightbox-src={photo.src}
+                data-lightbox-caption={photo.caption}
+                data-lightbox-alt={photo.alt}
+                aria-label={`View ${photo.alt}`}
+              >
+                <img
+                  src={photo.src}
+                  alt={photo.alt}
+                  class="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.closest('.home-gallery-item')?.remove()"
+                />
+              </button>
             </div>
-          ))}
+                    ))}
         </div>
       ) : (
         <p class="mb-4 border border-gold/15 bg-cream px-4 py-6 text-center font-body text-sm text-navy/65">
