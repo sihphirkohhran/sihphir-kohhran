@@ -40,14 +40,15 @@ export async function getWeeklySchedules() {
   return entries
     .filter((e) => e.id.startsWith('weekly/'))
     .map((e) => ({
-      id: e.id.replace(/^weekly\//, ''),
+      id: e.id.replace(/^weekly\//, '').replace(/\.md$/, ''),
       ...e.data,
       body: e.body,
     }))
     .sort((a, b) => {
       const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
       if (statusDifference) return statusDifference;
-      return weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
+      const dateDifference = weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
+      return dateDifference || a.id.localeCompare(b.id);
     });
 }
 

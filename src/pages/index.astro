@@ -62,13 +62,17 @@ const galleryPhotos = home.galleryOrder === 'oldest'
       .slice(0, galleryCount)
   : pickHomeGalleryPhotos(gallerySource, galleryCount);
 
-const latestWeekly = (await getWeeklySchedules())[0];
-const weeklySchedule = latestWeekly
+// Duplicate current records resolve to the newest week, then stable ID order, in getWeeklySchedules().
+const currentWeekly = (await getWeeklySchedules()).find((schedule) => schedule.status === 'current');
+const weeklySchedule = currentWeekly
   ? {
-      date: `${latestWeekly.week_start} — ${latestWeekly.week_end}`,
-      days: (latestWeekly.days as { day: string; duties: { role: string; name: string }[] }[]) ?? [],
+      date: [currentWeekly.week_start, currentWeekly.week_end].filter(Boolean).join(' — '),
+      days: (currentWeekly.days as {
+        day: string;
+        duties: { role?: string; name?: string; time?: string }[];
+      }[]) ?? [],
     }
-  : { date: '', days: [] };
+  : null;
 
 const latestMonthly = (await getMonthlyDuties())[0];
 const monthlyDuties = latestMonthly
@@ -411,28 +415,30 @@ const highlightItems = normalizeHighlights(
 
       <!-- Weekly Schedule Panel -->
       <div id="notice-weekly" class="notice-panel">
-        <div class="flex items-center justify-between mb-3">
-          <span class="font-body text-xs text-gray-500 tracking-wide">Week of: {weeklySchedule.date}</span>
-        </div>
-        <div class="space-y-3">
-          {weeklySchedule.days.map((day, i) => (
-            <div class={`reveal reveal-delay-${i + 1} border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
-              <div class="font-body text-sm font-semibold text-gray-600 tracking-wide uppercase mb-2">{day.day}</div>
-              <div class="space-y-1">
-                {day.duties.map(duty => (
-                  <div class="flex justify-between font-body text-sm text-gray-700 border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
-                    <span class="text-gray-400 text-xs">{duty.role}</span>
-                    <span class="font-medium text-navy text-right">{duty.name}</span>
+        {weeklySchedule ? (
+          <>
+            <div class="font-body text-xs text-gray-500 tracking-wide mb-3">Week of: {weeklySchedule.date}</div>
+            <div class="space-y-3">
+              {weeklySchedule.days.map((day, i) => (
+                <div class={`reveal reveal-delay-${i + 1} border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
+                  <div class="font-body text-sm font-semibold text-gray-600 tracking-wide uppercase mb-2">{day.day}</div>
+                  <div class="space-y-1">
+                    {day.duties.map(duty => (
+                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm text-gray-700 border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
+                        <span class="min-w-0 text-gray-400 text-xs break-words">{duty.role}</span>
+                        <span class="min-w-0 font-medium text-navy text-left break-words">{duty.name}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <div class="pagination mt-4">
-          <button class="page-btn active">1</button>
-          <button class="page-btn">2</button>
-          <button class="page-btn">3</button>
+          </>
+        ) : (
+          <p class="rounded border border-gold/20 bg-white px-4 py-3 font-body text-sm text-gray-500">No current weekly schedule is available.</p>
+        )}
+        <div class="mt-3 text-right">
+          <a href="/hun-ruatna" class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/30 hover:border-navy transition-colors">View All →</a>
         </div>
       </div>
 
@@ -441,15 +447,15 @@ const highlightItems = normalizeHighlights(
         <div class="font-body text-sm text-navy font-semibold tracking-wide mb-3">{monthlyDuties.month}</div>
         <div class="space-y-3">
           {monthlyDuties.sections.map((section, i) => (
-            <div class="bg-navy border border-gold/15 rounded overflow-hidden">
-              <div class="bg-navy-light px-4 py-2 border-b border-gold/10">
-                <span class="font-display text-gold-light font-semibold text-sm">{section.title}</span>
+            <div class="bg-white border border-gold/20 border-l-2 border-l-gold rounded-r overflow-hidden">
+              <div class="bg-cream px-4 py-2 border-b border-navy/10">
+                <span class="font-display text-navy font-semibold text-sm">{section.title}</span>
               </div>
               <div class="px-4 py-2 space-y-1">
                 {section.duties.map(duty => (
-                  <div class="flex justify-between font-body text-xs border-b border-gold/10 pb-1.5 last:border-0 last:pb-0">
-                    {duty.role && <span class="text-gold-pale/50">{duty.role}</span>}
-                    <span class={`text-gold-pale/80 ${!duty.role ? 'w-full' : ''}`}>{duty.name}</span>
+                  <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-xs text-navy border-b border-navy/10 pb-1.5 last:border-0 last:pb-0">
+                    <span class="min-w-0 text-gray-500 break-words">{duty.role}</span>
+                    <span class="min-w-0 text-navy text-left break-words">{duty.name}</span>
                   </div>
                 ))}
               </div>
