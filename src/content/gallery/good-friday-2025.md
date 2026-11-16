@@ -2,7 +2,7 @@
 caption: Good Friday
 year: 2025
 category: Good Friday
-description: GOOD FRIDAY (18.4.2025)
+description: 18 April 2025
 status: current
 photo: /images/1794471162757-1-good-friday-10-.jpg
 album_url: "https://drive.google.com/drive/folders/1BQoRLKlCdNlnhKShv2Fuqf826NMXKDtP?usp=sharing"
