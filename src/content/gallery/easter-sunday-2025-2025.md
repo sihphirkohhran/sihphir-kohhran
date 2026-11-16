@@ -2,7 +2,7 @@
 caption: Easter Sunday 2025
 year: 2025
 category: Easter Sunday
-description: EASTER SUNDAY (20.4.2025)
+description: 20 April 2025
 status: current
 photo: /images/1794471984944-1.jpg
 album_url: "https://drive.google.com/drive/folders/16Tq0kZoKc7n3wuyp1Po0QAWjVzWpfhh8?usp=sharing"
