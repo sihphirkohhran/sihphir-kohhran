@@ -2,7 +2,7 @@
 caption: Zan ven inkhawm 2025
 year: 2025
 category: Zan ven inkhawm
-description: ZAN VEN INKHAWM (17.4.2025)
+description: 17 April 2025
 status: current
 photo: /images/1794416057825-dscf3441.jpg
 album_url: "https://drive.google.com/drive/folders/1BQoRLKlCdNlnhKShv2Fuqf826NMXKDtP?usp=sharing"
