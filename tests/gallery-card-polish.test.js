@@ -48,7 +48,7 @@ test('CMS album fields, covers, descriptions, badges and photo counts remain int
   assert.match(page, /category: data\.category/);
   assert.match(page, /cover: featuredPhoto \|\| photos\[0\]\?\.src \|\| galleryPlaceholder/);
   assert.match(page, /album\.photos\.length/);
-  assert.match(page, /<span>\{album\.year\}<\/span>/);
+  assert.match(page, /<span>\{album\.yearLabel\}<\/span>/);
   assert.match(page, /<span>\{album\.category\}<\/span>/);
   assert.match(page, /Photographs preserved in the church archive\./);
 });
