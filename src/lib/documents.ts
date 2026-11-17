@@ -131,6 +131,7 @@ export function buildHomeDocumentSections(
     pdf_url: string;
     date?: string;
     year?: number | null;
+    yearType?: 'known' | 'approximate' | 'unspecified';
     month?: number | null;
     pinned?: boolean;
   }[],
@@ -140,6 +141,7 @@ export function buildHomeDocumentSections(
     pdf_url: string;
     date?: string;
     year?: number | null;
+    yearType?: 'known' | 'approximate' | 'unspecified';
     month?: number | null;
     pinned?: boolean;
     category?: string;
@@ -155,6 +157,7 @@ export function buildHomeDocumentSections(
         pdf_url: d.pdf_url,
         date: d.date,
         year: d.year,
+        yearType: d.yearType,
         month: d.month,
         pinned: d.pinned,
       }),
