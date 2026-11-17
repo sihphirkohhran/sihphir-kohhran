@@ -20,9 +20,9 @@ test('View Album remains a 15px EB Garamond SemiBold visual indicator with close
 });
 
 test('featured and archive cards are full-card semantic links to their existing internal details', () => {
-  assert.ok(page.includes('<a class="featured-album reveal gallery-card-link" href={`#album-${album.id}`} data-open-album={album.id} data-album-card'));
-  assert.ok(page.includes('<a class={`album-card gallery-card-link reveal reveal-delay-${index % 3 + 1}`} href={`#album-${album.id}`} data-open-album={album.id} data-album-card'));
-  assert.equal(page.split('data-open-album={album.id}').length - 1, 2);
+  assert.ok(page.includes('<a class="featured-album reveal gallery-card-link" href={album.externalNavigation ? album.albumUrl : `#album-${album.id}`} target={album.externalNavigation ? \'_blank\' : undefined} rel={album.externalNavigation ? \'noopener noreferrer\' : undefined} data-open-album={!album.externalNavigation ? album.id : undefined} data-album-card'));
+  assert.ok(page.includes('<a class={`album-card gallery-card-link reveal reveal-delay-${index % 3 + 1}`} href={album.externalNavigation ? album.albumUrl : `#album-${album.id}`} target={album.externalNavigation ? \'_blank\' : undefined} rel={album.externalNavigation ? \'noopener noreferrer\' : undefined} data-open-album={!album.externalNavigation ? album.id : undefined} data-album-card'));
+  assert.equal(page.split('data-open-album={!album.externalNavigation ? album.id : undefined}').length - 1, 2);
   assert.match(page, /querySelectorAll<HTMLAnchorElement>\('\[data-open-album\]'\)/);
   assert.match(page, /event\.preventDefault\(\)/);
   assert.match(page, /#album-\$\{button\.dataset\.openAlbum\}/);

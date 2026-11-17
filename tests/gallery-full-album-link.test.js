@@ -12,7 +12,7 @@ test('full album action removes explanatory copy and uses the requested label', 
 
 test('full album action is conditional on the existing CMS albumUrl field', () => {
   assert.ok(page.includes('{album.albumUrl && <div class="complete-album-action">'));
-  assert.ok(page.includes("albumUrl: data.album_url || ''"));
+  assert.match(page, /albumUrl: String\(data\.album_url \|\| ''\)\.trim\(\)/);
   assert.ok(!page.includes('href="#"'));
   assert.ok(!page.includes('class="complete-album"'));
   assert.ok(!page.includes('.complete-album{'));
