@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
+import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
 import PageHero from '../components/PageHero.astro';
 const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian Kohhran',search_placeholder:'Search title, description, category or year…',download_button:'Download',category_label:'Category',document_label:'Document',empty_message:'No documents found'});
@@ -65,7 +66,10 @@ const documents = entries
     }
     const primary = normalizedFiles[0];
     const fromId = parseYearMonthFromId(entry.id);
-    const year = data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
+    const yearType = resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
+    const year = yearType === 'unspecified' ? null : data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
+    const yearLabel = formatHistoricalYear(year, yearType);
+    const yearFilterValue = historicalYearFilterValue(year, yearType);
     const month = data.month ?? fromId.month ?? parseMonthFromDate(data.date) ?? null;
     const category = String(
       data.category || (entry.id.startsWith('ktp-inleng/') ? 'KTP Inleng' : 'Other'),
@@ -80,6 +84,9 @@ const documents = entries
       description,
       category,
       year,
+      yearType,
+      yearLabel,
+      yearFilterValue,
       uploadDate,
       sortDate,
       featured: Boolean(data.featured),
@@ -101,6 +108,7 @@ const categories = Array.from(new Set([
   ...documents.map((document) => document.category),
 ])).filter(Boolean);
 const years = Array.from(new Set(documents.map((document) => document.year).filter((year): year is number => year != null))).sort((a, b) => b - a);
+const hasUnspecifiedYear = documents.some((document) => document.yearType === 'unspecified');
 const featuredDocuments = documents.filter((document) => document.featured);
 const archiveDocuments = documents.filter((document) => !document.featured);
 
@@ -132,7 +140,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
       </label>
       <div class="document-filter-row">
         <label><span>{ui.category_label}</span><select id="document-category"><option value="all">All categories</option>{categories.map((category) => <option value={category}>{category}</option>)}</select></label>
-        <label><span>Year</span><select id="document-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}</select></label>
+        <label><span>Year</span><select id="document-year"><option value="all">All years</option>{years.map((year) => <option value={year}>{year}</option>)}{hasUnspecifiedYear && <option value="unspecified">Year Unspecified</option>}</select></label>
         <label><span>Sort</span><select id="document-sort"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select></label>
       </div>
       <p id="document-count" class="document-count">{documents.length} documents</p>
@@ -146,13 +154,13 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
         </div>
         <div class="document-grid featured-grid" id="featured-grid">
           {featuredDocuments.map((document, index) => (
-            <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.year ?? ''} data-date={document.sortDate}>
+            <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
               <div class="document-preview">
                 {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
                 <span class="featured-ribbon">Featured</span>
               </div>
               <div class="document-card-body">
-                <div class="document-badges"><span>{document.category}</span>{document.year && <span>{document.year}</span>}</div>
+                <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
                 <h3>{document.title}</h3>
                 <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
                 <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
@@ -167,12 +175,12 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     <section class="document-section archive-section">
       <div class="document-grid" id="document-grid">
         {archiveDocuments.map((document, index) => (
-          <article class={`document-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.year ?? ''} data-date={document.sortDate}>
+          <article class={`document-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
             <div class="document-preview">
               {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
             </div>
             <div class="document-card-body">
-              <div class="document-badges"><span>{document.category}</span>{document.year && <span>{document.year}</span>}</div>
+              <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
               <h3>{document.title}</h3>
               <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
               <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
