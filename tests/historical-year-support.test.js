@@ -13,7 +13,7 @@ const documentLib = read('../src/lib/documents.ts');
 
 test('shared historical year model formats known, approximate and unspecified values', () => {
   assert.match(yearHelper, /yearType === 'unspecified' \|\| year == null/);
-  assert.match(yearHelper, /Circa \\${year}/);
+  assert.match(yearHelper, /yearType === 'approximate' \? `Circa \$\{year\}`/);
   assert.match(yearHelper, /Year Unspecified/);
   assert.match(yearHelper, /return year != null && Number\.isFinite\(Number\(year\)\) \? 'known' : 'unspecified'/);
 });
@@ -31,7 +31,7 @@ test('Gallery Manager exposes the same three year choices and only requires a ye
   assert.match(galleryManager, /id="gallery-year-value-wrap"/);
   assert.match(galleryManager, /yearType!=='unspecified'.*Number\.isInteger/);
   assert.match(galleryManager, /yearType==='unspecified'\?delete selected\.data\.year/);
-  assert.match(galleryManager, /yearType==='approximate'.*Circa/);
+  assert.match(galleryManager, /==='approximate'.*Circa/);
   assert.match(galleryManager, /record\.data\.yearType = record\.data\.yearType \|\| \(record\.data\.year != null.*'known' : 'unspecified'/);
   assert.doesNotMatch(galleryManager, /const year=new Date\(\)\.getFullYear\(\)/);
 });
