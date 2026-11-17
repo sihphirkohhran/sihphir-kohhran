@@ -66,32 +66,31 @@ test('search, year/category filters, sorting and photo totals remain functional'
 
 
 test('archive cards use compact cover, body padding and vertical spacing without changing typography', () => {
-  assert.match(page, /\.album-cover\\{position:relative;width:100%;height:190px/);
-  assert.match(page, /\.album-body\\{display:flex;flex:1;flex-direction:column;padding:14px\\}/);
-  assert.match(page, /\.album-body small\\{margin-top:7px/);
-  assert.match(page, /\.album-body \.album-action\\{margin-top:8px\\}/);
-  assert.match(page, /@media\\(max-width:560px\\)[\\s\\S]*?\.album-cover\\{height:190px\\}/);
+  assert.ok(page.includes('.album-cover{position:relative;width:100%;height:190px'));
+  assert.ok(page.includes('.album-body{display:flex;flex:1;flex-direction:column;padding:14px}'));
+  assert.ok(page.includes('.album-body small{margin-top:7px'));
+  assert.ok(page.includes('.album-body .album-action{margin-top:8px}'));
+  assert.ok(page.includes('@media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid,.photo-grid{grid-template-columns:1fr}.album-cover{height:190px}'));
   assert.match(page, /font-family:'Poppins',sans-serif;font-size:18px;font-weight:700/);
   assert.match(page, /font-family:'EB Garamond',serif;font-size:15px;font-weight:600/);
   assert.match(page, /object-fit:cover/);
-  assert.match(page, /\.album-body\\{display:flex;flex:1;flex-direction:column;padding:14px\\}/);
-  assert.doesNotMatch(page, /\.album-body\\{[^}]*min-height/);
+  assert.doesNotMatch(page, /\.album-body\{[^}]*min-height/);
   assert.doesNotMatch(page, /\.album-body[^}]*margin-top:auto/);
 });
 
 test('Year filter remains dynamically populated and defaults to the latest available album year', () => {
-  assert.match(page, /const years = Array\.from\(new Set\(albums\.map\(album =>? album\.year\)\)\)\.sort\(\(a, b\) =>? b - a\)/);
-  assert.match(page, /const latestYear = years\[0\]/);
-  assert.match(page, /const initialAlbums = latestYear === undefined \? albums : albums\.filter\(\(album\) =>? album\.year === latestYear\)/);
-  assert.match(page, /<option value="all">All years<\/option>\{years\.map\(\(year\) =>? <option value=\{year\} selected=\{year === latestYear\}>\{year\}<\/option>\)\}/);
+  assert.ok(page.includes('const years = Array.from(new Set(albums.map((album) => album.year))).sort((a, b) => b - a);'));
+  assert.ok(page.includes('const latestYear = years[0];'));
+  assert.ok(page.includes('const initialAlbums = latestYear === undefined ? albums : albums.filter((album) => album.year === latestYear);'));
+  assert.ok(page.includes('<option value="all">All years</option>{years.map((year) => <option value={year} selected={year === latestYear}>{year}</option>)}'));
   assert.match(page, /selectedYear==='all'\|\|card\.dataset\.year===selectedYear/);
   assert.doesNotMatch(page, /<option value="all" selected/);
 });
 
 test('search, Category, Sort and Clear Filters retain their existing behavior', () => {
-  assert.match(page, /\[search,year,category\]\.forEach\(control=>control\?\.addEventListener\(control===search\?'input':'change',applyFilters\)\)/);
-  assert.match(page, /sort\?\.addEventListener\('change',applyFilters\)/);
-  assert.match(page, /if\(search\)search\.value='';if\(year\)year\.value='all';if\(category\)category\.value='all';if\(sort\)sort\.value='newest';applyFilters\(\);search\?\.focus\(\)/);
+  assert.ok(page.includes("[search,year,category].forEach(control=>control?.addEventListener(control===search?'input':'change',applyFilters))"));
+  assert.ok(page.includes("sort?.addEventListener('change',applyFilters)"));
+  assert.ok(page.includes("if(search)search.value='';if(year)year.value='all';if(category)category.value='all';if(sort)sort.value='newest';applyFilters();search?.focus()"));
   assert.match(page, /selectedCategory==='all'\|\|card\.dataset\.category===selectedCategory/);
   assert.match(page, /sort\?\.value==='az'\|\|sort\?\.value==='za'/);
   assert.match(page, /sort\?\.value==='photos'/);
