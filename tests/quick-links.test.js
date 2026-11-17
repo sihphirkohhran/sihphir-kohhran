@@ -5,11 +5,17 @@ import { readFileSync } from 'node:fs';
 const component = readFileSync(new URL('../src/components/QuickLinks.astro', import.meta.url), 'utf8');
 const links = JSON.parse(readFileSync(new URL('../src/content/settings/quick-links.json', import.meta.url), 'utf8')).links;
 
-test('Quick Links preserve CMS-provided labels, destinations, ordering and actions', () => {
-  assert.deepEqual(links.map(({ label, href, action, order }) => ({ label, href, action, order })), [
-    { label: 'Hun Ruatna', href: '/#notice-board', action: 'tab-weekly', order: 0 },
-    { label: 'Thlabi Mawhphurtu', href: '/#notice-board', action: 'tab-monthly', order: 1 },
-    { label: 'Notice Board', href: '/#notice-board', action: 'tab-notices', order: 2 },
+test('Quick Links use CMS-provided labels and preserve configured destinations, actions and ordering', () => {
+  // Labels are intentionally administrator-editable CMS content; validate their shape,
+  // not their wording, so legitimate CMS label changes do not break this test.
+  assert.ok(links.length > 0);
+  assert.ok(links.every(({ label }) => typeof label === 'string' && label.trim().length > 0));
+  assert.match(component, /\{link\.label\}/);
+
+  assert.deepEqual(links.map(({ href, action, order }) => ({ href, action, order })), [
+    { href: '/#notice-board', action: 'tab-weekly', order: 0 },
+    { href: '/#notice-board', action: 'tab-monthly', order: 1 },
+    { href: '/#notice-board', action: 'tab-notices', order: 2 },
   ]);
   assert.match(component, /\.filter\(\(link\) => link\.visible !== false && link\.enabled !== false\)/);
   assert.match(component, /\.sort\(\(a, b\) => \(a\.order \?\? 0\) - \(b\.order \?\? 0\)\)/);
