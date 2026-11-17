@@ -230,10 +230,44 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     if (count) count.textContent = visible + ' document' + (visible === 1 ? '' : 's');
   }
 
+  const fileTypeDetails: Record<string, { label: string; icon: string; color: string }> = {
+    pdf: { label: 'PDF Document', icon: 'file-text', color: 'pdf' },
+    xlsx: { label: 'Excel Spreadsheet', icon: 'file-spreadsheet', color: 'spreadsheet' },
+    xls: { label: 'Excel Spreadsheet', icon: 'file-spreadsheet', color: 'spreadsheet' },
+    csv: { label: 'CSV File', icon: 'file-spreadsheet', color: 'spreadsheet' },
+    docx: { label: 'Word Document', icon: 'file-text', color: 'word' },
+    doc: { label: 'Word Document', icon: 'file-text', color: 'word' },
+    pptx: { label: 'PowerPoint Presentation', icon: 'presentation', color: 'powerpoint' },
+    ppt: { label: 'PowerPoint Presentation', icon: 'presentation', color: 'powerpoint' },
+    zip: { label: 'ZIP Archive', icon: 'file-archive', color: 'zip' },
+    jpg: { label: 'Image', icon: 'file-image', color: 'image' },
+    jpeg: { label: 'Image', icon: 'file-image', color: 'image' },
+    png: { label: 'Image', icon: 'file-image', color: 'image' },
+    gif: { label: 'Image', icon: 'file-image', color: 'image' },
+    webp: { label: 'Image', icon: 'file-image', color: 'image' },
+    avif: { label: 'Image', icon: 'file-image', color: 'image' },
+    svg: { label: 'Image', icon: 'file-image', color: 'image' },
+  };
+  const fileIcons: Record<string, string> = {
+    'file-text': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8"/></svg>',
+    'file-spreadsheet': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M4 12h16M4 16h16M10 12v10M15 12v10"/></svg>',
+    presentation: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h18v13H3zM12 16v5M8 21h8M7 8h10M7 12h6"/></svg>',
+    'file-archive': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM4 8h16M10 4v4M14 4v4M12 11v2m-2 2h4v4h-4z"/></svg>',
+    'file-image': '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M7 18l4-4 3 3 2-2 2 3M9 11h.01"/></svg>',
+    file: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6"/></svg>',
+  };
+
+  function fileExtension(filename: string) {
+    return filename.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase() || '';
+  }
+
   function fileType(file: { filename?: string; type?: string; url?: string }) {
-    const value = file.type || file.filename || file.url || 'file';
-    const extension = value.includes('/') ? (file.filename || file.url || '').split('.').pop() || 'FILE' : value.split('.').pop() || value;
-    return extension.toUpperCase();
+    const extension = fileExtension(file.filename || '') || (file.type || '').toLowerCase();
+    return fileTypeDetails[extension] || { label: 'File', icon: 'file', color: 'other' };
+  }
+
+  function displayFilename(filename: string) {
+    return fileTypeDetails[fileExtension(filename)] ? filename.replace(/\.[^.]+$/, '') : filename;
   }
 
   function openDocumentRow(row: HTMLButtonElement) {
@@ -251,26 +285,36 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     fileList.replaceChildren();
     files.forEach((file) => {
       if (!file.url) return;
+      const filenameText = file.filename || 'Document';
+      const metadata = fileType(file);
       const item = document.createElement('li');
       item.className = 'document-file-item';
-      const details = document.createElement('div');
+      const link = document.createElement('a');
+      link.className = 'document-file-link';
+      link.href = file.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.setAttribute('aria-label', 'Open ' + filenameText + ' (' + metadata.label + ') in a new tab');
+      const icon = document.createElement('span');
+      icon.className = 'document-file-icon document-file-icon-' + metadata.color;
+      icon.setAttribute('aria-hidden', 'true');
+      icon.innerHTML = fileIcons[metadata.icon] || fileIcons.file;
+      const details = document.createElement('span');
       details.className = 'document-file-details';
       const filename = document.createElement('span');
       filename.className = 'document-file-name';
-      filename.textContent = file.filename || 'Document';
+      filename.textContent = displayFilename(filenameText);
       const type = document.createElement('span');
       type.className = 'document-file-type';
-      type.textContent = fileType(file) + ' file';
+      type.textContent = metadata.label;
       details.append(filename, type);
-      const actions = document.createElement('div');
-      actions.className = 'document-file-actions';
-      const open = document.createElement('a');
-      open.href = file.url; open.target = '_blank'; open.rel = 'noopener noreferrer'; open.textContent = 'Open';
-      open.setAttribute('aria-label', 'Open ' + (file.filename || 'file') + ' in a new tab');
-      const download = document.createElement('a');
-      download.href = file.url; download.download = file.filename || ''; download.textContent = 'Download';
-      download.setAttribute('aria-label', 'Download ' + (file.filename || 'file'));
-      actions.append(open, download); item.append(details, actions); fileList.append(item);
+      const arrow = document.createElement('span');
+      arrow.className = 'document-file-arrow';
+      arrow.setAttribute('aria-hidden', 'true');
+      arrow.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg>';
+      link.append(icon, details, arrow);
+      item.append(link);
+      fileList.append(item);
     });
     dialog.showModal();
     closeDialog?.focus();
@@ -336,16 +380,27 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   .document-dialog-subtitle{margin:8px 0 0;color:#e5d7ad;font-size:.65rem;font-weight:600;letter-spacing:.04em}
   .document-dialog-close{display:grid;flex:none;place-items:center;width:32px;height:32px;border:1px solid rgba(229,215,173,.48);border-radius:4px;background:rgba(255,255,255,.06);color:#fff;font-size:1.25rem;line-height:1;cursor:pointer;transition:background .15s ease,border-color .15s ease}
   .document-dialog-close:hover{border-color:#ddc782;background:rgba(255,255,255,.14)}
-  .document-dialog-close:focus-visible,.document-file-actions a:focus-visible{outline:2px solid #ddc782;outline-offset:3px}
+  .document-dialog-close:focus-visible{outline:2px solid #ddc782;outline-offset:3px}
   .document-file-list{display:grid;flex:0 1 auto;min-height:0;gap:0;margin:0;padding:0 18px;overflow-y:auto;overscroll-behavior:contain;list-style:none}
-  .document-dialog :global(.document-file-item){display:flex;align-items:center;justify-content:space-between;gap:18px;padding:15px 0;border-bottom:1px solid rgba(18,35,59,.1)}
+  .document-dialog :global(.document-file-item){display:block;margin:0;border-bottom:1px solid rgba(18,35,59,.1)}
   .document-dialog :global(.document-file-item:last-child){border-bottom:0}
-  .document-dialog :global(.document-file-details){display:grid;min-width:0;flex:1;gap:5px}
+  .document-dialog :global(.document-file-link){display:flex;min-width:0;min-height:64px;align-items:center;gap:12px;padding:11px 5px;color:inherit;text-decoration:none;border-radius:4px;transition:background .15s ease}
+  .document-dialog :global(.document-file-link:hover){background:rgba(23,41,65,.035)}
+  .document-dialog :global(.document-file-link:focus-visible){outline:2px solid #b8953f;outline-offset:-2px;background:rgba(23,41,65,.035)}
+  .document-dialog :global(.document-file-icon){display:grid;flex:none;place-items:center;width:30px;height:34px;border:1px solid rgba(95,105,118,.18);border-radius:4px;background:#f5f6f7;color:#747d89}
+  .document-dialog :global(.document-file-icon svg){width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .document-dialog :global(.document-file-icon-pdf){border-color:rgba(164,78,78,.2);background:#fff7f5;color:#a44e4e}
+  .document-dialog :global(.document-file-icon-spreadsheet){border-color:rgba(61,125,91,.2);background:#f2f8f3;color:#3d7d5b}
+  .document-dialog :global(.document-file-icon-word){border-color:rgba(69,109,164,.2);background:#f3f7fc;color:#456da4}
+  .document-dialog :global(.document-file-icon-powerpoint){border-color:rgba(174,116,60,.2);background:#fff7f0;color:#ae743c}
+  .document-dialog :global(.document-file-icon-zip){border-color:rgba(132,103,154,.2);background:#f8f4fb;color:#84679a}
+  .document-dialog :global(.document-file-icon-image){border-color:rgba(95,105,118,.18);background:#f5f6f7;color:#747d89}
+  .document-dialog :global(.document-file-details){display:grid;min-width:0;flex:1;gap:4px}
   .document-dialog :global(.document-file-name){display:block;overflow-wrap:anywhere;color:#263851;font-size:.82rem;font-weight:600;line-height:1.4}
-  .document-dialog :global(.document-file-type){display:block;margin-top:1px;color:#858c96;font-size:.62rem;text-transform:uppercase;letter-spacing:.07em;line-height:1.35}
-  .document-dialog :global(.document-file-actions){display:flex;flex:none;align-items:center;gap:9px}
-  .document-dialog :global(.document-file-actions a){display:inline-flex;align-items:center;justify-content:center;min-width:58px;border:1px solid rgba(184,149,63,.42);border-radius:4px;padding:7px 11px;background:#fff;color:#6e5729;font-size:.67rem;font-weight:700;line-height:1.2;text-decoration:none;white-space:nowrap}
-  .document-dialog :global(.document-file-actions a:hover){background:#fbf4e5;border-color:#b8953f}
+  .document-dialog :global(.document-file-type){display:block;color:#858c96;font-size:.64rem;line-height:1.35}
+  .document-dialog :global(.document-file-arrow){display:grid;flex:none;place-items:center;width:25px;height:25px;color:#9a8458;opacity:.75;transition:transform .15s ease,opacity .15s ease}
+  .document-dialog :global(.document-file-arrow svg){width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+  .document-dialog :global(.document-file-link:hover .document-file-arrow){transform:translate(2px,-2px);opacity:1}
   .document-empty{display:grid;justify-items:center;padding:60px 20px;text-align:center}
   .empty-illustration{position:relative;width:92px;height:78px}
   .empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:6px;background:#fffaf0;transform:rotate(-5deg)}
@@ -355,6 +410,6 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   .document-empty p{margin:0;color:#7b828d;font-size:.76rem}
   .document-empty button{margin-top:15px;border:1px solid rgba(18,35,59,.18);border-radius:5px;padding:8px 12px;background:white;color:#253851;font-size:.68rem;font-weight:700}
   @media(max-width:760px){.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
-  @media(max-width:560px){.document-toolbar{gap:10px;padding-top:10px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-section{margin-top:23px}.document-section-heading{display:block}.document-section-heading p{margin-top:5px;text-align:left}.document-row{gap:10px;padding:10px 3px}.document-row-title{font-size:.88rem}.document-row-meta{gap:3px 7px;font-size:.58rem}.document-row-meta>span+span:before{margin-right:7px}.document-dialog{width:calc(100vw - 20px);max-height:78vh}.document-dialog-header{gap:10px;padding:14px}.document-dialog-header h2{font-size:1.05rem}.document-file-list{padding:0 14px}.document-dialog :global(.document-file-item){align-items:stretch;flex-direction:column;gap:10px}.document-dialog :global(.document-file-actions){width:100%}.document-dialog :global(.document-file-actions a){flex:1;text-align:center}}
+  @media(max-width:560px){.document-toolbar{gap:10px;padding-top:10px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-section{margin-top:23px}.document-section-heading{display:block}.document-section-heading p{margin-top:5px;text-align:left}.document-row{gap:10px;padding:10px 3px}.document-row-title{font-size:.88rem}.document-row-meta{gap:3px 7px;font-size:.58rem}.document-row-meta>span+span:before{margin-right:7px}.document-dialog{width:calc(100vw - 20px);max-height:78vh}.document-dialog-header{gap:10px;padding:14px}.document-dialog-header h2{font-size:1.05rem}.document-file-list{padding:0 10px}.document-dialog :global(.document-file-link){min-height:62px;gap:10px;padding:10px 4px}.document-dialog :global(.document-file-name){font-size:.78rem}}
   @media(prefers-reduced-motion:reduce){.document-row,.document-row-arrow{transition:none}}
 </style>
