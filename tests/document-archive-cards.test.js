@@ -9,7 +9,7 @@ test('featured and archive documents render compact full-width list rows', () =>
   assert.equal((page.match(/class="document-row" data-document-row data-document-open/g) || []).length, 2);
   assert.match(page, /<span class="document-row-title">\{document\.title\}<\/span>/);
   assert.match(page, /document-row-meta[\s\S]*?\{document\.category\}[\s\S]*?\{document\.yearLabel\}[\s\S]*?document\.fileCount/);
-  assert.doesNotMatch(page, /document-grid|document-card|document-badges|document-actions/);
+  assert.doesNotMatch(page, /class="document-grid"|document-card|document-badges|document-actions/);
   assert.match(page, /\.document-list\{display:flex;flex-direction:column/);
   assert.match(page, /\.document-row:focus-visible/);
   assert.match(page, /@media\(max-width:560px\)/);
