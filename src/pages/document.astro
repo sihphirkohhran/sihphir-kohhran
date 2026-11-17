@@ -98,6 +98,7 @@ const documents = entries
       extension: ext,
       previewable: ext === 'pdf' || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
       image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
+      files: normalizedFiles.map((file) => ({ ...file, type: file.type || fileExtension(file.filename || file.url) })),
       fileCount: normalizedFiles.length,
     };
   })
@@ -153,36 +154,26 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
           <div><span>Selected archive</span><h2>Featured Documents</h2></div>
           <p>Important publications and frequently requested records.</p>
         </div>
-        <div class="document-grid featured-grid" id="featured-grid">
-          {featuredDocuments.map((document, index) => (
-            <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
-              <div class="document-card-body">
-                <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}><svg viewBox="0 0 20 22" aria-hidden="true"><path d="M4 1.5h7l5 5V20.5H4z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 1.8v5h5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span>{iconLabel(document.extension)}</span></span><span class="featured-ribbon">Featured</span></div>
-                <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
-                <h3>{document.title}</h3>
-                {document.description && <p class="document-description">{document.description}</p>}
-                <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span></div>
-                <div class="document-actions"><a href={document.url} target="_blank" rel="noopener noreferrer" class="view-link">View Document</a><a href={document.url} download class="download-link">Download</a></div>
-              </div>
-            </article>
+        <div class="document-list featured-list" id="featured-grid">
+          {featuredDocuments.map((document) => (
+            <button type="button" class="document-row" data-document-row data-document-open data-files={JSON.stringify(document.files)} data-title={document.title} data-search-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
+              <span class={`file-icon file-${document.extension}`} aria-hidden="true"><svg viewBox="0 0 20 22"><path d="M4 1.5h7l5 5V20.5H4z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 1.8v5h5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span>
+              <span class="document-row-copy"><span class="document-row-title">{document.title}</span><span class="document-row-meta"><span class="document-row-category">{document.category}</span><span>{document.yearLabel}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span><span class="document-featured-label">Featured</span></span></span>
+              <svg class="document-row-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           ))}
         </div>
       </section>
     )}
 
     <section class="document-section archive-section">
-      <div class="document-grid" id="document-grid">
-        {archiveDocuments.map((document, index) => (
-          <article class={`document-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
-            <div class="document-card-body">
-              <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}><svg viewBox="0 0 20 22" aria-hidden="true"><path d="M4 1.5h7l5 5V20.5H4z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 1.8v5h5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span>{iconLabel(document.extension)}</span></span></div>
-              <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
-              <h3>{document.title}</h3>
-              {document.description && <p class="document-description">{document.description}</p>}
-              <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span></div>
-              <div class="document-actions"><a href={document.url} target="_blank" rel="noopener noreferrer" class="view-link">View Document</a><a href={document.url} download class="download-link">Download</a></div>
-            </div>
-          </article>
+      <div class="document-list" id="document-grid">
+        {archiveDocuments.map((document) => (
+          <button type="button" class="document-row" data-document-row data-document-open data-files={JSON.stringify(document.files)} data-title={document.title} data-search-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
+            <span class={`file-icon file-${document.extension}`} aria-hidden="true"><svg viewBox="0 0 20 22"><path d="M4 1.5h7l5 5V20.5H4z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 1.8v5h5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg></span>
+            <span class="document-row-copy"><span class="document-row-title">{document.title}</span><span class="document-row-meta"><span class="document-row-category">{document.category}</span><span>{document.yearLabel}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span></span></span>
+            <svg class="document-row-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M10 5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
         ))}
       </div>
     </section>
@@ -193,6 +184,10 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
       <p>Try a different search term or clear one of the filters.</p>
       <button type="button" id="document-clear">Clear filters</button>
     </section>
+    <dialog class="document-dialog" id="document-dialog" aria-labelledby="document-dialog-title">
+      <div class="document-dialog-header"><div><span class="document-dialog-eyebrow">Document files</span><h2 id="document-dialog-title"></h2></div><button type="button" class="document-dialog-close" id="document-dialog-close" aria-label="Close file selection">×</button></div>
+      <ul class="document-file-list" id="document-file-list"></ul>
+    </dialog>
   </main>
 </BaseLayout>
 
@@ -203,38 +198,84 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   const sort = document.querySelector<HTMLSelectElement>('#document-sort');
   const empty = document.querySelector<HTMLElement>('#document-empty');
   const count = document.querySelector<HTMLElement>('#document-count');
-  const downloadLabel=document.querySelector<HTMLElement>('.documents-page')?.dataset.downloadLabel;document.querySelectorAll('.download-link').forEach(link=>{if(downloadLabel)link.textContent=downloadLabel;});
+  const dialog = document.querySelector<HTMLDialogElement>('#document-dialog');
+  const dialogTitle = document.querySelector<HTMLElement>('#document-dialog-title');
+  const fileList = document.querySelector<HTMLUListElement>('#document-file-list');
+  const closeDialog = document.querySelector<HTMLButtonElement>('#document-dialog-close');
+  let lastFocusedRow: HTMLButtonElement | null = null;
 
   function applyFilters() {
     const query = search?.value.trim().toLowerCase() || '';
     const selectedCategory = category?.value || 'all';
     const selectedYear = year?.value || 'all';
     let visible = 0;
-
-    document.querySelectorAll<HTMLElement>('[data-document-card]').forEach((card) => {
-      const haystack = `${card.dataset.title} ${card.dataset.description} ${card.dataset.category?.toLowerCase()} ${card.dataset.year}`;
-      const matches = (!query || haystack.includes(query)) &&
-        (selectedCategory === 'all' || card.dataset.category === selectedCategory) &&
-        (selectedYear === 'all' || card.dataset.year === selectedYear);
-      card.hidden = !matches;
+    document.querySelectorAll<HTMLElement>('[data-document-row]').forEach((row) => {
+      const haystack = [row.dataset.searchTitle, row.dataset.description, row.dataset.category?.toLowerCase(), row.dataset.year].join(' ');
+      const matches = (!query || haystack.includes(query)) && (selectedCategory === 'all' || row.dataset.category === selectedCategory) && (selectedYear === 'all' || row.dataset.year === selectedYear);
+      row.hidden = !matches;
       if (matches) visible++;
     });
-
-    document.querySelectorAll<HTMLElement>('.document-grid').forEach((grid) => {
-      const cards = [...grid.querySelectorAll<HTMLElement>('[data-document-card]')];
-      cards.sort((a, b) => {
-        if (sort?.value === 'title') return (a.dataset.title || '').localeCompare(b.dataset.title || '');
+    document.querySelectorAll<HTMLElement>('.document-list').forEach((list) => {
+      const rows = [...list.querySelectorAll<HTMLElement>('[data-document-row]')];
+      rows.sort((a, b) => {
+        if (sort?.value === 'title') return (a.dataset.searchTitle || '').localeCompare(b.dataset.searchTitle || '');
         const result = (b.dataset.date || '').localeCompare(a.dataset.date || '');
         return sort?.value === 'oldest' ? -result : result;
-      }).forEach((card) => grid.append(card));
+      }).forEach((row) => list.append(row));
     });
-
-    document.querySelector<HTMLElement>('#featured-documents')?.toggleAttribute('hidden', !document.querySelector('#featured-grid [data-document-card]:not([hidden])'));
-    document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden', !document.querySelector('#document-grid [data-document-card]:not([hidden])'));
+    document.querySelector<HTMLElement>('#featured-documents')?.toggleAttribute('hidden', !document.querySelector('#featured-grid [data-document-row]:not([hidden])'));
+    document.querySelector<HTMLElement>('.archive-section')?.toggleAttribute('hidden', !document.querySelector('#document-grid [data-document-row]:not([hidden])'));
     if (empty) empty.hidden = visible > 0;
-    if (count) count.textContent = `${visible} document${visible === 1 ? '' : 's'}`;
+    if (count) count.textContent = visible + ' document' + (visible === 1 ? '' : 's');
   }
 
+  function fileType(file: { filename?: string; type?: string; url?: string }) {
+    const value = file.type || file.filename || file.url || 'file';
+    const extension = value.includes('/') ? (file.filename || file.url || '').split('.').pop() || 'FILE' : value.split('.').pop() || value;
+    return extension.toUpperCase();
+  }
+
+  function openDocumentRow(row: HTMLButtonElement) {
+    let files: Array<{ url: string; filename: string; type?: string }> = [];
+    try { files = JSON.parse(row.dataset.files || '[]'); } catch { files = []; }
+    if (files.length === 1 && files[0]?.url) {
+      window.open(files[0].url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (files.length < 2 || !dialog || !dialogTitle || !fileList) return;
+    lastFocusedRow = row;
+    dialogTitle.textContent = row.dataset.title || 'Document files';
+    fileList.replaceChildren();
+    files.forEach((file) => {
+      if (!file.url) return;
+      const item = document.createElement('li');
+      item.className = 'document-file-item';
+      const details = document.createElement('div');
+      details.className = 'document-file-details';
+      const filename = document.createElement('span');
+      filename.className = 'document-file-name';
+      filename.textContent = file.filename || 'Document';
+      const type = document.createElement('span');
+      type.className = 'document-file-type';
+      type.textContent = fileType(file) + ' file';
+      details.append(filename, type);
+      const actions = document.createElement('div');
+      actions.className = 'document-file-actions';
+      const open = document.createElement('a');
+      open.href = file.url; open.target = '_blank'; open.rel = 'noopener noreferrer'; open.textContent = 'Open';
+      open.setAttribute('aria-label', 'Open ' + (file.filename || 'file') + ' in a new tab');
+      const download = document.createElement('a');
+      download.href = file.url; download.download = file.filename || ''; download.textContent = 'Download';
+      download.setAttribute('aria-label', 'Download ' + (file.filename || 'file'));
+      actions.append(open, download); item.append(details, actions); fileList.append(item);
+    });
+    dialog.showModal();
+    closeDialog?.focus();
+  }
+
+  document.querySelectorAll<HTMLButtonElement>('[data-document-open]').forEach((row) => row.addEventListener('click', () => openDocumentRow(row)));
+  closeDialog?.addEventListener('click', () => dialog?.close());
+  dialog?.addEventListener('close', () => lastFocusedRow?.focus());
   [search, category, year].forEach((control) => control?.addEventListener(control === search ? 'input' : 'change', applyFilters));
   sort?.addEventListener('change', applyFilters);
   document.querySelector('#document-clear')?.addEventListener('click', () => {
@@ -242,62 +283,71 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     if (category) category.value = 'all';
     if (year) year.value = 'all';
     if (sort) sort.value = 'newest';
-    applyFilters();
-    search?.focus();
+    applyFilters(); search?.focus();
   });
   applyFilters();
 </script>
 
 <style>
   .documents-page{color:#13233a}
-  .document-toolbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:12px;background:#fffdf8}
-  .document-search{grid-column:1/-1;display:flex;align-items:center;gap:11px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:0 14px;background:white}
-  .document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 3px rgba(184,149,63,.12)}
-  .document-search svg{width:19px;height:19px;fill:none;stroke:#9a772b;stroke-width:1.7}
-  .document-search input{width:100%;border:0;outline:0;padding:13px 0;background:transparent;color:#182941;font-family:var(--font-body,serif);font-size:.9rem}
-  .document-filter-row{display:flex;flex-wrap:wrap;gap:10px}
-  .document-filter-row label{display:grid;gap:5px}
-  .document-filter-row label>span{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7b8290}
-  .document-filter-row select{min-width:150px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px 32px 9px 10px;background:white;color:#263851;font-size:.76rem}
-  .document-count{align-self:end;margin:0 2px 10px;color:#79808b;font-size:.72rem}
-  .document-section{margin-top:36px}
-  .document-section-heading{display:flex;justify-content:space-between;gap:25px;align-items:end;margin-bottom:16px}
-  .document-section-heading span{color:#9c7628;font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
-  .document-section-heading h2{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.5rem;color:#162840}
-  .document-section-heading p{max-width:340px;margin:0;color:#7a818d;font-size:.75rem;text-align:right}
-  .document-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .document-card{display:flex;min-width:0;flex-direction:column;border:1px solid rgba(18,35,59,.12);border-radius:10px;background:#fff;transition:border-color .18s ease,background .18s ease}
-  .document-card:hover{border-color:rgba(184,149,63,.55);background:#fffefa}
-  .document-card[hidden],.document-section[hidden],.document-empty[hidden]{display:none}
-  .document-card-body{display:flex;flex:1;flex-direction:column;padding:16px}
-  .document-card-top{display:flex;align-items:center;justify-content:space-between;min-height:34px;margin-bottom:10px}
-  .file-icon{display:inline-flex;align-items:center;gap:5px;min-width:54px;height:32px;padding:0 7px;border:1px solid rgba(164,78,78,.2);border-radius:5px;background:#fff7f5;color:#a44e4e;font-size:.55rem;font-weight:800;letter-spacing:.04em}.file-icon svg{width:13px;height:15px;flex:none}
+  .document-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 16px;padding:14px 0 12px;border-bottom:1px solid rgba(18,35,59,.12)}
+  .document-search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid rgba(18,35,59,.16);border-radius:5px;padding:0 12px;background:#fff}
+  .document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 2px rgba(184,149,63,.1)}
+  .document-search svg{width:17px;height:17px;fill:none;stroke:#9a772b;stroke-width:1.7}
+  .document-search input{width:100%;border:0;outline:0;padding:10px 0;background:transparent;color:#182941;font-family:var(--font-body,serif);font-size:.86rem}
+  .document-filter-row{display:flex;flex-wrap:wrap;gap:9px}
+  .document-filter-row label{display:grid;gap:4px}
+  .document-filter-row label>span{font-size:.56rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7b8290}
+  .document-filter-row select{min-width:132px;border:1px solid rgba(18,35,59,.15);border-radius:4px;padding:7px 27px 7px 9px;background:white;color:#263851;font-size:.72rem}
+  .document-count{align-self:end;margin:0 1px 8px;color:#79808b;font-size:.68rem}
+  .document-section{margin-top:27px}
+  .document-section-heading{display:flex;justify-content:space-between;gap:20px;align-items:end;margin-bottom:10px}
+  .document-section-heading span{color:#9c7628;font-size:.55rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+  .document-section-heading h2{margin:3px 0 0;font-family:var(--font-display,serif);font-size:1.35rem;color:#162840}
+  .document-section-heading p{max-width:320px;margin:0;color:#7a818d;font-size:.72rem;text-align:right}
+  .document-list{display:flex;flex-direction:column;border-top:1px solid rgba(18,35,59,.11)}
+  .document-row{display:flex;width:100%;min-width:0;align-items:center;gap:13px;border:0;border-bottom:1px solid rgba(18,35,59,.1);padding:11px 7px;background:transparent;text-align:left;cursor:pointer;transition:background .15s ease}
+  .document-row:hover{background:#fffdf7}
+  .document-row:focus-visible{position:relative;z-index:1;outline:2px solid #b8953f;outline-offset:-2px;background:#fffdf7}
+  .document-row[hidden],.document-section[hidden],.document-empty[hidden]{display:none}
+  .file-icon{display:grid;flex:none;place-items:center;width:31px;height:35px;border:1px solid rgba(164,78,78,.2);border-radius:3px;background:#fff7f5;color:#a44e4e}
+  .file-icon svg{width:15px;height:17px}
   .file-docx,.file-doc{border-color:rgba(69,109,164,.2);background:#f3f7fc;color:#456da4}
   .file-xlsx,.file-xls,.file-csv{border-color:rgba(61,125,91,.2);background:#f2f8f3;color:#3d7d5b}
   .file-pptx,.file-ppt{border-color:rgba(174,96,60,.2);background:#fff5ef;color:#ae603c}
   .file-zip{border-color:rgba(132,103,154,.2);background:#f8f4fb;color:#84679a}
-  .featured-ribbon{border-radius:999px;padding:4px 8px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
-  .featured-card{border-color:rgba(184,149,63,.35)}
-  .document-badges{display:flex;flex-wrap:wrap;gap:6px}
-  .document-badges span{border:1px solid rgba(184,149,63,.22);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
-  .document-card h3{margin:9px 0 5px;color:#172941;font-family:var(--font-display,serif);font-size:1.02rem;line-height:1.35}
-  .document-description{display:-webkit-box;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:2}
-  .document-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(18,35,59,.08);color:#89909a;font-size:.6rem}
-  .document-meta span+span:before{content:'·';margin-right:10px;color:#c0a568}
-  .document-actions{display:flex;align-items:center;gap:8px;margin-top:13px}
-  .document-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:33px;border-radius:6px;padding:7px 12px;text-decoration:none;font-size:.63rem;font-weight:700}
-  .view-link{border:1px solid rgba(184,149,63,.55);background:#fdf8eb;color:#253851}
-  .view-link:hover{border-color:#b8953f;background:#f8efd9}
-  .download-link{border:1px solid rgba(184,149,63,.4);background:#fffaf0;color:#8c6a27}
-  .download-link:hover{border-color:#b8953f;background:#fdf5e4}
-  .document-empty{display:grid;justify-items:center;padding:75px 20px;text-align:center}
+  .document-row-copy{display:grid;min-width:0;flex:1;gap:3px}
+  .document-row-title{overflow-wrap:anywhere;color:#172941;font-family:var(--font-display,serif);font-size:.94rem;font-weight:600;line-height:1.3}
+  .document-row-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 9px;color:#838a94;font-size:.62rem;line-height:1.35}
+  .document-row-meta>span+span:before{content:'·';margin-right:9px;color:#b99a5b}
+  .document-row-category{color:#5e6876}.document-featured-label{color:#9b792f}
+  .document-row-arrow{width:17px;height:17px;flex:none;color:#aa8a49;opacity:.7;transition:transform .15s ease,opacity .15s ease}
+  .document-row:hover .document-row-arrow{transform:translateX(2px);opacity:1}
+  .document-dialog{width:min(560px,calc(100vw - 28px));max-width:none;max-height:min(78vh,680px);padding:0;border:1px solid rgba(18,35,59,.18);border-radius:7px;background:#fffdf8;color:#172941;box-shadow:0 18px 55px rgba(10,25,43,.2)}
+  .document-dialog::backdrop{background:rgba(13,27,44,.48)}
+  .document-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;padding:17px 18px 13px;border-bottom:1px solid rgba(18,35,59,.12)}
+  .document-dialog-eyebrow{color:#9b792f;font-size:.56rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase}
+  .document-dialog-header h2{margin:4px 0 0;color:#172941;font-family:var(--font-display,serif);font-size:1.15rem;line-height:1.3}
+  .document-dialog-close{display:grid;flex:none;place-items:center;width:30px;height:30px;border:1px solid rgba(18,35,59,.16);border-radius:4px;background:#fff;color:#263851;font-size:1.25rem;line-height:1;cursor:pointer}
+  .document-dialog-close:focus-visible,.document-file-actions a:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
+  .document-file-list{display:grid;gap:0;margin:0;padding:0 18px;list-style:none}
+  .document-file-item{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 0;border-bottom:1px solid rgba(18,35,59,.09)}
+  .document-file-item:last-child{border-bottom:0}
+  .document-file-details{display:grid;min-width:0;gap:4px}
+  .document-file-name{overflow-wrap:anywhere;color:#263851;font-size:.8rem;font-weight:600}
+  .document-file-type{color:#858c96;font-size:.62rem;text-transform:uppercase;letter-spacing:.06em}
+  .document-file-actions{display:flex;flex:none;gap:7px}
+  .document-file-actions a{border:1px solid rgba(184,149,63,.4);border-radius:4px;padding:6px 9px;color:#6e5729;font-size:.65rem;font-weight:700;text-decoration:none}
+  .document-file-actions a:hover{background:#fbf4e5;border-color:#b8953f}
+  .document-empty{display:grid;justify-items:center;padding:60px 20px;text-align:center}
   .empty-illustration{position:relative;width:92px;height:78px}
-  .empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:8px;background:#fffaf0;transform:rotate(-5deg)}
+  .empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:6px;background:#fffaf0;transform:rotate(-5deg)}
   .empty-illustration span:after{content:'';position:absolute;left:14px;right:14px;top:20px;height:18px;border-top:2px solid rgba(184,149,63,.25);border-bottom:2px solid rgba(184,149,63,.25)}
   .empty-illustration i{position:absolute;right:7px;bottom:2px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#142740;color:#ddc782;font-style:normal}
   .document-empty h2{margin:15px 0 5px;font-family:var(--font-display,serif);color:#172941}
-  .document-empty p{margin:0;color:#7b828d;font-size:.78rem}
-  .document-empty button{margin-top:17px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:9px 13px;background:white;color:#253851;font-size:.7rem;font-weight:700}
-  @media(max-width:760px){.document-grid{grid-template-columns:1fr}.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
-  @media(max-width:560px){.documents-hero{padding-top:2rem;padding-bottom:2rem}.document-toolbar{padding:13px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-section{margin-top:30px}.document-section-heading{display:block}.document-section-heading p{margin-top:6px;text-align:left}.document-card-body{padding:14px}.document-actions a{flex:1}}
+  .document-empty p{margin:0;color:#7b828d;font-size:.76rem}
+  .document-empty button{margin-top:15px;border:1px solid rgba(18,35,59,.18);border-radius:5px;padding:8px 12px;background:white;color:#253851;font-size:.68rem;font-weight:700}
+  @media(max-width:760px){.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
+  @media(max-width:560px){.document-toolbar{gap:10px;padding-top:10px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-section{margin-top:23px}.document-section-heading{display:block}.document-section-heading p{margin-top:5px;text-align:left}.document-row{gap:10px;padding:10px 3px}.document-row-title{font-size:.88rem}.document-row-meta{gap:3px 7px;font-size:.58rem}.document-row-meta>span+span:before{margin-right:7px}.document-file-item{align-items:flex-start;flex-direction:column;gap:9px}.document-file-actions{width:100%}.document-file-actions a{flex:1;text-align:center}.document-dialog-header{padding:14px}.document-file-list{padding:0 14px}}
+  @media(prefers-reduced-motion:reduce){.document-row,.document-row-arrow{transition:none}}
 </style>
