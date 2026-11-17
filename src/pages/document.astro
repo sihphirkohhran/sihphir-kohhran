@@ -156,16 +156,13 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
         <div class="document-grid featured-grid" id="featured-grid">
           {featuredDocuments.map((document, index) => (
             <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
-              <div class="document-preview">
-                {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
-                <span class="featured-ribbon">Featured</span>
-              </div>
               <div class="document-card-body">
+                <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}>{iconLabel(document.extension)}</span><span class="featured-ribbon">Featured</span></div>
                 <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
                 <h3>{document.title}</h3>
-                <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
-                <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
-                <div class="document-actions">{document.previewable && <a href={document.url} target="_blank" rel="noopener" class="preview-link">Preview</a>}<a href={document.url} download class="download-link">Download</a><a href={document.url} target="_blank" rel="noopener" class="open-link" aria-label={`Open ${document.title}`}>Open ↗</a></div>
+                {document.description && <p class="document-description">{document.description}</p>}
+                <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span></div>
+                <div class="document-actions"><a href={document.url} target="_blank" rel="noopener noreferrer" class="view-link">View Document</a><a href={document.url} download class="download-link">Download</a></div>
               </div>
             </article>
           ))}
@@ -177,15 +174,13 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
       <div class="document-grid" id="document-grid">
         {archiveDocuments.map((document, index) => (
           <article class={`document-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
-            <div class="document-preview">
-              {document.image ? <img src={document.url} alt="" loading="lazy" /> : document.extension === 'pdf' ? <iframe src={`${document.url}#page=1&view=FitH&toolbar=0&navpanes=0`} title={`Preview of ${document.title}`} loading="lazy"></iframe> : <span class={`file-mark file-${document.extension}`}>{iconLabel(document.extension)}</span>}
-            </div>
             <div class="document-card-body">
+              <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}>{iconLabel(document.extension)}</span></div>
               <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
               <h3>{document.title}</h3>
-              <p class="document-description">{document.description || 'An official document from the church archive.'}</p>
-              <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span>{document.fileCount > 1 && <span>{document.fileCount} files</span>}</div>
-              <div class="document-actions">{document.previewable && <a href={document.url} target="_blank" rel="noopener" class="preview-link">Preview</a>}<a href={document.url} download class="download-link">Download</a><a href={document.url} target="_blank" rel="noopener" class="open-link" aria-label={`Open ${document.title}`}>Open ↗</a></div>
+              {document.description && <p class="document-description">{document.description}</p>}
+              <div class="document-meta"><span>{formatDate(document.uploadDate)}</span><span>{formatSize(document.size)}</span><span>{document.fileCount} {document.fileCount === 1 ? 'file' : 'files'}</span></div>
+              <div class="document-actions"><a href={document.url} target="_blank" rel="noopener noreferrer" class="view-link">View Document</a><a href={document.url} download class="download-link">Download</a></div>
             </div>
           </article>
         ))}
@@ -254,7 +249,55 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 </script>
 
 <style>
-  .documents-page{color:#13233a}.document-toolbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:14px;background:#fffdf8;box-shadow:0 12px 35px rgba(20,36,58,.07)}.document-search{grid-column:1/-1;display:flex;align-items:center;gap:11px;border:1px solid rgba(18,35,59,.18);border-radius:10px;padding:0 14px;background:white}.document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 3px rgba(184,149,63,.12)}.document-search svg{width:19px;height:19px;fill:none;stroke:#9a772b;stroke-width:1.7}.document-search input{width:100%;border:0;outline:0;padding:13px 0;background:transparent;color:#182941;font-family:var(--font-body,serif);font-size:.9rem}.document-filter-row{display:flex;flex-wrap:wrap;gap:10px}.document-filter-row label{display:grid;gap:5px}.document-filter-row label>span{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7b8290}.document-filter-row select{min-width:150px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px 32px 9px 10px;background:white;color:#263851;font-size:.76rem}.document-count{align-self:end;margin:0 2px 10px;color:#79808b;font-size:.72rem}.document-section{margin-top:42px}.document-section-heading{display:flex;justify-content:space-between;gap:25px;align-items:end;margin-bottom:18px}.document-section-heading span{color:#9c7628;font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}.document-section-heading h2{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.55rem;color:#162840}.document-section-heading p{max-width:340px;margin:0;color:#7a818d;font-size:.75rem;text-align:right}.document-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.document-card{display:flex;min-width:0;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:14px;background:#fff;box-shadow:0 7px 25px rgba(23,38,59,.07);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.document-card:hover{transform:translateY(-3px);border-color:rgba(184,149,63,.38);box-shadow:0 15px 35px rgba(23,38,59,.12)}.document-card[hidden],.document-section[hidden],.document-empty[hidden]{display:none}.document-preview{position:relative;display:grid;place-items:center;height:180px;overflow:hidden;background:linear-gradient(145deg,#eef0f1,#faf8f1)}.document-preview iframe{width:125%;height:150%;border:0;pointer-events:none;transform:scale(.8)}.document-preview img{width:100%;height:100%;object-fit:cover}.file-mark{display:grid;place-items:center;width:76px;height:92px;border-radius:8px 8px 11px 11px;background:#fff;color:#a44e4e;box-shadow:0 8px 22px rgba(26,40,58,.12);font-size:.68rem;font-weight:800;letter-spacing:.06em}.file-docx{color:#456da4}.file-xlsx{color:#3d7d5b}.file-pptx{color:#ae603c}.file-zip{color:#84679a}.featured-ribbon{position:absolute;top:12px;right:12px;border-radius:999px;padding:5px 8px;background:#b8953f;color:#fff;font-size:.54rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.featured-card{border-color:rgba(184,149,63,.32)}.document-card-body{display:flex;flex:1;flex-direction:column;padding:17px}.document-badges{display:flex;flex-wrap:wrap;gap:6px}.document-badges span{border:1px solid rgba(184,149,63,.22);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}.document-card h3{margin:12px 0 7px;color:#172941;font-family:var(--font-display,serif);font-size:1.05rem;line-height:1.3}.document-description{display:-webkit-box;min-height:3.7em;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:3}.document-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:14px;padding-top:11px;border-top:1px solid rgba(18,35,59,.08);color:#89909a;font-size:.6rem}.document-meta span+span:before{content:'·';margin-right:10px;color:#c0a568}.document-actions{display:flex;align-items:center;gap:7px;margin-top:16px}.document-actions a{border-radius:7px;padding:8px 10px;text-decoration:none;font-size:.62rem;font-weight:700}.preview-link{border:1px solid rgba(18,35,59,.15);color:#344862}.download-link{background:#b8953f;color:white;box-shadow:0 5px 12px rgba(184,149,63,.23)}.open-link{margin-left:auto;color:#8c6a27}.document-empty{display:grid;justify-items:center;padding:75px 20px;text-align:center}.empty-illustration{position:relative;width:92px;height:78px}.empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:8px;background:#fffaf0;transform:rotate(-5deg)}.empty-illustration span:after{content:'';position:absolute;left:14px;right:14px;top:20px;height:18px;border-top:2px solid rgba(184,149,63,.25);border-bottom:2px solid rgba(184,149,63,.25)}.empty-illustration i{position:absolute;right:7px;bottom:2px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#142740;color:#ddc782;font-style:normal}.document-empty h2{margin:15px 0 5px;font-family:var(--font-display,serif);color:#172941}.document-empty p{margin:0;color:#7b828d;font-size:.78rem}.document-empty button{margin-top:17px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:9px 13px;background:white;color:#253851;font-size:.7rem;font-weight:700}
-  @media(max-width:850px){.document-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
-  @media(max-width:560px){.documents-hero{padding-top:2rem;padding-bottom:2rem}.document-toolbar{padding:13px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-grid{grid-template-columns:1fr}.document-section{margin-top:32px}.document-section-heading{display:block}.document-section-heading p{margin-top:6px;text-align:left}.document-preview{height:165px}.document-actions a{padding:8px 9px}}
+  .documents-page{color:#13233a}
+  .document-toolbar{position:relative;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:15px;padding:18px;border:1px solid rgba(18,35,59,.11);border-radius:12px;background:#fffdf8}
+  .document-search{grid-column:1/-1;display:flex;align-items:center;gap:11px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:0 14px;background:white}
+  .document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 3px rgba(184,149,63,.12)}
+  .document-search svg{width:19px;height:19px;fill:none;stroke:#9a772b;stroke-width:1.7}
+  .document-search input{width:100%;border:0;outline:0;padding:13px 0;background:transparent;color:#182941;font-family:var(--font-body,serif);font-size:.9rem}
+  .document-filter-row{display:flex;flex-wrap:wrap;gap:10px}
+  .document-filter-row label{display:grid;gap:5px}
+  .document-filter-row label>span{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#7b8290}
+  .document-filter-row select{min-width:150px;border:1px solid rgba(18,35,59,.16);border-radius:8px;padding:9px 32px 9px 10px;background:white;color:#263851;font-size:.76rem}
+  .document-count{align-self:end;margin:0 2px 10px;color:#79808b;font-size:.72rem}
+  .document-section{margin-top:36px}
+  .document-section-heading{display:flex;justify-content:space-between;gap:25px;align-items:end;margin-bottom:16px}
+  .document-section-heading span{color:#9c7628;font-size:.57rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase}
+  .document-section-heading h2{margin:4px 0 0;font-family:var(--font-display,serif);font-size:1.5rem;color:#162840}
+  .document-section-heading p{max-width:340px;margin:0;color:#7a818d;font-size:.75rem;text-align:right}
+  .document-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .document-card{display:flex;min-width:0;flex-direction:column;border:1px solid rgba(18,35,59,.12);border-radius:10px;background:#fff;transition:border-color .18s ease,background .18s ease}
+  .document-card:hover{border-color:rgba(184,149,63,.55);background:#fffefa}
+  .document-card[hidden],.document-section[hidden],.document-empty[hidden]{display:none}
+  .document-card-body{display:flex;flex:1;flex-direction:column;padding:16px}
+  .document-card-top{display:flex;align-items:center;justify-content:space-between;min-height:34px;margin-bottom:10px}
+  .file-icon{display:inline-grid;place-items:center;min-width:38px;height:30px;padding:0 7px;border:1px solid rgba(164,78,78,.2);border-radius:5px;background:#fff7f5;color:#a44e4e;font-size:.57rem;font-weight:800;letter-spacing:.04em}
+  .file-docx,.file-doc{border-color:rgba(69,109,164,.2);background:#f3f7fc;color:#456da4}
+  .file-xlsx,.file-xls,.file-csv{border-color:rgba(61,125,91,.2);background:#f2f8f3;color:#3d7d5b}
+  .file-pptx,.file-ppt{border-color:rgba(174,96,60,.2);background:#fff5ef;color:#ae603c}
+  .file-zip{border-color:rgba(132,103,154,.2);background:#f8f4fb;color:#84679a}
+  .featured-ribbon{border-radius:999px;padding:4px 8px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+  .featured-card{border-color:rgba(184,149,63,.35)}
+  .document-badges{display:flex;flex-wrap:wrap;gap:6px}
+  .document-badges span{border:1px solid rgba(184,149,63,.22);border-radius:999px;padding:4px 7px;background:#fdf8eb;color:#8e6a25;font-size:.53rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .document-card h3{margin:9px 0 5px;color:#172941;font-family:var(--font-display,serif);font-size:1.02rem;line-height:1.35}
+  .document-description{display:-webkit-box;margin:0;overflow:hidden;color:#747b87;font-size:.72rem;line-height:1.55;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+  .document-meta{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:12px;padding-top:10px;border-top:1px solid rgba(18,35,59,.08);color:#89909a;font-size:.6rem}
+  .document-meta span+span:before{content:'·';margin-right:10px;color:#c0a568}
+  .document-actions{display:flex;align-items:center;gap:8px;margin-top:13px}
+  .document-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:33px;border-radius:6px;padding:7px 12px;text-decoration:none;font-size:.63rem;font-weight:700}
+  .view-link{border:1px solid #172b45;background:#172b45;color:white}
+  .view-link:hover{background:#223b5c}
+  .download-link{border:1px solid rgba(184,149,63,.4);background:#fffaf0;color:#8c6a27}
+  .download-link:hover{border-color:#b8953f;background:#fdf5e4}
+  .document-empty{display:grid;justify-items:center;padding:75px 20px;text-align:center}
+  .empty-illustration{position:relative;width:92px;height:78px}
+  .empty-illustration span{position:absolute;inset:9px 20px 0;border:1px solid rgba(184,149,63,.35);border-radius:8px;background:#fffaf0;transform:rotate(-5deg)}
+  .empty-illustration span:after{content:'';position:absolute;left:14px;right:14px;top:20px;height:18px;border-top:2px solid rgba(184,149,63,.25);border-bottom:2px solid rgba(184,149,63,.25)}
+  .empty-illustration i{position:absolute;right:7px;bottom:2px;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:#142740;color:#ddc782;font-style:normal}
+  .document-empty h2{margin:15px 0 5px;font-family:var(--font-display,serif);color:#172941}
+  .document-empty p{margin:0;color:#7b828d;font-size:.78rem}
+  .document-empty button{margin-top:17px;border:1px solid rgba(18,35,59,.18);border-radius:8px;padding:9px 13px;background:white;color:#253851;font-size:.7rem;font-weight:700}
+  @media(max-width:760px){.document-grid{grid-template-columns:1fr}.document-toolbar{grid-template-columns:1fr}.document-count{margin:0}.document-filter-row label{flex:1}.document-filter-row select{width:100%;min-width:0}}
+  @media(max-width:560px){.documents-hero{padding-top:2rem;padding-bottom:2rem}.document-toolbar{padding:13px}.document-filter-row{display:grid;grid-template-columns:1fr 1fr}.document-filter-row label:last-child{grid-column:1/-1}.document-section{margin-top:30px}.document-section-heading{display:block}.document-section-heading p{margin-top:6px;text-align:left}.document-card-body{padding:14px}.document-actions a{flex:1}}
 </style>
