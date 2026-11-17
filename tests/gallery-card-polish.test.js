@@ -71,7 +71,7 @@ test('archive covers retain their intended height and content body is genuinely 
   assert.ok(page.includes('.album-body .album-title{margin:0 0 4px}'));
   assert.ok(page.includes('.album-body small{margin-top:4px'));
   assert.ok(page.includes('.album-body .album-action{min-height:0;margin-top:5px;padding:2px 0}'));
-  assert.ok(page.includes('@media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid,.photo-grid{grid-template-columns:1fr}.album-cover{height:210px}'));
+  assert.ok(page.includes('@media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid{grid-template-columns:1fr}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.album-cover{height:210px}'));
   assert.match(page, /font-family:'Poppins',sans-serif;font-size:18px;font-weight:700/);
   assert.match(page, /font-family:'EB Garamond',serif;font-size:15px;font-weight:600/);
   assert.match(page, /object-fit:cover/);
