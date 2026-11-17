@@ -52,7 +52,7 @@ test('gallery search, sort, album navigation, external links and lightbox handle
   for (const pattern of [
     /\[search,year,category\]\.forEach/,
     /sort\?\.addEventListener\('change',applyFilters\)/,
-    /sort\.value==='photos'/,
+    /sort\?\.value==='photos'/,
     /data-open-album/,
     /target=\{album\.externalNavigation \? '_blank' : undefined\}/,
     /data-photo/,
