@@ -55,3 +55,17 @@ test('historical-year labels and published/archive visibility rules remain intac
   assert.match(page, /entry\.data\.status !== 'archived' && entry\.data\.published !== false/);
   assert.match(page, /historicalYearFilterValue\(year, yearType\)/);
 });
+
+test('2025 Rawngbawltu List retains both source attachments and their actual filenames', () => {
+  const source = readFileSync(new URL('../src/content/documents/other/2025-rawngbawltu-list.md', import.meta.url), 'utf8');
+  const filesLine = source.match(/^files:\s*(\[.*\])\s*$/m);
+  assert.ok(filesLine, 'expected the existing normalized files frontmatter collection');
+  const files = JSON.parse(filesLine[1]);
+  assert.equal(files.length, 2);
+  assert.deepEqual(files.map((file) => file.filename), ['SS Rawngbawltu 2025.pdf', '2025 Rawngbawltute.pdf']);
+  assert.deepEqual(files.map((file) => file.url), [
+    '/documents/1794409442115-ss-rawngbawltu-2025.pdf',
+    '/documents/1794409442031-2025-rawngbawltute.pdf',
+  ]);
+  assert.match(page, /data-files=\{JSON\.stringify\(document\.files\)\}/);
+});
