@@ -44,11 +44,11 @@ test('CMS album fields, covers, descriptions, badges and photo counts remain int
   assert.match(page, /getCollection\('gallery'\)/);
   assert.match(page, /title: data\.caption/);
   assert.match(page, /description: data\.description \|\| ''/);
-  assert.match(page, /year: data\.year/);
+  assert.match(page, /year: historicalYear/);
   assert.match(page, /category: data\.category/);
   assert.match(page, /cover: featuredPhoto \|\| photos\[0\]\?\.src \|\| galleryPlaceholder/);
   assert.match(page, /album\.photos\.length/);
-  assert.match(page, /<span>\{album\.year\}<\/span>/);
+  assert.match(page, /<span>\{album\.yearLabel\}<\/span>/);
   assert.match(page, /<span>\{album\.category\}<\/span>/);
   assert.match(page, /Photographs preserved in the church archive\./);
 });
@@ -82,10 +82,11 @@ test('archive covers retain their intended height and content body is genuinely 
 });
 
 test('Year filter remains dynamically populated and defaults to the latest available album year', () => {
-  assert.ok(page.includes('const years = Array.from(new Set(albums.map((album) => album.year))).sort((a, b) => b - a);'));
+  assert.ok(page.includes('const years = Array.from(new Set(albums.map((album) => album.year).filter((year): year is number => year != null))).sort((a, b) => b - a);'));
   assert.ok(page.includes('const latestYear = years[0];'));
-  assert.ok(page.includes('const initialAlbums = latestYear === undefined ? albums : albums.filter((album) => album.year === latestYear);'));
-  assert.ok(page.includes('<option value="all">All years</option>{years.map((year) => <option value={year} selected={year === latestYear}>{year}</option>)}'));
+  assert.ok(page.includes("const initialYearFilter = latestYear === undefined ? (hasUnspecifiedYear ? 'unspecified' : 'all') : String(latestYear);"));
+  assert.ok(page.includes('const initialAlbums = initialYearFilter === \'all\' ? albums : albums.filter((album) => album.yearFilterValue === initialYearFilter);'));
+  assert.ok(page.includes('<option value="all">All Years</option>{years.map((year) => <option value={year} selected={String(year) === initialYearFilter}>{year}</option>)}{hasUnspecifiedYear && <option value="unspecified" selected={initialYearFilter === \'unspecified\'}>Year Unspecified</option>}'));
   assert.match(page, /selectedYear==='all'\|\|card\.dataset\.year===selectedYear/);
   assert.doesNotMatch(page, /<option value="all" selected/);
 });

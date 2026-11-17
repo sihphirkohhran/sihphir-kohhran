@@ -243,7 +243,8 @@ const gallery = defineCollection({
   type: 'content',
   schema: z.object({
     caption: z.string(),
-    year: z.number(),
+    year: z.number().optional(),
+    yearType: z.enum(['known', 'approximate', 'unspecified']).optional(),
     category: z.string(),
     date: z.string().optional(),
     description: z.string().optional(),
@@ -349,6 +350,7 @@ const documents = defineCollection({
   type: 'content',
   schema: z.object({
     year: z.number().optional(),
+    yearType: z.enum(['known', 'approximate', 'unspecified']).optional(),
     month: z.number().optional(),
     name: z.string(),
     date: z.string().optional(),

@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { formatHistoricalYear, resolveHistoricalYearType } from './historical-year';
 
 /** Normalize gallery photo field(s) from CMS (single or multiple). */
 export function getEntryPhotoUrls(data: {
@@ -22,16 +23,18 @@ export type GalleryPhotoItem = {
   alt: string;
   caption: string;
   category: string;
-  year: number;
+  year: number | null;
+  yearType: 'known' | 'approximate' | 'unspecified';
+  yearLabel: string;
   sortKey: string;
   order: number;
   albumUrl?: string;
   albumTitle: string;
 };
 
-function entrySortKey(year: number, date?: string, id?: string): string {
+function entrySortKey(year: number | null, date?: string, id?: string): string {
   const datePart = date ? String(date).replace(/\D/g, '') : '';
-  return `${year}-${datePart}-${id ?? ''}`;
+  return `${year ?? ''}-${datePart}-${id ?? ''}`;
 }
 
 /** All gallery images from CMS, newest entries first. */
@@ -45,7 +48,9 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
     if (data.photo && !rawPhotos.some((photo) =>
       String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim() === data.photo,
     )) rawPhotos.unshift(data.photo);
-    const sortKey = entrySortKey(data.year, data.date, entry.id);
+    const resolvedYearType = resolveHistoricalYearType(data.year, data.yearType);
+    const historicalYear = resolvedYearType === 'unspecified' ? null : data.year ?? null;
+    const sortKey = entrySortKey(historicalYear, data.date, entry.id);
     rawPhotos.forEach((photo) => {
       const src = String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim();
       if (!src) return;
@@ -56,7 +61,9 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
         alt: photoAlt.trim() || data.caption,
         caption: photoCaption.trim() || data.caption,
         category: data.category,
-        year: data.year,
+        year: historicalYear,
+        yearType: resolvedYearType,
+        yearLabel: formatHistoricalYear(historicalYear, resolvedYearType),
         sortKey,
         order: data.display_order ?? Number.MAX_SAFE_INTEGER,
         albumUrl: data.album_url,
@@ -66,7 +73,7 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
   }
 
   return photos.sort((a, b) =>
-    b.year - a.year || a.order - b.order || b.sortKey.localeCompare(a.sortKey),
+    (b.year ?? -Infinity) - (a.year ?? -Infinity) || a.order - b.order || b.sortKey.localeCompare(a.sortKey),
   );
 }
 
@@ -137,6 +144,8 @@ export function getFallbackGalleryPhotos(limit = 6): GalleryPhotoItem[] {
     caption: img.caption,
     category: 'Gallery',
     year,
+    yearType: 'known',
+    yearLabel: String(year),
     sortKey: `${year}-${i}`,
     order: i,
     albumTitle: img.caption,
