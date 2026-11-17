@@ -39,7 +39,7 @@ test('recognized final extensions are removed only from the visible filename', (
   assert.match(page, /filenameText/);
   assert.match(page, /link\.setAttribute\('aria-label', 'Open ' \+ filenameText/);
   assert.doesNotMatch(page, /download\.download/);
-  for (const extension of ['pdf','xlsx','xls','csv','docx','doc','pptx','ppt','zip','jpg','jpeg','png','gif','webp','avif','svg']) {
+  for (const extension of ['pdf','xlsx','xls','csv','docx','doc','pptx','ppt','zip','jpg','jpeg','png','gif','webp','avif','svg','bmp','tif','tiff','heic','ico']) {
     assert.ok(page.includes(extension + ': { label:'), 'missing mapping for ' + extension);
   }
   for (const label of ['PDF Document','Excel Spreadsheet','CSV File','Word Document','PowerPoint Presentation','ZIP Archive','Image']) {
