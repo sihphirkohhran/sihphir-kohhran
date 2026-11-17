@@ -88,7 +88,11 @@ const formatDate = (value: string) => {
 </BaseLayout>
 
 <script>
+  import { resolveCategoryFromSearch } from '../lib/category-query';
+
   const search=document.querySelector<HTMLInputElement>('#gallery-search'),year=document.querySelector<HTMLSelectElement>('#gallery-year'),category=document.querySelector<HTMLSelectElement>('#gallery-category'),sort=document.querySelector<HTMLSelectElement>('#gallery-sort'),count=document.querySelector<HTMLElement>('#gallery-count'),empty=document.querySelector<HTMLElement>('#gallery-empty');
+  const requestedCategory=resolveCategoryFromSearch(window.location.search,category?[...category.options].map(option=>option.value).filter(value=>value!=='all'):[]);
+  if(requestedCategory&&category&&year){category.value=requestedCategory;year.value='all';}
   document.querySelectorAll<HTMLImageElement>('[data-gallery-cover]').forEach(image=>{const useFallback=()=>{const fallback=image.dataset.coverFallback||'/images/profile-placeholder.svg';if(image.src!==new URL(fallback,location.href).href){image.src=fallback;image.dataset.coverFallback='/images/profile-placeholder.svg';}else if(!image.src.endsWith('/images/profile-placeholder.svg'))image.src='/images/profile-placeholder.svg';};image.addEventListener('error',useFallback);if(image.complete&&!image.naturalWidth)useFallback();});
   const galleryPage=document.querySelector<HTMLElement>('.gallery-page');document.querySelectorAll('[data-close-album]').forEach(button=>button.textContent=`← ${galleryPage?.dataset.backLabel||'Back to Gallery'}`);const downloadLabel=galleryPage?.dataset.downloadLabel;if(downloadLabel)document.querySelector('#lightbox-download')?.replaceChildren(downloadLabel);
   // Unspecified-year albums always sort after numeric years in both chronological directions.
