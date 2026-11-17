@@ -42,7 +42,7 @@ const albums = entries.map((entry) => {
 
 if (!albums.length) {
   const fallback = getFallbackGalleryPhotos(18);
-  if (fallback.length) albums.push({ id: 'church-gallery', title: 'Church Gallery', year: fallback[0].year, category: 'Gallery', description: 'Photographs from Sihphir Presbyterian Kohhran.', date: '', order: 0, featured: false, cover: fallback[0].src, coverFallback: galleryPlaceholder, albumUrl: '', photos: fallback.map(({ src, alt, caption }) => ({ src, alt, caption })) });
+  if (fallback.length) albums.push({ id: 'church-gallery', title: 'Church Gallery', year: fallback[0].year, yearType: 'known', yearLabel: String(fallback[0].year), yearFilterValue: String(fallback[0].year), category: 'Gallery', description: 'Photographs from Sihphir Presbyterian Kohhran.', date: '', order: 0, featured: false, cover: fallback[0].src, coverFallback: galleryPlaceholder, albumUrl: '', photos: fallback.map(({ src, alt, caption }) => ({ src, alt, caption })) });
 }
 
 const featured = albums.filter((album) => album.featured);
