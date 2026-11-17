@@ -61,8 +61,9 @@ export function toDocumentItem(
 ): DocumentItem {
   const id = idPrefix ? raw.id.replace(new RegExp(`^${idPrefix}`), '') : raw.id;
   const fromId = parseYearMonthFromId(id);
-  const yearType = raw.yearType ?? (raw.year != null ? 'known' : 'unspecified');
-  const year = yearType === 'unspecified' ? null : raw.year ?? fromId.year ?? parseYearFromDate(raw.date) ?? null;
+  const legacyYear = raw.year ?? fromId.year ?? parseYearFromDate(raw.date) ?? null;
+  const yearType = raw.yearType ?? (legacyYear != null ? 'known' : 'unspecified');
+  const year = yearType === 'unspecified' ? null : legacyYear;
   const resolvedYearType = yearType === 'known' && year == null ? 'unspecified' : yearType;
   const yearLabel = resolvedYearType === 'unspecified' || year == null ? 'Year Unspecified' : resolvedYearType === 'approximate' ? `Circa ${year}` : String(year);
   const month = raw.month ?? fromId.month ?? parseMonthFromDate(raw.date) ?? null;
