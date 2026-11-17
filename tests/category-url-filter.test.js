@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { resolveCategoryFromSearch } from '../src/lib/category-query.ts';
+import { resolveCategoryFromSearch } from '../src/lib/category-query.js';
 
 const documentPage = readFileSync(new URL('../src/pages/document.astro', import.meta.url), 'utf8');
 const galleryPage = readFileSync(new URL('../src/pages/gallery.astro', import.meta.url), 'utf8');
