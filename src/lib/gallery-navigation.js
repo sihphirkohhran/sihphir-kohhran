@@ -4,12 +4,13 @@
  */
 export function uniqueGalleryPhotos(photos = []) {
   const seen = new Set();
-  return photos.filter((photo) => {
+  return photos.reduce((unique, photo) => {
     const src = String(typeof photo === 'string' ? photo : photo?.src ?? photo?.photo ?? '').trim();
-    if (!src || seen.has(src)) return false;
+    if (!src || seen.has(src)) return unique;
     seen.add(src);
-    return true;
-  });
+    unique.push(typeof photo === 'string' ? { src } : { ...photo, src });
+    return unique;
+  }, []);
 }
 
 export function isValidExternalAlbumUrl(value) {
