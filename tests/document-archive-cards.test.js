@@ -88,3 +88,40 @@ test('dialog styles dynamically created file rows through Astro global selectors
   assert.match(page, /document-dialog :global\(\.document-file-name\)\{[^}]*display:block/);
   assert.match(page, /document-dialog :global\(\.document-file-type\)\{[^}]*display:block/);
 });
+
+
+test('dialog header uses the deep navy, gold and cream palette with an accessible close control', () => {
+  assert.match(page, /DOCUMENT ARCHIVE/);
+  assert.match(page, /\.document-dialog-header\{[^}]*background:#172941/);
+  assert.match(page, /\.document-dialog-header h2\{[^}]*color:#fff/);
+  assert.match(page, /\.document-dialog-eyebrow\{[^}]*color:#ddc782/);
+  assert.match(page, /\.document-dialog-subtitle\{[^}]*color:#e5d7ad/);
+  assert.match(page, /id="document-dialog-close" aria-label="Close file selection"/);
+  assert.match(page, /\.document-dialog-close:hover/);
+  assert.match(page, /\.document-dialog-close:focus-visible/);
+  assert.match(page, /background:#fffdf8/);
+});
+
+test('dialog subtitle reports the actual number of attached files with singular and plural wording', () => {
+  assert.match(page, /id="document-dialog-subtitle"/);
+  assert.match(page, /const attachedFileCount = files\.filter\(\(file\) => Boolean\(file\.url\)\)\.length/);
+  assert.match(page, /attachedFileCount \+ ' attached file' \+ \(attachedFileCount === 1 \? '' : 's'\)/);
+  assert.match(page, /dialogSubtitle\.textContent =/);
+});
+
+test('dialog constrains its height and scrolls only the file list while keeping the header visible', () => {
+  assert.match(page, /\.document-dialog\{[^}]*max-height:min\(78vh,680px\)/);
+  assert.match(page, /\.document-dialog\[open\]\{display:flex;flex-direction:column\}/);
+  assert.match(page, /\.document-dialog-header\{[^}]*flex:none/);
+  assert.match(page, /\.document-file-list\{[^}]*flex:0 1 auto/);
+  assert.match(page, /\.document-file-list\{[^}]*min-height:0/);
+  assert.match(page, /\.document-file-list\{[^}]*overflow-y:auto/);
+  assert.match(page, /\.document-file-list\{[^}]*overscroll-behavior:contain/);
+  assert.doesNotMatch(page, /\.document-dialog\{[^}]*overflow-y:auto/);
+});
+
+test('mobile dialog keeps file actions within the viewport and allows long filenames to wrap', () => {
+  assert.match(page, /@media\(max-width:560px\)[\s\S]*?\.document-dialog\{width:calc\(100vw - 20px\);max-height:78vh\}/);
+  assert.match(page, /\.document-dialog :global\(\.document-file-name\)\{[^}]*overflow-wrap:anywhere/);
+  assert.match(page, /@media\(max-width:560px\)[\s\S]*?\.document-dialog :global\(\.document-file-actions a\)\{flex:1;text-align:center\}/);
+});
