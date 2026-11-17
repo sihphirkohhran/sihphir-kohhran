@@ -192,8 +192,12 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 </BaseLayout>
 
 <script>
+  import { resolveCategoryFromSearch } from '../lib/category-query';
+
   const search = document.querySelector<HTMLInputElement>('#document-search');
   const category = document.querySelector<HTMLSelectElement>('#document-category');
+  const requestedCategory = resolveCategoryFromSearch(window.location.search, category ? Array.from(category.options, (option) => option.value).filter((value) => value !== 'all') : []);
+  if (requestedCategory && category) category.value = requestedCategory;
   const year = document.querySelector<HTMLSelectElement>('#document-year');
   const sort = document.querySelector<HTMLSelectElement>('#document-sort');
   const empty = document.querySelector<HTMLElement>('#document-empty');
