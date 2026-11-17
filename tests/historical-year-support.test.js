@@ -15,7 +15,7 @@ test('shared historical year model formats known, approximate and unspecified va
   assert.match(yearHelper, /yearType === 'unspecified' \|\| year == null/);
   assert.match(yearHelper, /yearType === 'approximate' \? `Circa \$\{year\}`/);
   assert.match(yearHelper, /Year Unspecified/);
-  assert.match(yearHelper, /return year != null && Number\.isFinite\(Number\(year\)\) \? 'known' : 'unspecified'/);
+  assert.match(yearHelper, /return hasNumericYear \? 'known' : 'unspecified'/);
 });
 
 test('content schemas accept optional historical year metadata without requiring migration', () => {
