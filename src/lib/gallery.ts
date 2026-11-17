@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { formatHistoricalYear, resolveHistoricalYearType } from './historical-year';
 
 /** Normalize gallery photo field(s) from CMS (single or multiple). */
 export function getEntryPhotoUrls(data: {
@@ -47,7 +48,9 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
     if (data.photo && !rawPhotos.some((photo) =>
       String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim() === data.photo,
     )) rawPhotos.unshift(data.photo);
-    const sortKey = entrySortKey(data.year ?? null, data.date, entry.id);
+    const resolvedYearType = resolveHistoricalYearType(data.year, data.yearType);
+    const historicalYear = resolvedYearType === 'unspecified' ? null : data.year ?? null;
+    const sortKey = entrySortKey(historicalYear, data.date, entry.id);
     rawPhotos.forEach((photo) => {
       const src = String(typeof photo === 'string' ? photo : photo.src ?? photo.photo ?? '').trim();
       if (!src) return;
@@ -58,9 +61,9 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
         alt: photoAlt.trim() || data.caption,
         caption: photoCaption.trim() || data.caption,
         category: data.category,
-        year: data.year ?? null,
-        yearType: (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType ?? (data.year != null ? 'known' : 'unspecified'),
-        yearLabel: (data as typeof data & { yearType?: string }).yearType === 'unspecified' || data.year == null ? 'Year Unspecified' : (data as typeof data & { yearType?: string }).yearType === 'approximate' ? `Circa ${data.year}` : String(data.year),
+        year: historicalYear,
+        yearType: resolvedYearType,
+        yearLabel: formatHistoricalYear(historicalYear, resolvedYearType),
         sortKey,
         order: data.display_order ?? Number.MAX_SAFE_INTEGER,
         albumUrl: data.album_url,
