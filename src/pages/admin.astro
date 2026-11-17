@@ -1,4 +1,5 @@
 ---
+import { SITE_ORIGIN } from '../lib/site';
 ---
 <!doctype html>
 <html lang="en">
@@ -23,6 +24,9 @@
 
   <body>
     <main id="admin-app" aria-live="polite"></main>
+    <script define:vars={{ siteOrigin: SITE_ORIGIN }}>
+      window.SIHPHIR_PUBLIC_SITE_ORIGIN = siteOrigin;
+    </script>
     <script is:inline src="/admin/gallery-manager.js"></script>
     <script is:inline src="/admin/document-manager.js"></script>
     <script is:inline src="/admin/committee-manager.js"></script>
