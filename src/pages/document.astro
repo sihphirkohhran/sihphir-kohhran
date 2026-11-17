@@ -157,7 +157,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
           {featuredDocuments.map((document, index) => (
             <article class={`document-card featured-card reveal reveal-delay-${(index % 3) + 1}`} data-document-card data-title={document.title.toLowerCase()} data-description={document.description.toLowerCase()} data-category={document.category} data-year={document.yearFilterValue} data-date={document.sortDate}>
               <div class="document-card-body">
-                <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}>{iconLabel(document.extension)}</span><span class="featured-ribbon">Featured</span></div>
+                <div class="document-card-top"><span class={`file-icon file-${document.extension}`} aria-label={`${iconLabel(document.extension)} file`}><svg viewBox="0 0 20 22" aria-hidden="true"><path d="M4 1.5h7l5 5V20.5H4z" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 1.8v5h5" fill="none" stroke="currentColor" stroke-width="1.4"/></svg><span>{iconLabel(document.extension)}</span></span><span class="featured-ribbon">Featured</span></div>
                 <div class="document-badges"><span>{document.category}</span><span>{document.yearLabel}</span></div>
                 <h3>{document.title}</h3>
                 {document.description && <p class="document-description">{document.description}</p>}
@@ -271,7 +271,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   .document-card[hidden],.document-section[hidden],.document-empty[hidden]{display:none}
   .document-card-body{display:flex;flex:1;flex-direction:column;padding:16px}
   .document-card-top{display:flex;align-items:center;justify-content:space-between;min-height:34px;margin-bottom:10px}
-  .file-icon{display:inline-grid;place-items:center;min-width:38px;height:30px;padding:0 7px;border:1px solid rgba(164,78,78,.2);border-radius:5px;background:#fff7f5;color:#a44e4e;font-size:.57rem;font-weight:800;letter-spacing:.04em}
+  .file-icon{display:inline-flex;align-items:center;gap:5px;min-width:54px;height:32px;padding:0 7px;border:1px solid rgba(164,78,78,.2);border-radius:5px;background:#fff7f5;color:#a44e4e;font-size:.55rem;font-weight:800;letter-spacing:.04em}.file-icon svg{width:13px;height:15px;flex:none}
   .file-docx,.file-doc{border-color:rgba(69,109,164,.2);background:#f3f7fc;color:#456da4}
   .file-xlsx,.file-xls,.file-csv{border-color:rgba(61,125,91,.2);background:#f2f8f3;color:#3d7d5b}
   .file-pptx,.file-ppt{border-color:rgba(174,96,60,.2);background:#fff5ef;color:#ae603c}
@@ -286,8 +286,8 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   .document-meta span+span:before{content:'·';margin-right:10px;color:#c0a568}
   .document-actions{display:flex;align-items:center;gap:8px;margin-top:13px}
   .document-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:33px;border-radius:6px;padding:7px 12px;text-decoration:none;font-size:.63rem;font-weight:700}
-  .view-link{border:1px solid #172b45;background:#172b45;color:white}
-  .view-link:hover{background:#223b5c}
+  .view-link{border:1px solid rgba(184,149,63,.55);background:#fdf8eb;color:#253851}
+  .view-link:hover{border-color:#b8953f;background:#f8efd9}
   .download-link{border:1px solid rgba(184,149,63,.4);background:#fffaf0;color:#8c6a27}
   .download-link:hover{border-color:#b8953f;background:#fdf5e4}
   .document-empty{display:grid;justify-items:center;padding:75px 20px;text-align:center}
