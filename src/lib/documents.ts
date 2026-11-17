@@ -192,6 +192,7 @@ export function buildHomeDocumentSections(
               pdf_url: d.pdf_url,
               date: d.date,
               year: d.year,
+              yearType: d.yearType,
               month: d.month,
               pinned: d.pinned,
             }),
