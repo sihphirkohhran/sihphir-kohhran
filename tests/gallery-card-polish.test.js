@@ -65,18 +65,21 @@ test('search, year/category filters, sorting and photo totals remain functional'
 });
 
 
-test('archive cards use compact cover, body padding and vertical spacing without changing typography', () => {
-  assert.ok(page.includes('.album-cover{position:relative;width:100%;height:190px'));
-  assert.ok(page.includes('.album-body{display:flex;flex:1;flex-direction:column;padding:14px}'));
-  assert.ok(page.includes('.album-body small{margin-top:7px'));
-  assert.ok(page.includes('.album-body .album-action{margin-top:8px}'));
-  assert.ok(page.includes('@media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid,.photo-grid{grid-template-columns:1fr}.album-cover{height:190px}'));
+test('archive covers retain their intended height and content body is genuinely compact', () => {
+  assert.ok(page.includes('.album-cover{position:relative;width:100%;height:220px'));
+  assert.ok(page.includes('.album-body{display:flex;flex-direction:column;padding:12px 14px}'));
+  assert.ok(page.includes('.album-body .album-title{margin:0 0 4px}'));
+  assert.ok(page.includes('.album-body small{margin-top:4px'));
+  assert.ok(page.includes('.album-body .album-action{min-height:0;margin-top:5px;padding:2px 0}'));
+  assert.ok(page.includes('@media(max-width:560px){.gallery-toolbar{padding:13px}.filter-row{display:grid;grid-template-columns:1fr 1fr}.filter-row label:last-child{grid-column:1/-1}.gallery-section{margin-top:32px}.section-heading,.photo-heading{display:block}.section-heading p,.photo-heading p{margin-top:6px;text-align:left}.featured-copy{padding:22px}.album-grid,.photo-grid{grid-template-columns:1fr}.album-cover{height:210px}'));
   assert.match(page, /font-family:'Poppins',sans-serif;font-size:18px;font-weight:700/);
   assert.match(page, /font-family:'EB Garamond',serif;font-size:15px;font-weight:600/);
   assert.match(page, /object-fit:cover/);
+  assert.doesNotMatch(page, /\.album-body\{[^}]*flex:1/);
   assert.doesNotMatch(page, /\.album-body\{[^}]*min-height/);
   assert.doesNotMatch(page, /\.album-body[^}]*margin-top:auto/);
-});
+  assert.doesNotMatch(page, /\.album-body \.album-action\{[^}]*min-height:[1-9]/);
+});;
 
 test('Year filter remains dynamically populated and defaults to the latest available album year', () => {
   assert.ok(page.includes('const years = Array.from(new Set(albums.map((album) => album.year))).sort((a, b) => b - a);'));
