@@ -1,8 +1,10 @@
 export type HistoricalYearType = 'known' | 'approximate' | 'unspecified';
 
 export function resolveHistoricalYearType(year: number | null | undefined, yearType?: HistoricalYearType | null): HistoricalYearType {
-  if (yearType === 'unspecified' || yearType === 'approximate' || yearType === 'known') return yearType;
-  return year != null && Number.isFinite(Number(year)) ? 'known' : 'unspecified';
+  if (yearType === 'unspecified') return 'unspecified';
+  const hasNumericYear = year != null && Number.isFinite(Number(year));
+  if (yearType === 'approximate' || yearType === 'known') return hasNumericYear ? yearType : 'unspecified';
+  return hasNumericYear ? 'known' : 'unspecified';
 }
 
 export function formatHistoricalYear(year: number | null | undefined, yearType?: HistoricalYearType | null): string {
