@@ -10,6 +10,8 @@ export type DocumentItem = {
   url: string;
   date: string;
   year: number | null;
+  yearType: 'known' | 'approximate' | 'unspecified';
+  yearLabel: string;
   month: number | null;
   pinned: boolean;
   featured: boolean;
@@ -49,6 +51,7 @@ export function toDocumentItem(
     pdf_url: string;
     date?: string;
     year?: number | null;
+    yearType?: 'known' | 'approximate' | 'unspecified';
     month?: number | null;
     pinned?: boolean;
     featured?: boolean;
@@ -58,11 +61,10 @@ export function toDocumentItem(
 ): DocumentItem {
   const id = idPrefix ? raw.id.replace(new RegExp(`^${idPrefix}`), '') : raw.id;
   const fromId = parseYearMonthFromId(id);
-  const year =
-    raw.year ??
-    fromId.year ??
-    parseYearFromDate(raw.date) ??
-    null;
+  const yearType = raw.yearType ?? (raw.year != null ? 'known' : 'unspecified');
+  const year = yearType === 'unspecified' ? null : raw.year ?? fromId.year ?? parseYearFromDate(raw.date) ?? null;
+  const resolvedYearType = yearType === 'known' && year == null ? 'unspecified' : yearType;
+  const yearLabel = resolvedYearType === 'unspecified' || year == null ? 'Year Unspecified' : resolvedYearType === 'approximate' ? `Circa ${year}` : String(year);
   const month = raw.month ?? fromId.month ?? parseMonthFromDate(raw.date) ?? null;
 
   return {
@@ -71,6 +73,8 @@ export function toDocumentItem(
     url: String(raw.pdf_url),
     date: String(raw.date ?? ''),
     year,
+    yearType: resolvedYearType,
+    yearLabel,
     month,
     pinned: Boolean(raw.pinned),
     featured: Boolean(raw.featured),
