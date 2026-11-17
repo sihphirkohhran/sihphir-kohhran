@@ -22,16 +22,18 @@ export type GalleryPhotoItem = {
   alt: string;
   caption: string;
   category: string;
-  year: number;
+  year: number | null;
+  yearType: 'known' | 'approximate' | 'unspecified';
+  yearLabel: string;
   sortKey: string;
   order: number;
   albumUrl?: string;
   albumTitle: string;
 };
 
-function entrySortKey(year: number, date?: string, id?: string): string {
+function entrySortKey(year: number | null, date?: string, id?: string): string {
   const datePart = date ? String(date).replace(/\D/g, '') : '';
-  return `${year}-${datePart}-${id ?? ''}`;
+  return `${year ?? ''}-${datePart}-${id ?? ''}`;
 }
 
 /** All gallery images from CMS, newest entries first. */
@@ -56,7 +58,9 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
         alt: photoAlt.trim() || data.caption,
         caption: photoCaption.trim() || data.caption,
         category: data.category,
-        year: data.year,
+        year: data.year ?? null,
+        yearType: (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType ?? (data.year != null ? 'known' : 'unspecified'),
+        yearLabel: (data as typeof data & { yearType?: string }).yearType === 'unspecified' || data.year == null ? 'Year Unspecified' : (data as typeof data & { yearType?: string }).yearType === 'approximate' ? `Circa ${data.year}` : String(data.year),
         sortKey,
         order: data.display_order ?? Number.MAX_SAFE_INTEGER,
         albumUrl: data.album_url,
@@ -66,7 +70,7 @@ export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
   }
 
   return photos.sort((a, b) =>
-    b.year - a.year || a.order - b.order || b.sortKey.localeCompare(a.sortKey),
+    (b.year ?? -Infinity) - (a.year ?? -Infinity) || a.order - b.order || b.sortKey.localeCompare(a.sortKey),
   );
 }
 
@@ -137,6 +141,8 @@ export function getFallbackGalleryPhotos(limit = 6): GalleryPhotoItem[] {
     caption: img.caption,
     category: 'Gallery',
     year,
+    yearType: 'known',
+    yearLabel: String(year),
     sortKey: `${year}-${i}`,
     order: i,
     albumTitle: img.caption,
