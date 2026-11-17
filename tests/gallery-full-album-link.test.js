@@ -14,7 +14,8 @@ test('full album action is conditional on the existing CMS albumUrl field', () =
   assert.ok(page.includes('{album.albumUrl && <div class="complete-album-action">'));
   assert.ok(page.includes("albumUrl: data.album_url || ''"));
   assert.ok(!page.includes('href="#"'));
-  assert.ok(!page.includes('complete-album'));
+  assert.ok(!page.includes('class="complete-album"'));
+  assert.ok(!page.includes('.complete-album{'));
 });
 
 test('full album link preserves the CMS URL and safe new-tab behavior', () => {
