@@ -21,7 +21,7 @@ test('homepage gallery uses real CMS photos only and never duplicates image sour
 test('homepage gallery photos all open the shared lightbox with CMS captions and alt text', () => {
   assert.match(gallery, /alt: photoAlt\.trim\(\) \|\| data\.caption/);
   assert.match(gallery, /caption: photoCaption\.trim\(\) \|\| data\.caption/);
-  assert.match(gallery, /albumUrl: data\.album_url/);
+  assert.match(gallery, /albumUrl: String\(data\.album_url \|\| ''\)\.trim\(\)/);
   assert.match(home, /data-lightbox-src=\{photo\.src\}/);
   assert.match(home, /data-lightbox-caption=\{photo\.caption\}/);
   assert.match(home, /data-lightbox-alt=\{photo\.alt\}/);
