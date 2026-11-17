@@ -69,3 +69,22 @@ test('2025 Rawngbawltu List retains both source attachments and their actual fil
   ]);
   assert.match(page, /data-files=\{JSON\.stringify\(document\.files\)\}/);
 });
+
+test('dialog styles dynamically created file rows through Astro global selectors', () => {
+  assert.match(page, /document-dialog-subtitle[^>]*>Attached files/);
+  for (const selector of [
+    '.document-file-item',
+    '.document-file-details',
+    '.document-file-name',
+    '.document-file-type',
+    '.document-file-actions',
+    '.document-file-actions a',
+  ]) {
+    assert.ok(page.includes('.document-dialog :global(' + selector + ')'), 'missing scoped global dialog selector for ' + selector);
+  }
+  assert.match(page, /document-dialog :global\(\.document-file-item\)\{[^}]*gap:18px/);
+  assert.match(page, /document-dialog :global\(\.document-file-actions\)\{[^}]*gap:9px/);
+  assert.match(page, /document-dialog :global\(\.document-file-actions a\)\{[^}]*min-width:58px/);
+  assert.match(page, /document-dialog :global\(\.document-file-name\)\{[^}]*display:block/);
+  assert.match(page, /document-dialog :global\(\.document-file-type\)\{[^}]*display:block/);
+});
