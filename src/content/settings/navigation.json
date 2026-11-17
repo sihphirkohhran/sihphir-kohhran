@@ -78,6 +78,14 @@
       "visible": true,
       "order": 9,
       "parent": ""
+    },
+    {
+      "label": "Kohhran Rawngbawltu list",
+      "href": "/document?category=Rawngbawltute",
+      "key": "new-item",
+      "visible": true,
+      "order": 10,
+      "parent": "Rawngbawltu"
     }
   ]
 }
