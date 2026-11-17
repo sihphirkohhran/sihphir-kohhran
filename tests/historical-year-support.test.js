@@ -30,7 +30,7 @@ test('Gallery Manager exposes the same three year choices and only requires a ye
   assert.match(galleryManager, /name="yearType"/);
   assert.match(galleryManager, /id="gallery-year-value-wrap"/);
   assert.match(galleryManager, /yearType!=='unspecified'.*Number\.isInteger/);
-  assert.match(galleryManager, /yearType==='unspecified'\?delete selected\.data\.year/);
+  assert.match(galleryManager, /yearType==='unspecified'\)delete selected\.data\.year/);
   assert.match(galleryManager, /==='approximate'.*Circa/);
   assert.match(galleryManager, /record\.data\.yearType = record\.data\.yearType \|\| \(record\.data\.year != null.*'known' : 'unspecified'/);
   assert.doesNotMatch(galleryManager, /const year=new Date\(\)\.getFullYear\(\)/);
@@ -45,7 +45,7 @@ test('Document Manager preserves explicit unspecified and legacy year inference'
   assert.match(documentManager, /d\.yearType=d\.yearType\s*\|\|/);
   assert.match(documentManager, /d\.yearType==='unspecified'/);
   assert.match(documentManager, /d\.date\|\|''\)\.match/);
-  assert.match(documentManager, /yearType==='unspecified'\?delete selected\.data\.year/);
+  assert.match(documentManager, /yearType==='unspecified'\)delete selected\.data\.year/);
   assert.doesNotMatch(documentManager, /year:new Date\(\)\.getFullYear\(\)/);
 });
 
