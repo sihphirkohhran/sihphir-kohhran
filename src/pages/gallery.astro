@@ -27,11 +27,13 @@ const albums = entries.map((entry) => {
   // Gallery Manager persists the featured asset in `photo`; `photos` is the ordered gallery.
   const featuredPhoto = galleryPhotoSrc(data.photo || '');
   if (featuredPhoto && !photos.some((photo) => photo.src === featuredPhoto)) photos.unshift({ src: featuredPhoto, alt: data.caption, caption: data.caption });
+  const resolvedYearType = resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
+  const historicalYear = resolvedYearType === 'unspecified' ? null : data.year ?? null;
   return {
-    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), title: data.caption, year: data.year ?? null,
-    yearType: resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType),
-    yearLabel: formatHistoricalYear(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType),
-    yearFilterValue: historicalYearFilterValue(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType),
+    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), title: data.caption, year: historicalYear,
+    yearType: resolvedYearType,
+    yearLabel: formatHistoricalYear(historicalYear, resolvedYearType),
+    yearFilterValue: historicalYearFilterValue(historicalYear, resolvedYearType),
     category: data.category, description: data.description || '', date: data.date || '',
     order: data.display_order ?? Number.MAX_SAFE_INTEGER, featured: Boolean((data as typeof data & { featured?: boolean }).featured),
     cover: featuredPhoto || photos[0]?.src || galleryPlaceholder,
