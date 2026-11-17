@@ -70,6 +70,13 @@ test('Documents page keeps All years as default and suppresses all fallback year
   assert.match(documentPage, /document\.yearLabel/);
 });
 
+test('explicit unspecified metadata excludes any stale numeric year from Gallery options and shared loaders', () => {
+  assert.match(galleryPage, /const historicalYear = resolvedYearType === 'unspecified' \? null : data\.year \?\? null/);
+  assert.match(galleryManager, /records\.filter\(record=>yearType\(record\.data\)!=='unspecified'\)\.map\(record=>record\.data\.year\)/);
+  assert.match(documentManager, /records\.filter\(record=>yearType\(record\.data\)!=='unspecified'\)\.map\(record=>record\.data\.year\)/);
+  assert.match(documentPage, /yearType === 'unspecified' \? null : legacyYear/);
+});
+
 test('shared document normalization preserves legacy fallback but explicit unspecified wins', () => {
   assert.match(documentLib, /const legacyYear = raw\.year \?\? fromId\.year \?\? parseYearFromDate\(raw\.date\) \?\? null/);
   assert.match(documentLib, /raw\.yearType \?\? \(legacyYear != null \? 'known' : 'unspecified'\)/);
