@@ -66,8 +66,9 @@ const documents = entries
     }
     const primary = normalizedFiles[0];
     const fromId = parseYearMonthFromId(entry.id);
-    const yearType = resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
-    const year = yearType === 'unspecified' ? null : data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
+    const legacyYear = data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
+    const yearType = resolveHistoricalYearType(legacyYear, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
+    const year = yearType === 'unspecified' ? null : legacyYear;
     const yearLabel = formatHistoricalYear(year, yearType);
     const yearFilterValue = historicalYearFilterValue(year, yearType);
     const month = data.month ?? fromId.month ?? parseMonthFromDate(data.date) ?? null;
