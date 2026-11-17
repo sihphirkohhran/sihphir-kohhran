@@ -79,7 +79,7 @@ test('archive covers retain their intended height and content body is genuinely 
   assert.doesNotMatch(page, /\.album-body\{[^}]*min-height/);
   assert.doesNotMatch(page, /\.album-body[^}]*margin-top:auto/);
   assert.match(page, /\.album-body \.album-action\{min-height:0;margin-top:5px;padding:2px 0\}/);
-});;
+});
 
 test('Year filter remains dynamically populated and defaults to the latest available album year', () => {
   assert.ok(page.includes('const years = Array.from(new Set(albums.map((album) => album.year))).sort((a, b) => b - a);'));
