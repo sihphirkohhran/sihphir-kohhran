@@ -12,8 +12,8 @@ const yearHelper = read('../src/lib/historical-year.ts');
 const documentLib = read('../src/lib/documents.ts');
 
 test('shared historical year model formats known, approximate and unspecified values', () => {
-  assert.match(yearHelper, /yearType === 'unspecified' \|\| year == null/);
-  assert.match(yearHelper, /yearType === 'approximate' \? `Circa \$\{year\}`/);
+  assert.match(yearHelper, /type === 'unspecified' \|\| year == null/);
+  assert.match(yearHelper, /type === 'approximate' \? `Circa \$\{year\}`/);
   assert.match(yearHelper, /Year Unspecified/);
   assert.match(yearHelper, /return hasNumericYear \? 'known' : 'unspecified'/);
 });
