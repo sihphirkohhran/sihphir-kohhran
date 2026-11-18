@@ -31,6 +31,7 @@ export function resolveCommitteeDeepLink(records = [], search = '') {
   }
   const committeeId = params.get('committee');
   if (committeeId?.trim()) {
+    if (committeeId === 'archive') return { type: 'listing', committeeId: 'archive' };
     const record = getLatestPublishedCommitteeRecord(records, committeeId);
     return record ? { type: 'committee', record } : null;
   }
