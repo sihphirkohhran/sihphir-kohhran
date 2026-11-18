@@ -49,7 +49,8 @@ test('Gallery direct links resolve by the collection entry ID and retain legacy 
   assert.ok(galleryPage.includes('contentId: normalizeContentEntryId(entry.id)'));
   assert.ok(galleryPage.includes('data-album-key={album.contentId}'));
   assert.ok(galleryPage.includes("new URLSearchParams(window.location.search).get('album')"));
-  assert.match(galleryPage, /findAlbumDetail = \\(key: string\\) => albumDetails\\.find\\(detail => contentEntryIdMatches\\(detail\\.dataset\\.albumKey \\|\\| '', key\\)\\)/);
+  assert.ok(galleryPage.includes("const findAlbumDetail = (key: string) => albumDetails.find(detail => contentEntryIdMatches(detail.dataset.albumKey || '', key));"));
+  assert.ok(galleryPage.includes("import { contentEntryIdMatches } from '../lib/content-deep-links';"));
   assert.ok(galleryPage.includes("window.location.hash.startsWith('#album-')"));
   assert.ok(galleryPage.includes("history.pushState({ galleryAlbum: true }"));
   assert.ok(galleryPage.includes("window.addEventListener('popstate'"));
@@ -81,7 +82,8 @@ test('Gallery preserves external Google Photos and Drive navigation for zero-or-
 test('Document rows expose stable IDs and direct one-file links follow original file behavior', () => {
   assert.equal((documentPage.match(/data-document-id=\{document\.id\}/g) || []).length, 2);
   assert.ok(documentPage.includes("resolveContentDeepLink(window.location.search, 'document')"));
-  assert.ok(documentPage.includes('item.dataset.documentId === requestedId'));
+  assert.ok(documentPage.includes("contentEntryIdMatches(item.dataset.documentId || '', requestedId)"));
+  assert.ok(documentPage.includes("import { contentEntryIdMatches, resolveContentDeepLink } from '../lib/content-deep-links';"));
   assert.ok(documentPage.includes('if (options.fromUrl) window.location.replace(files[0].url)'));
   assert.ok(documentPage.includes("window.open(files[0].url, '_blank', 'noopener,noreferrer')"));
 });
@@ -94,6 +96,7 @@ test('Document direct multi-file links open the existing accessible file dialog 
   assert.ok(documentPage.includes('history.pushState({ documentDialog: true }'));
   assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));
   assert.ok(documentPage.includes("window.addEventListener('popstate'"));
+  assert.ok(documentPage.includes("contentEntryIdMatches(item.dataset.documentId || '', requestedId)"));
   assert.ok(documentPage.includes('clearDocumentDeepLink()'));
   assert.ok(documentPage.includes('lastFocusedRow?.focus()'));
   assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));
