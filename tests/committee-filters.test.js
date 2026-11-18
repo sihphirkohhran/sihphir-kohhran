@@ -78,8 +78,8 @@ test('All Years includes every dynamically added archive year without a fixed ye
 
 test('Committee page archive records, year options, and sort order are generated from published content', () => {
   const page = readFileSync(new URL('../src/pages/committee.astro', import.meta.url), 'utf8');
-  assert.match(page, /getCollection\\('committee'\\)[\\s\\S]*?\\.filter\\(\\(entry\\) => entry\\.data\\.status !== 'archived' && entry\\.data\\.published !== false\\)/);
-  assert.match(page, /\\.sort\\(\\(a, b\\) => b\\.data\\.year - a\\.data\\.year/);
-  assert.match(page, /new Set\\(committees\\.map\\(\\(committee\\) => committee\\.year\\)\\)/);
-  assert.match(page, /yearsByCommittee\\.set\\(committee\\.committeeId, available\\.sort\\(\\(a, b\\) => b - a\\)\\)/);
+  assert.match(page, /getCollection\('committee'\)[\s\S]*?\.filter\(\(entry\) => entry\.data\.status !== 'archived' && entry\.data\.published !== false\)/);
+  assert.match(page, /\.sort\(\(a, b\) => b\.data\.year - a\.data\.year/);
+  assert.match(page, /new Set\(committees\.map\(\(committee\) => committee\.year\)\)/);
+  assert.match(page, /yearsByCommittee\.set\(committee\.committeeId, available\.sort\(\(a, b\) => b - a\)\)/);
 });
