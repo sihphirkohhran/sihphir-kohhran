@@ -21,7 +21,7 @@ export function getLatestPublishedCommitteeRecord(records = [], committeeId) {
       || Number(a.displayOrder ?? a.display_order ?? 999) - Number(b.displayOrder ?? b.display_order ?? 999))[0] ?? null;
 }
 
-export function resolveCommitteeDeepLink(records = [], search = '') {
+export function resolveCommitteeDeepLink(records = [], search = '', availableCommitteeIds = []) {
   const params = new URLSearchParams(search);
   const archiveId = params.get('archive');
   if (archiveId?.trim()) {
@@ -31,8 +31,10 @@ export function resolveCommitteeDeepLink(records = [], search = '') {
   }
   const committeeId = params.get('committee');
   if (committeeId?.trim()) {
-    const record = getLatestPublishedCommitteeRecord(records, committeeId);
-    return record ? { type: 'committee', record } : null;
+    const knownIds = availableCommitteeIds.length
+      ? availableCommitteeIds.map(item => String(typeof item === 'object' ? item.id : item))
+      : records.map(item => String(item.committeeId ?? item.committee_id ?? ''));
+    return knownIds.includes(committeeId) ? { type: 'committee', committeeId } : null;
   }
   return null;
 }
