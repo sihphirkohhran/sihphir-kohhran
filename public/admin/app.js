@@ -249,6 +249,6 @@
   const noticeAwareRender=render;
   render=async function(){if(area==='pages'){layout();return window.SihphirPageManager.mount({api,esc,slug,notification,readUpload});}return noticeAwareRender();};
   const schoolAwareRender=render;
-  render=async function(){if(['school','gallery-settings','document-settings'].includes(area)){layout();return window.SihphirSchoolManager.mount({area,api,esc,notification,readUpload});}return schoolAwareRender();};
+  render=async function(){if(['school','gallery-settings','document-settings'].includes(area)){layout();try{return await window.SihphirSchoolManager.mount({area,api,esc,notification,readUpload});}catch(error){const host=document.querySelector('#view');if(host){host.innerHTML=`<section class="panel empty" role="alert"><h2>Presbyterian English School editor could not load</h2><p>${esc(error?.message||'An unexpected loading error occurred.')}</p><button class="gold" id="school-retry">Try again</button></section>`;host.querySelector('#school-retry').onclick=()=>render();}notification(error?.message||'School editor failed to load.','error');}}return schoolAwareRender();};
   (async()=>{try{await api('/api/auth/session');render();}catch{location.replace('/admin/login');}})();
 })();
