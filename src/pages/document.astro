@@ -352,10 +352,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   }
 
   document.querySelectorAll<HTMLButtonElement>('[data-document-open]').forEach((row) => row.addEventListener('click', () => openDocumentRow(row, { pushHistory: true })));
-  closeDialog?.addEventListener('click', () => {
-    if (history.state?.documentDialog) history.back();
-    else dialog?.close();
-  });
+  closeDialog?.addEventListener('click', () => dialog?.close());
   dialog?.addEventListener('close', () => {
     const hasDocumentLink = new URLSearchParams(window.location.search).has('document');
     if (hasDocumentLink && history.state?.documentDialog) {
@@ -370,7 +367,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   });
   window.addEventListener('popstate', () => {
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
-    if (!requestedId) { if (dialog?.open) dialog.close(); return; }
+    if (!requestedId) { if (dialog?.open) dialog.close(); else lastFocusedRow?.focus(); return; }
     const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => item.dataset.documentId === requestedId);
     if (!row) { clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }
     row.hidden = false;
