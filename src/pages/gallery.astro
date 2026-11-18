@@ -138,7 +138,7 @@ const formatDate = (value: string) => {
     url.searchParams.set('album', detail.dataset.albumKey);
     url.hash = '';
     history.pushState({ galleryAlbum: true }, '', url);
-    openAlbumDetail(detail, 'smooth', card);
+    openAlbumDetail(detail, 'smooth', button);
   }));
   document.querySelectorAll<HTMLButtonElement>('[data-close-album]').forEach(button => button.addEventListener('click', () => {
     if (history.state?.galleryAlbum) { history.back(); return; }
