@@ -31,7 +31,7 @@ const albums = entries.map((entry) => {
   const resolvedYearType = resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
   const historicalYear = resolvedYearType === 'unspecified' ? null : data.year ?? null;
   return {
-    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), contentId: entry.id, title: data.caption, year: historicalYear,
+    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), contentId: normalizeContentEntryId(entry.id), title: data.caption, year: historicalYear,
     yearType: resolvedYearType,
     yearLabel: formatHistoricalYear(historicalYear, resolvedYearType),
     yearFilterValue: historicalYearFilterValue(historicalYear, resolvedYearType),
@@ -100,7 +100,7 @@ const formatDate = (value: string) => {
   [search,year,category].forEach(control=>control?.addEventListener(control===search?'input':'change',applyFilters));sort?.addEventListener('change',applyFilters);document.querySelector('#gallery-clear')?.addEventListener('click',()=>{if(search)search.value='';if(year)year.value='all';if(category)category.value='all';if(sort)sort.value='newest';applyFilters();search?.focus();});
   let lastAlbumTrigger: HTMLAnchorElement | null = null;
   const albumDetails = [...document.querySelectorAll<HTMLElement>('.album-detail')];
-  const findAlbumDetail = (key: string) => albumDetails.find(detail => detail.dataset.albumKey === key);
+  const findAlbumDetail = (key: string) => albumDetails.find(detail => contentEntryIdMatches(detail.dataset.albumKey || '', key));
   function showGalleryListing(scrollY?: number) {
     albumDetails.forEach(detail => detail.hidden = true);
     document.querySelectorAll<HTMLElement>('.gallery-toolbar,.gallery-section,.gallery-empty').forEach(item => item.hidden = false);
