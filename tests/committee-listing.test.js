@@ -70,3 +70,21 @@ test('committee card typography remains Poppins Bold with EB Garamond details in
   assert.match(page, /\.committee-card h3\{[^}]*font-family:'Poppins',sans-serif;[^}]*font-size:15\.5px;font-weight:700/);
   assert.match(page, /\.committee-card footer>span\{font-family:'EB Garamond',serif;[^}]*font-size:\.9rem/);
 });
+
+
+test('Committee Copy Link query is handled as a listing filter, not an archive detail', () => {
+  assert.match(page, /resolveCommitteeDeepLink\\(linkRecords,window\\.location\\.search,availableCommitteeIds\\)/);
+  assert.match(page, /resolved\\?\\.type==='archive'/);
+  assert.match(page, /resolved\\?\\.type==='committee'/);
+  assert.match(page, /committee\\.value=resolved\\.committeeId/);
+  assert.match(page, /year\\.value='all'/);
+  assert.match(page, /committee\\.searchParams/);
+});
+
+test('Back to Committees restores default filters and removes both deep-link parameters', () => {
+  const handler = page.match(/document\\.querySelectorAll<HTMLButtonElement>\\('\[data-close-committee\]'\\)[^\\n]+/)?.[0] ?? '';
+  assert.match(handler, /getCommitteeListingUrl\\(window\\.location\\.href\\)/);
+  assert.match(handler, /resetListingFilters\\(\\)/);
+  assert.match(handler, /showListing\\(\\)/);
+  assert.doesNotMatch(handler, /history\\.back\\(\\)/);
+});
