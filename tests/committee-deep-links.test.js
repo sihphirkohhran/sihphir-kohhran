@@ -31,14 +31,21 @@ test('Committee archive identifiers normalize Astro Markdown suffixes without ch
   assert.equal(committeeArchiveIdMatches('pes-2025.md', 'pes-2024'), false);
 });
 
-test('permanent Committee links resolve the latest published non-archived yearly record', () => {
+test('Committee Copy Links resolve to a filtered listing rather than opening the latest yearly detail', () => {
   assert.equal(getLatestPublishedCommitteeRecord(records, 'pes')?.archiveId, 'pes-2026.md');
-  assert.equal(resolveCommitteeDeepLink(records, '?committee=pes')?.record.archiveId, 'pes-2026.md');
-  assert.equal(resolveCommitteeDeepLink(records, '?committee=archive')?.record.archiveId, 'archive-2025.md');
+  assert.deepEqual(resolveCommitteeDeepLink(records, '?committee=pes', ['pes', 'archive']), {
+    type: 'committee', committeeId: 'pes',
+  });
+  assert.deepEqual(resolveCommitteeDeepLink(records, '?committee=archive', ['pes', 'archive']), {
+    type: 'committee', committeeId: 'archive',
+  });
+  assert.equal(resolveCommitteeDeepLink(records, '?committee=missing', ['pes', 'archive']), null);
 });
 
-test('archive links resolve the exact historical record and never follow a newer year', () => {
+test('archive links resolve the exact historical record and take precedence over Committee filter parameters', () => {
   assert.equal(resolveCommitteeDeepLink(records, '?archive=pes-2024')?.record.year, 2024);
+  assert.equal(resolveCommitteeDeepLink(records, '?committee=archive&archive=pes-2024', ['pes', 'archive'])?.type, 'archive');
+  assert.equal(resolveCommitteeDeepLink(records, '?committee=archive&archive=pes-2024', ['pes', 'archive'])?.record.year, 2024);
   assert.equal(resolveCommitteeDeepLink(records, '?archive=pes-2025.md')?.record.year, 2025);
   assert.equal(resolveCommitteeDeepLink(records, '?archive=archive-2025')?.record.committeeId, 'archive');
 });
