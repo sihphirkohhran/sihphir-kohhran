@@ -34,7 +34,7 @@ test('Committee archive identifiers normalize Astro Markdown suffixes without ch
 test('permanent Committee links resolve the latest published non-archived yearly record', () => {
   assert.equal(getLatestPublishedCommitteeRecord(records, 'pes')?.archiveId, 'pes-2026.md');
   assert.equal(resolveCommitteeDeepLink(records, '?committee=pes')?.record.archiveId, 'pes-2026.md');
-  assert.equal(resolveCommitteeDeepLink(records, '?committee=archive')?.record.archiveId, 'archive-2025.md');
+  assert.deepEqual(resolveCommitteeDeepLink(records, '?committee=archive'), { type: 'listing', committeeId: 'archive' });
 });
 
 test('archive links resolve the exact historical record and never follow a newer year', () => {
@@ -140,4 +140,56 @@ test('browser Back and Forward continue to restore previously visited Committee 
   assert.match(page, /history\.pushState\(\{committeeDetail:true\}/);
   assert.match(page, /function syncFromLocation\(\)/);
   assert.match(page, /resolveCommitteeDeepLink\(linkRecords,window\.location\.search\)/);
+});
+
+
+test('archive Committee selector deep link opens the listing, not the latest archive detail', () => {
+  const result = resolveCommitteeDeepLink(records, '?committee=archive');
+  assert.deepEqual(result, { type: 'listing', committeeId: 'archive' });
+  assert.equal(resolveCommitteeDeepLink(records, '?archive=archive-2025')?.record.archiveId, 'archive-2025.md');
+  assert.match(page, /archiveListingRequested = Astro\.url\.searchParams\.get\('committee'\) === 'archive'/);
+  assert.match(page, /listingDefaultYear = archiveListingRequested \? 'all' : defaultYear/);
+  assert.match(page, /selected=\{committee\.id === requestedCommitteeId\}/);
+  assert.match(page, /resolved\?\.type==='listing'/);
+});
+
+test('archive listing renders every eligible yearly record dynamically in newest-first order', () => {
+  const yearlyArchives = [
+    { archiveId: 'archive-2022.md', committeeId: 'archive', year: 2022, published: true, status: 'current' },
+    { archiveId: 'archive-2023.md', committeeId: 'archive', year: 2023, published: true, status: 'current' },
+    { archiveId: 'archive-2024.md', committeeId: 'archive', year: 2024, published: true, status: 'current' },
+    { archiveId: 'archive-2025.md', committeeId: 'archive', year: 2025, published: true, status: 'current' },
+    { archiveId: 'archive-2026.md', committeeId: 'archive', year: 2026, published: true, status: 'current' },
+    { archiveId: 'archive-draft-2027.md', committeeId: 'archive', year: 2027, published: false, status: 'current' },
+    { archiveId: 'archive-retired-2021.md', committeeId: 'archive', year: 2021, published: true, status: 'archived' },
+  ];
+  const eligible = yearlyArchives.filter(record => record.published !== false && record.status !== 'archived')
+    .sort((a, b) => b.year - a.year);
+  assert.deepEqual(eligible.map(record => record.year), [2026, 2025, 2024, 2023, 2022]);
+  assert.match(page, /\.filter\(\(entry\) => entry\.data\.status !== 'archived' && entry\.data\.published !== false\)/);
+  assert.match(page, /\.sort\(\(a, b\) => b\.data\.year - a\.data\.year/);
+  assert.match(page, /archive\.map\(\(committee, index\)/);
+  assert.doesNotMatch(page, /slice\(0,\s*\d+\)/);
+});
+
+test('archive listing direct load and refresh restore Archives & Documentation with All Years', () => {
+  assert.match(page, /Astro\.url\.searchParams\.get\('committee'\) === 'archive'/);
+  assert.match(page, /if\(committee\)committee\.value=resolved\.committeeId;if\(year\)year\.value='all';showListing\(\)/);
+  assert.match(page, /syncFromLocation\(\);/);
+  assert.match(page, /window\.addEventListener\('popstate',syncFromLocation\)/);
+});
+
+test('archive listing selection composes with search and year filters and preserves the existing filter implementation', () => {
+  assert.match(page, /matchesCommitteeFilters\(/);
+  assert.match(page, /const filters=\{query:search\?\.value\.trim\(\)\.toLowerCase\(\)\|\|'',year:year\?\.value\|\|'all',committeeId:committee\?\.value\|\|'all'\}/);
+  assert.match(page, /document\.querySelectorAll<HTMLElement>\('\[data-committee-card\]'\)/);
+  assert.match(page, /resetCommitteeFilters\(year\?\.dataset\.defaultYear\|\|'all'\)/);
+});
+
+test('archive detail deep links remain exact and browser Back/Forward restores listing and detail states', () => {
+  assert.equal(resolveCommitteeDeepLink(records, '?archive=archive-2025')?.record.archiveId, 'archive-2025.md');
+  assert.equal(resolveCommitteeDeepLink(records, '?committee=archive')?.type, 'listing');
+  assert.match(page, /url\.searchParams\.set\(param,value\)/);
+  assert.match(page, /window\.addEventListener\('popstate',syncFromLocation\)/);
+  assert.match(page, /function syncFromLocation\(\)/);
 });
