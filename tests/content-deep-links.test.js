@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { buildContentDeepLink, contentEntryIdMatches, normalizeContentEntryId, resolveContentDeepLink } from '../src/lib/content-deep-links.js';
 import { resolveCategoryFromSearch } from '../src/lib/category-query.js';
 import { shouldOpenExternalAlbum } from '../src/lib/gallery-navigation.js';
@@ -20,6 +20,8 @@ test('Astro 4 Markdown collection IDs normalize to CMS path identifiers for real
   const savedGalleryPath = 'src/content/gallery/tumkau-ni-2026-2026.md';
   const astroDocumentEntryId = 'other/year-book-2025.md';
   const astroGalleryEntryId = 'tumkau-ni-2026-2026.md';
+  assert.equal(existsSync(new URL('../src/content/documents/other/year-book-2025.md', import.meta.url)), true);
+  assert.equal(existsSync(new URL('../src/content/gallery/tumkau-ni-2026-2026.md', import.meta.url)), true);
   const cmsDocumentIdentifier = savedDocumentPath.replace('src/content/documents/', '').replace(/\.md$/i, '');
   const cmsGalleryIdentifier = savedGalleryPath.replace('src/content/gallery/', '').replace(/\.md$/i, '');
 
