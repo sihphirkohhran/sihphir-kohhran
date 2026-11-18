@@ -113,7 +113,7 @@ const formatDate = (value: string) => {
     document.querySelectorAll<HTMLElement>('.gallery-toolbar,.gallery-section,.gallery-empty').forEach(item => item.hidden = true);
     albumDetails.forEach(item => item.hidden = item !== detail);
     detail.hidden = false;
-    detail.scrollIntoView({ behavior, block: 'start' });
+    if (behavior === 'smooth') detail.scrollIntoView({behavior:'smooth',block:'start'}); else detail.scrollIntoView({behavior:'auto',block:'start'});
   }
   function syncAlbumFromLocation() {
     const requestedId = new URLSearchParams(window.location.search).get('album');
