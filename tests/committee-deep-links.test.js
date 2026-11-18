@@ -93,7 +93,7 @@ test('public page exposes normalized stable archive IDs and resolves direct link
   assert.match(page, /resolveCommitteeDeepLink\(/);
   assert.match(page, /window\.addEventListener\('popstate'/);
   assert.match(page, /history\.pushState\(/);
-  assert.match(page, /history\.replaceState\(/);
+  assert.match(page, /history\.pushState\(\{committeeListing:true\}/);
   assert.match(page, /data-close-committee/);
   assert.match(page, /data-committee-year-switch/);
   assert.match(page, /committee-link-fallback/);
