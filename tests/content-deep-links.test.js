@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildContentDeepLink, resolveContentDeepLink } from '../src/lib/content-deep-links.js';
+import { buildContentDeepLink, contentEntryIdMatches, normalizeContentEntryId, resolveContentDeepLink } from '../src/lib/content-deep-links.js';
 import { resolveCategoryFromSearch } from '../src/lib/category-query.js';
 import { shouldOpenExternalAlbum } from '../src/lib/gallery-navigation.js';
 
@@ -13,6 +13,25 @@ const documentManager = read('../public/admin/document-manager.js');
 const galleryCss = read('../public/admin/gallery-manager.css');
 const documentCss = read('../public/admin/document-manager.css');
 const productionOrigin = 'https://sihphirpresbyteriankohhran.org';
+
+
+test('Astro 4 Markdown collection IDs normalize to CMS path identifiers for real saved records', () => {
+  const savedDocumentPath = 'src/content/documents/other/year-book-2025.md';
+  const savedGalleryPath = 'src/content/gallery/tumkau-ni-2026-2026.md';
+  const astroDocumentEntryId = 'other/year-book-2025.md';
+  const astroGalleryEntryId = 'tumkau-ni-2026-2026.md';
+  const cmsDocumentIdentifier = savedDocumentPath.replace('src/content/documents/', '').replace(/\\.md$/i, '');
+  const cmsGalleryIdentifier = savedGalleryPath.replace('src/content/gallery/', '').replace(/\\.md$/i, '');
+
+  assert.equal(normalizeContentEntryId(astroDocumentEntryId), cmsDocumentIdentifier);
+  assert.equal(normalizeContentEntryId(astroGalleryEntryId), cmsGalleryIdentifier);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/year-book-2025'), true);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/year-book-2025.md'), true);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, 'tumkau-ni-2026-2026'), true);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, 'tumkau-ni-2026-2026.md'), true);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/not-the-year-book'), false);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, ''), false);
+});
 
 test('deep-link helpers create absolute production URLs with stable encoded identifiers', () => {
   assert.equal(buildContentDeepLink(productionOrigin, '/gallery', 'album', 'good-friday-2025'), productionOrigin + '/gallery?album=good-friday-2025');
