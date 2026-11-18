@@ -5,7 +5,7 @@ import { resolveCommitteePhoto } from '../lib/committee';
 import { renderSafeRichText } from '../lib/markdown';
 import { getPageSettings } from '../lib/page-settings';
 import { getCommitteeOptions, getDefaultCommitteeYear, getFilteredCommitteeRecords } from '../lib/committee-filters.js';
-import { normalizeCommitteeArchiveId } from '../lib/committee-deep-links.js';
+import { getCommitteeListingUrl, normalizeCommitteeArchiveId } from '../lib/committee-deep-links.js';
 
 const ui=await getPageSettings('committee',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Church Committees',hero_subtitle:'Meet the committees serving the church across its ministries and responsibilities.',history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search committees…',empty_message:'No committees found',back_button:'Back to committees',view_button:'View Committee'});
 
@@ -126,7 +126,7 @@ const defaultMemberPhoto = '/images/profile-placeholder.svg';
   [search,year,committee].forEach(control=>control?.addEventListener(control===search?'input':'change',filter));
   document.querySelector('#committee-clear')?.addEventListener('click',()=>{const defaults=resetCommitteeFilters(year?.dataset.defaultYear||'all');if(search)search.value=defaults.query;if(year)year.value=defaults.year;if(committee)committee.value=defaults.committeeId;filter();search?.focus();});
   cards.forEach(link=>link.addEventListener('click',event=>{event.preventDefault();const target=details.find(detail=>detail.id===`committee-detail-${link.dataset.viewCommittee}`);if(target)openDetail(target,{push:true});}));
-  document.querySelectorAll<HTMLButtonElement>('[data-close-committee]').forEach(button=>button.addEventListener('click',()=>{if(history.state?.committeeDetail){history.back();return;}const url=new URL(window.location.href);url.searchParams.delete('committee');url.searchParams.delete('archive');url.hash='';history.replaceState(null,'',url);showListing();document.querySelector('.committee-filters')?.scrollIntoView({behavior:'smooth'});}));
+  document.querySelectorAll<HTMLButtonElement>('[data-close-committee]').forEach(button=>button.addEventListener('click',()=>{const url=getCommitteeListingUrl(window.location.href);history.pushState({committeeListing:true},'',url);showListing();document.querySelector('.committee-filters')?.scrollIntoView({behavior:'smooth'});}));
   document.querySelectorAll<HTMLSelectElement>('[data-committee-year-switch]').forEach(select=>select.addEventListener('change',()=>{const current=select.closest<HTMLElement>('[data-committee-detail]'),target=details.find(detail=>detail.dataset.committeeId===current?.dataset.committeeId&&detail.dataset.year===select.value);if(current&&target)openDetail(target,{push:true});}));
   window.addEventListener('popstate',syncFromLocation);
   filter();
