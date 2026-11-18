@@ -1,5 +1,5 @@
 export function normalizeContentEntryId(identifier) {
-  return String(identifier ?? '').trim().replace(/\\.md$/i, '');
+  return String(identifier ?? '').trim().replace(/\.md$/i, '');
 }
 
 export function contentEntryIdMatches(entryId, requestedId) {
