@@ -102,7 +102,7 @@ test('public page exposes normalized stable archive IDs and resolves direct link
 test('Committee deep links preserve combined filters, reset defaults, and year switching', () => {
   assert.match(page, /matchesCommitteeFilters\(/);
   assert.match(page, /resetCommitteeFilters\(year\?\.dataset\.defaultYear\|\|'all'\)/);
-  assert.match(page, /data-default-year=\{defaultYear\}/);
+  assert.match(page, /data-default-year=\{listingDefaultYear\}/);
   assert.match(page, /data-committee-year-switch/);
   assert.match(styles, /committee-master-rows article\{[^}]*grid-template-columns:minmax\(0,1fr\) 130px auto auto/);
 });
