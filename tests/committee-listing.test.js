@@ -33,7 +33,7 @@ test('entire card remains a semantic link to its existing inline details section
   assert.equal((listing.match(/data-view-committee=\{committee\.id\}/g) || []).length, 2);
   assert.match(page, /querySelectorAll<HTMLAnchorElement>\('\[data-view-committee\]'\)/);
   assert.match(page, /event\.preventDefault\(\)/);
-  assert.match(page, /history\.replaceState\(null,''/);
+  assert.match(page, /history\.pushState\(\{committeeDetail:true\}/);
   assert.match(page, /committee-card-link:focus-visible\{outline:3px solid #b8953f/);
 });
 
