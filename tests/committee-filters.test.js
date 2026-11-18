@@ -60,3 +60,26 @@ test('no-match filter combinations return an empty result without throwing', () 
     query: 'not present', year: 'all', committeeId: 'all',
   }), []);
 });
+
+
+test('All Years includes every dynamically added archive year without a fixed year or count limit', () => {
+  const futureArchives = Array.from({ length: 16 }, (_, index) => ({
+    name: 'Archives & Documentation Committee',
+    committeeId: 'archive',
+    year: 2015 + index,
+  })).sort((a, b) => b.year - a.year);
+  const matching = getFilteredCommitteeRecords(futureArchives, {
+    query: '', year: 'all', committeeId: 'archive',
+  });
+  assert.equal(matching.length, 16);
+  assert.equal(matching[0].year, 2030);
+  assert.equal(matching.at(-1).year, 2015);
+});
+
+test('Committee page archive records, year options, and sort order are generated from published content', () => {
+  const page = readFileSync(new URL('../src/pages/committee.astro', import.meta.url), 'utf8');
+  assert.match(page, /getCollection\\('committee'\\)[\\s\\S]*?\\.filter\\(\\(entry\\) => entry\\.data\\.status !== 'archived' && entry\\.data\\.published !== false\\)/);
+  assert.match(page, /\\.sort\\(\\(a, b\\) => b\\.data\\.year - a\\.data\\.year/);
+  assert.match(page, /new Set\\(committees\\.map\\(\\(committee\\) => committee\\.year\\)\\)/);
+  assert.match(page, /yearsByCommittee\\.set\\(committee\\.committeeId, available\\.sort\\(\\(a, b\\) => b - a\\)\\)/);
+});
