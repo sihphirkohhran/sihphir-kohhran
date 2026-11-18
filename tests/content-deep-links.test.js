@@ -62,7 +62,7 @@ test('Document direct multi-file links open the existing accessible file dialog 
   assert.ok(documentPage.includes('closeDialog?.focus()'));
   assert.ok(documentPage.includes("dialog?.addEventListener('close'"));
   assert.ok(documentPage.includes('history.pushState({ documentDialog: true }'));
-  assert.ok(documentPage.includes('if (history.state?.documentDialog) history.back()'));
+  assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));
   assert.ok(documentPage.includes("window.addEventListener('popstate'"));
   assert.ok(documentPage.includes('clearDocumentDeepLink()'));
   assert.ok(documentPage.includes('lastFocusedRow?.focus()'));
