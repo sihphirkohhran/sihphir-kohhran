@@ -26,6 +26,27 @@
   };
   const DEFAULT_CATEGORIES = ['Biak In','Committee','Pastors','Elders','Missionaries','Fellowship','Social Front','Events','History','Youth','Children','Other'];
   const SETTINGS_PATH = 'src/content/settings/gallery-categories.json';
+  const copyAbsoluteLink = async (url, notification) => {
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(url);
+      else {
+        const field = document.createElement('textarea');
+        field.value = url;
+        field.setAttribute('readonly', '');
+        field.style.position = 'fixed';
+        field.style.opacity = '0';
+        document.body.append(field);
+        field.select();
+        const copied = document.execCommand('copy');
+        field.remove();
+        if (!copied) throw new Error('Clipboard access is unavailable.');
+      }
+      notification('Copied!');
+    } catch {
+      notification('Could not copy link. Check your browser clipboard permissions.', 'error');
+    }
+  };
+
   const GALLERY_ROOT = 'src/content/gallery/';
 
   const unquote = value => {
@@ -108,7 +129,7 @@
       };
       const editorTemplate = () => {
         const data=selected.data, photos=selected.photos, cover=data.photo||photos[0]?.src||'';
-        return `<form class="gallery-professional-editor" id="gallery-editor-form"><header class="gallery-editor-head"><div><span class="status" id="gallery-save-state">${selected.isNew?'New gallery':'Saved'}</span><h2>${esc(data.caption||'Untitled Gallery')}</h2><p>Manage gallery details and photographs.</p></div><div class="gallery-editor-actions"><button type="button" class="danger" id="gallery-delete">Delete Gallery</button><button class="gold" id="gallery-save" ${uploadCount?'disabled':''}>Save Gallery</button></div></header><section class="gallery-details"><label><span>Gallery title</span><input name="caption" value="${esc(data.caption||'')}"></label><label class="gallery-year-information"><span>Year Information</span><select name="yearType" id="gallery-year-type"><option value="known" ${yearType(data)==='known'?'selected':''}>Known Year</option><option value="approximate" ${yearType(data)==='approximate'?'selected':''}>Approximate Year</option><option value="unspecified" ${yearType(data)==='unspecified'?'selected':''}>Year Unspecified</option></select></label><label id="gallery-year-value-wrap" ${yearType(data)==='unspecified'?'hidden':''} style="display:${yearType(data)==='unspecified'?'none':''}"><span>Year</span><input name="year" id="gallery-year-value" type="number" min="1" max="9999" value="${esc(data.year??'')}" ${yearType(data)==='unspecified'?'':'required'}></label><label><span>Category</span><select name="category">${categoryOptions(data.category)}</select></label><label><span>Album URL / More Photos URL (optional)</span><input name="album_url" type="url" value="${esc(data.album_url||'')}" placeholder="https://photos.google.com/..."></label><label class="gallery-description"><span>Description</span><textarea name="description" rows="3">${esc(data.description||'')}</textarea></label></section><section class="gallery-photo-section"><div class="gallery-photo-head"><div><h3>Photos</h3><p>Drag cards to reorder.</p></div><div><span>${photos.length} photo${photos.length===1?'':'s'}</span><button type="button" class="gold" id="gallery-upload-photos">Upload Photos</button></div></div><div class="gallery-upload-zone" id="gallery-upload-zone" tabindex="0"><b>Drop multiple photos here</b><span>or</span><button type="button" id="gallery-browse">Upload Photos</button><small id="gallery-upload-status">JPEG, PNG, WebP or GIF · up to 10 MB each</small><input id="gallery-file-input" type="file" accept="image/*" multiple hidden></div><div class="gallery-assets" id="gallery-assets">${photoCards()}</div></section></form><div class="gallery-lightbox" id="gallery-lightbox" hidden role="dialog" aria-modal="true"><button type="button" class="gallery-lightbox-close" aria-label="Close">×</button><button type="button" class="gallery-lightbox-prev" aria-label="Previous">‹</button><figure><img alt=""><figcaption></figcaption></figure><button type="button" class="gallery-lightbox-next" aria-label="Next">›</button></div>`;
+        return `<form class="gallery-professional-editor" id="gallery-editor-form"><header class="gallery-editor-head"><div><span class="status" id="gallery-save-state">${selected.isNew?'New gallery':'Saved'}</span><h2>${esc(data.caption||'Untitled Gallery')}</h2><p>Manage gallery details and photographs.</p></div><div class="gallery-editor-actions"><button type="button" class="danger" id="gallery-delete">Delete Gallery</button><button type="button" id="gallery-copy-link" ${selected.isNew||!selected.path?'disabled':''}>Copy Album Link</button><button class="gold" id="gallery-save" ${uploadCount?'disabled':''}>Save Gallery</button></div></header><section class="gallery-details"><label><span>Gallery title</span><input name="caption" value="${esc(data.caption||'')}"></label><label class="gallery-year-information"><span>Year Information</span><select name="yearType" id="gallery-year-type"><option value="known" ${yearType(data)==='known'?'selected':''}>Known Year</option><option value="approximate" ${yearType(data)==='approximate'?'selected':''}>Approximate Year</option><option value="unspecified" ${yearType(data)==='unspecified'?'selected':''}>Year Unspecified</option></select></label><label id="gallery-year-value-wrap" ${yearType(data)==='unspecified'?'hidden':''} style="display:${yearType(data)==='unspecified'?'none':''}"><span>Year</span><input name="year" id="gallery-year-value" type="number" min="1" max="9999" value="${esc(data.year??'')}" ${yearType(data)==='unspecified'?'':'required'}></label><label><span>Category</span><select name="category">${categoryOptions(data.category)}</select></label><label><span>Album URL / More Photos URL (optional)</span><input name="album_url" type="url" value="${esc(data.album_url||'')}" placeholder="https://photos.google.com/..."></label><label class="gallery-description"><span>Description</span><textarea name="description" rows="3">${esc(data.description||'')}</textarea></label></section><section class="gallery-photo-section"><div class="gallery-photo-head"><div><h3>Photos</h3><p>Drag cards to reorder.</p></div><div><span>${photos.length} photo${photos.length===1?'':'s'}</span><button type="button" class="gold" id="gallery-upload-photos">Upload Photos</button></div></div><div class="gallery-upload-zone" id="gallery-upload-zone" tabindex="0"><b>Drop multiple photos here</b><span>or</span><button type="button" id="gallery-browse">Upload Photos</button><small id="gallery-upload-status">JPEG, PNG, WebP or GIF · up to 10 MB each</small><input id="gallery-file-input" type="file" accept="image/*" multiple hidden></div><div class="gallery-assets" id="gallery-assets">${photoCards()}</div></section></form><div class="gallery-lightbox" id="gallery-lightbox" hidden role="dialog" aria-modal="true"><button type="button" class="gallery-lightbox-close" aria-label="Close">×</button><button type="button" class="gallery-lightbox-prev" aria-label="Previous">‹</button><figure><img alt=""><figcaption></figcaption></figure><button type="button" class="gallery-lightbox-next" aria-label="Next">›</button></div>`;
       };
       const photoCards = () => selected.photos.length ? selected.photos.map((photo,index)=>`<article class="gallery-asset" draggable="true" data-photo-index="${index}"><div class="gallery-asset-media"><button type="button" class="gallery-drag" title="Drag to reorder" aria-label="Drag image ${index+1}">⋮⋮</button><span class="gallery-order">${index+1}</span><button type="button" class="gallery-asset-preview" data-photo-preview="${index}"><img src="${esc(photo.src)}" alt="${esc(photo.alt)}"></button>${selected.data.photo===photo.src?'<span class="gallery-featured">Featured</span>':''}${photo.uploading?'<span class="gallery-uploading">Uploading…</span>':''}</div><div class="gallery-asset-fields"><label><span>Caption</span><input data-photo-field="caption" data-photo-index="${index}" value="${esc(photo.caption)}"></label><label><span>Alt text</span><input data-photo-field="alt" data-photo-index="${index}" value="${esc(photo.alt)}"></label><div class="gallery-file-row"><span title="${esc(photo.filename)}">${esc(photo.filename)}</span><button type="button" data-photo-feature="${index}">Set featured</button><button type="button" class="danger" data-photo-delete="${index}">Delete</button></div></div></article>`).join('') : '<div class="gallery-no-photos"><b>No photos yet</b><span>Upload one or more images to begin this gallery.</span></div>';
 
@@ -125,6 +146,20 @@
         const form=document.querySelector('#gallery-editor-form'), assets=document.querySelector('#gallery-assets'), input=document.querySelector('#gallery-file-input'), zone=document.querySelector('#gallery-upload-zone'), lightbox=document.querySelector('#gallery-lightbox');
         form.addEventListener('input',markDirty); form.addEventListener('change',event=>{if(event.target.id==='gallery-year-type'){const unspecified=event.target.value==='unspecified',wrap=document.querySelector('#gallery-year-value-wrap'),input=document.querySelector('#gallery-year-value');wrap.hidden=unspecified;wrap.style.display=unspecified?'none':'';input.required=!unspecified;}markDirty();});
         form.onsubmit=saveGallery; document.querySelector('#gallery-delete').onclick=deleteGallery;
+        document.querySelector('#gallery-copy-link').onclick=async()=>{
+          if(!selected||selected.isNew||!selected.path)return;
+          const identifier=selected.path.startsWith(GALLERY_ROOT)?selected.path.slice(GALLERY_ROOT.length).replace(/\.md$/,''): '';
+          if(!identifier)return notification('This gallery has no stable saved identifier.','error');
+          const saved=JSON.parse(baseline||'{}'), savedPhotos=Array.isArray(saved.photos)?saved.photos:[], uniqueSources=new Set([...savedPhotos.map(photo=>typeof photo==='string'?photo:photo?.src),saved.data?.photo].filter(Boolean));
+          const externalUrl=String(saved.data?.album_url||'').trim();
+          let validExternal=false;
+          try{const parsed=new URL(externalUrl);validExternal=['http:','https:'].includes(parsed.protocol)&&Boolean(parsed.hostname);}catch{}
+          if(uniqueSources.size<=1&&validExternal)return copyAbsoluteLink(externalUrl,notification);
+          const origin=window.SIHPHIR_PUBLIC_SITE_ORIGIN;
+          if(!origin)return notification('The production website address is unavailable.','error');
+          const url=new URL('/gallery',origin);url.searchParams.set('album',identifier);
+          return copyAbsoluteLink(url.toString(),notification);
+        };
         document.querySelector('#gallery-upload-photos').onclick=()=>input.click();document.querySelector('#gallery-browse').onclick=()=>input.click(); input.onchange=()=>{uploadPhotos(input.files);input.value='';};
         ['dragenter','dragover'].forEach(name=>zone.addEventListener(name,event=>{event.preventDefault();zone.classList.add('over');}));['dragleave','drop'].forEach(name=>zone.addEventListener(name,event=>{event.preventDefault();zone.classList.remove('over');}));zone.addEventListener('drop',event=>uploadPhotos(event.dataTransfer.files));
         assets.addEventListener('input',event=>{const index=Number(event.target.dataset.photoIndex),field=event.target.dataset.photoField;if(field&&selected.photos[index]){selected.photos[index][field]=event.target.value;markDirty();}});
