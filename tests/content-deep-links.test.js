@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { buildContentDeepLink, resolveContentDeepLink } from '../src/lib/content-deep-links.js';
+import { existsSync, readFileSync } from 'node:fs';
+import { buildContentDeepLink, contentEntryIdMatches, normalizeContentEntryId, resolveContentDeepLink } from '../src/lib/content-deep-links.js';
 import { resolveCategoryFromSearch } from '../src/lib/category-query.js';
 import { shouldOpenExternalAlbum } from '../src/lib/gallery-navigation.js';
 
@@ -14,6 +14,27 @@ const galleryCss = read('../public/admin/gallery-manager.css');
 const documentCss = read('../public/admin/document-manager.css');
 const productionOrigin = 'https://sihphirpresbyteriankohhran.org';
 
+
+test('Astro 4 Markdown collection IDs normalize to CMS path identifiers for real saved records', () => {
+  const savedDocumentPath = 'src/content/documents/other/year-book-2025.md';
+  const savedGalleryPath = 'src/content/gallery/tumkau-ni-2026-2026.md';
+  const astroDocumentEntryId = 'other/year-book-2025.md';
+  const astroGalleryEntryId = 'tumkau-ni-2026-2026.md';
+  assert.equal(existsSync(new URL('../src/content/documents/other/year-book-2025.md', import.meta.url)), true);
+  assert.equal(existsSync(new URL('../src/content/gallery/tumkau-ni-2026-2026.md', import.meta.url)), true);
+  const cmsDocumentIdentifier = savedDocumentPath.replace('src/content/documents/', '').replace(/\.md$/i, '');
+  const cmsGalleryIdentifier = savedGalleryPath.replace('src/content/gallery/', '').replace(/\.md$/i, '');
+
+  assert.equal(normalizeContentEntryId(astroDocumentEntryId), cmsDocumentIdentifier);
+  assert.equal(normalizeContentEntryId(astroGalleryEntryId), cmsGalleryIdentifier);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/year-book-2025'), true);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/year-book-2025.md'), true);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, 'tumkau-ni-2026-2026'), true);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, 'tumkau-ni-2026-2026.md'), true);
+  assert.equal(contentEntryIdMatches(astroDocumentEntryId, 'other/not-the-year-book'), false);
+  assert.equal(contentEntryIdMatches(astroGalleryEntryId, ''), false);
+});
+
 test('deep-link helpers create absolute production URLs with stable encoded identifiers', () => {
   assert.equal(buildContentDeepLink(productionOrigin, '/gallery', 'album', 'good-friday-2025'), productionOrigin + '/gallery?album=good-friday-2025');
   assert.equal(buildContentDeepLink(productionOrigin, '/document', 'document', 'other/year-book 2025'), productionOrigin + '/document?document=other%2Fyear-book+2025');
@@ -25,10 +46,11 @@ test('deep-link helpers create absolute production URLs with stable encoded iden
 });
 
 test('Gallery direct links resolve by the collection entry ID and retain legacy album fragments', () => {
-  assert.ok(galleryPage.includes('contentId: entry.id'));
+  assert.ok(galleryPage.includes('contentId: normalizeContentEntryId(entry.id)'));
   assert.ok(galleryPage.includes('data-album-key={album.contentId}'));
   assert.ok(galleryPage.includes("new URLSearchParams(window.location.search).get('album')"));
-  assert.match(galleryPage, /findAlbumDetail = \(key: string\) => albumDetails\.find\(detail => detail\.dataset\.albumKey === key\)/);
+  assert.ok(galleryPage.includes("const findAlbumDetail = (key: string) => albumDetails.find(detail => contentEntryIdMatches(detail.dataset.albumKey || '', key));"));
+  assert.ok(galleryPage.includes("import { contentEntryIdMatches } from '../lib/content-deep-links';"));
   assert.ok(galleryPage.includes("window.location.hash.startsWith('#album-')"));
   assert.ok(galleryPage.includes("history.pushState({ galleryAlbum: true }"));
   assert.ok(galleryPage.includes("window.addEventListener('popstate'"));
@@ -60,7 +82,8 @@ test('Gallery preserves external Google Photos and Drive navigation for zero-or-
 test('Document rows expose stable IDs and direct one-file links follow original file behavior', () => {
   assert.equal((documentPage.match(/data-document-id=\{document\.id\}/g) || []).length, 2);
   assert.ok(documentPage.includes("resolveContentDeepLink(window.location.search, 'document')"));
-  assert.ok(documentPage.includes('item.dataset.documentId === requestedId'));
+  assert.ok(documentPage.includes("contentEntryIdMatches(item.dataset.documentId || '', requestedId)"));
+  assert.ok(documentPage.includes("import { contentEntryIdMatches, resolveContentDeepLink } from '../lib/content-deep-links';"));
   assert.ok(documentPage.includes('if (options.fromUrl) window.location.replace(files[0].url)'));
   assert.ok(documentPage.includes("window.open(files[0].url, '_blank', 'noopener,noreferrer')"));
 });
@@ -73,6 +96,7 @@ test('Document direct multi-file links open the existing accessible file dialog 
   assert.ok(documentPage.includes('history.pushState({ documentDialog: true }'));
   assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));
   assert.ok(documentPage.includes("window.addEventListener('popstate'"));
+  assert.ok(documentPage.includes("contentEntryIdMatches(item.dataset.documentId || '', requestedId)"));
   assert.ok(documentPage.includes('clearDocumentDeepLink()'));
   assert.ok(documentPage.includes('lastFocusedRow?.focus()'));
   assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));

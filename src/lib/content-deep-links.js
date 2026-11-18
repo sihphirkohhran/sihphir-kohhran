@@ -1,3 +1,12 @@
+export function normalizeContentEntryId(identifier) {
+  return String(identifier ?? '').trim().replace(/\.md$/i, '');
+}
+
+export function contentEntryIdMatches(entryId, requestedId) {
+  const requested = normalizeContentEntryId(requestedId);
+  return Boolean(requested) && normalizeContentEntryId(entryId) === requested;
+}
+
 export function buildContentDeepLink(origin, pathname, parameter, identifier) {
   const id = String(identifier ?? '').trim();
   if (!id) return null;

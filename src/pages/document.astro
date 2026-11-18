@@ -6,6 +6,7 @@ import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
 import PageHero from '../components/PageHero.astro';
+import { normalizeContentEntryId } from '../lib/content-deep-links';
 const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian Kohhran',search_placeholder:'Search title, description, category or year…',download_button:'Download',category_label:'Category',document_label:'Document',empty_message:'No documents found'});
 
 const pageEntry=await getEntry('settings','document-page');
@@ -80,7 +81,7 @@ const documents = entries
     const sortDate = documentSortDate(primary?.uploadedAt || primary?.modifiedAt || data.date, year, month, entry.id);
     const ext = fileExtension(primary?.filename || primary?.url || '');
     return {
-      id: entry.id,
+      id: normalizeContentEntryId(entry.id),
       title: String(data.name),
       description,
       category,
@@ -193,7 +194,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 
 <script>
   import { resolveCategoryFromSearch } from '../lib/category-query';
-  import { resolveContentDeepLink } from '../lib/content-deep-links';
+  import { contentEntryIdMatches, resolveContentDeepLink } from '../lib/content-deep-links';
 
   const search = document.querySelector<HTMLInputElement>('#document-search');
   const category = document.querySelector<HTMLSelectElement>('#document-category');
@@ -345,7 +346,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   function syncDocumentDeepLink() {
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) return;
-    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => item.dataset.documentId === requestedId);
+    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => contentEntryIdMatches(item.dataset.documentId || '', requestedId));
     if (!row) { clearDocumentDeepLink(); return; }
     row.hidden = false;
     openDocumentRow(row, { fromUrl: true });
@@ -368,7 +369,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   window.addEventListener('popstate', () => {
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) { if (dialog?.open) dialog.close(); else lastFocusedRow?.focus(); return; }
-    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => item.dataset.documentId === requestedId);
+    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => contentEntryIdMatches(item.dataset.documentId || '', requestedId));
     if (!row) { clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }
     row.hidden = false;
     if (!dialog?.open) openDocumentRow(row, { fromUrl: true });

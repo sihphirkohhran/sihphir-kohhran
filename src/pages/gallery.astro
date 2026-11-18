@@ -6,6 +6,7 @@ import { uniqueGalleryPhotos, shouldOpenExternalAlbum } from '../lib/gallery-nav
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
 import PageHero from '../components/PageHero.astro';
+import { normalizeContentEntryId } from '../lib/content-deep-links';
 const ui=await getPageSettings('gallery',{hero_caption:'Sihphir Presbyterian Kohhran',search_placeholder:'Search albums, descriptions or categories…',view_album:'Open Gallery',empty_message:'No albums found',gallery_label:'Gallery Photos',category_label:'Category',back_button:'Back to Gallery',download_button:'Download'});
 
 const pageEntry=await getEntry('settings','gallery-page');
@@ -31,7 +32,7 @@ const albums = entries.map((entry) => {
   const resolvedYearType = resolveHistoricalYearType(data.year, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
   const historicalYear = resolvedYearType === 'unspecified' ? null : data.year ?? null;
   return {
-    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), contentId: entry.id, title: data.caption, year: historicalYear,
+    id: entry.id.replace(/[^a-z0-9]+/gi, '-'), contentId: normalizeContentEntryId(entry.id), title: data.caption, year: historicalYear,
     yearType: resolvedYearType,
     yearLabel: formatHistoricalYear(historicalYear, resolvedYearType),
     yearFilterValue: historicalYearFilterValue(historicalYear, resolvedYearType),
@@ -89,6 +90,7 @@ const formatDate = (value: string) => {
 
 <script>
   import { resolveCategoryFromSearch } from '../lib/category-query';
+  import { contentEntryIdMatches } from '../lib/content-deep-links';
 
   const search=document.querySelector<HTMLInputElement>('#gallery-search'),year=document.querySelector<HTMLSelectElement>('#gallery-year'),category=document.querySelector<HTMLSelectElement>('#gallery-category'),sort=document.querySelector<HTMLSelectElement>('#gallery-sort'),count=document.querySelector<HTMLElement>('#gallery-count'),empty=document.querySelector<HTMLElement>('#gallery-empty');
   const requestedCategory=resolveCategoryFromSearch(window.location.search,category?[...category.options].map(option=>option.value).filter(value=>value!=='all'):[]);
@@ -100,7 +102,7 @@ const formatDate = (value: string) => {
   [search,year,category].forEach(control=>control?.addEventListener(control===search?'input':'change',applyFilters));sort?.addEventListener('change',applyFilters);document.querySelector('#gallery-clear')?.addEventListener('click',()=>{if(search)search.value='';if(year)year.value='all';if(category)category.value='all';if(sort)sort.value='newest';applyFilters();search?.focus();});
   let lastAlbumTrigger: HTMLAnchorElement | null = null;
   const albumDetails = [...document.querySelectorAll<HTMLElement>('.album-detail')];
-  const findAlbumDetail = (key: string) => albumDetails.find(detail => detail.dataset.albumKey === key);
+  const findAlbumDetail = (key: string) => albumDetails.find(detail => contentEntryIdMatches(detail.dataset.albumKey || '', key));
   function showGalleryListing(scrollY?: number) {
     albumDetails.forEach(detail => detail.hidden = true);
     document.querySelectorAll<HTMLElement>('.gallery-toolbar,.gallery-section,.gallery-empty').forEach(item => item.hidden = false);
