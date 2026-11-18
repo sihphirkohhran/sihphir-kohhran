@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { runInNewContext } from 'node:vm';
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 const fixture = read('./fixtures/rich-text.html');
@@ -66,7 +67,7 @@ const schoolManager = read('../public/admin/school-manager.js');
 const schoolData = read('../src/content/settings/school.json');
 
 test('shared rich-text editor exposes the PES field and mount API', () => {
-  assert.match(helper, /const field=\(\{key,label,value='?'\}\)=>/);
+  assert.ok(helper.includes("const field=({key,label,value=''})=>"));
   assert.match(helper, /const mount=\(host,onChange=\(\)=>\{\}\)=>/);
   assert.match(helper, /const read=host=>Object\.fromEntries/);
   assert.match(helper, /data-rich-editor/);
@@ -100,4 +101,40 @@ test('PES loading failures show a recoverable Admin Panel error instead of a bla
   assert.match(app, /Presbyterian English School editor could not load/);
   assert.match(app, /school-retry/);
   assert.match(app, /role="alert"/);
+});
+
+test('PES rich-text field mounts, emits edits, and reads existing HTML back', () => {
+  const window = {};
+  runInNewContext(helper, { window, URL, DOMParser: class {} });
+  const rich = window.SihphirRichTextEditor;
+  const markup = rich.field({ key: 'history', label: 'History', value: '<p><strong>Existing history</strong></p>' });
+  assert.ok(markup.includes('contenteditable="true"'));
+  assert.ok(markup.includes('<p><strong>Existing history</strong></p>'));
+  assert.ok(markup.includes('data-rich-command="insertOrderedList"'));
+
+  const listeners = {};
+  const toolbarListeners = {};
+  const toolbar = { addEventListener: (name, callback) => { toolbarListeners[name] = callback; } };
+  const editor = {
+    dataset: { richKey: 'history' },
+    innerHTML: '<p><strong>Existing history</strong></p>',
+    parentElement: { querySelector: () => toolbar },
+    addEventListener: (name, callback) => { listeners[name] = callback; },
+    focus() {},
+  };
+  const host = { querySelectorAll: () => [editor] };
+  let changed = null;
+  assert.equal(rich.mount(host, (key, value) => { changed = [key, value]; }), 1);
+  editor.innerHTML = '<h2>Updated history</h2><ol><li>One</li></ol>';
+  listeners.input();
+  assert.deepEqual(changed, ['history', editor.innerHTML]);
+  assert.deepEqual(JSON.parse(JSON.stringify(rich.read(host))), { history: editor.innerHTML });
+  assert.ok(toolbarListeners.mousedown);
+  assert.ok(toolbarListeners.click);
+});
+
+test('PES save handler reads rich HTML and verifies the content after reloading', () => {
+  assert.match(schoolManager, /Object\.assign\(data,rich\.read\(host\)\)/);
+  assert.match(schoolManager, /await save\(\);const verification=await api\('\/api\/admin\/content\?path='/);
+  assert.match(schoolManager, /JSON\.stringify\(reloaded\)!==JSON\.stringify\(data\)/);
 });
