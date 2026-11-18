@@ -117,7 +117,7 @@
       const bindEditor=()=>{const form=document.querySelector('#document-editor-form'),input=document.querySelector('#document-input'),drop=document.querySelector('#document-drop'),assets=document.querySelector('.document-assets');form.addEventListener('input',markDirty);form.addEventListener('change',event=>{if(event.target.id==='document-year-type'){const unspecified=event.target.value==='unspecified',wrap=document.querySelector('#document-year-value-wrap'),input=document.querySelector('#document-year-value');wrap.hidden=unspecified;wrap.style.display=unspecified?'none':'';input.required=!unspecified;}markDirty();});form.onsubmit=save;document.querySelector('#document-delete').onclick=remove;document.querySelector('#document-preview').onclick=preview;
         document.querySelector('#document-copy-link').onclick=async()=>{
           if(!selected||selected.isNew||!selected.path)return;
-          const identifier=selected.path.startsWith('src/content/documents/')?selected.path.slice('src/content/documents/'.length).replace(/\\.md$/,''):'';
+          const identifier=selected.path.startsWith('src/content/documents/')?selected.path.slice('src/content/documents/'.length).replace(/\.md$/,''):'';
           if(!identifier)return notification('This document has no stable saved identifier.','error');
           const origin=window.SIHPHIR_PUBLIC_SITE_ORIGIN;
           if(!origin)return notification('The production website address is unavailable.','error');
