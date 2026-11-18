@@ -80,7 +80,7 @@ const documents = entries
     const sortDate = documentSortDate(primary?.uploadedAt || primary?.modifiedAt || data.date, year, month, entry.id);
     const ext = fileExtension(primary?.filename || primary?.url || '');
     return {
-      id: entry.id,
+      id: normalizeContentEntryId(entry.id),
       title: String(data.name),
       description,
       category,
@@ -193,7 +193,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 
 <script>
   import { resolveCategoryFromSearch } from '../lib/category-query';
-  import { resolveContentDeepLink } from '../lib/content-deep-links';
+  import { contentEntryIdMatches, normalizeContentEntryId, resolveContentDeepLink } from '../lib/content-deep-links';
 
   const search = document.querySelector<HTMLInputElement>('#document-search');
   const category = document.querySelector<HTMLSelectElement>('#document-category');
@@ -345,7 +345,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   function syncDocumentDeepLink() {
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) return;
-    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => item.dataset.documentId === requestedId);
+    const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => contentEntryIdMatches(item.dataset.documentId || '', requestedId));
     if (!row) { clearDocumentDeepLink(); return; }
     row.hidden = false;
     openDocumentRow(row, { fromUrl: true });
