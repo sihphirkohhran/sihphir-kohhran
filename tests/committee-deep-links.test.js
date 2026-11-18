@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import {
   committeeArchiveIdMatches,
   getLatestPublishedCommitteeRecord,
+  getCommitteeListingUrl,
   normalizeCommitteeArchiveId,
   resolveCommitteeDeepLink,
 } from '../src/lib/committee-deep-links.js';
@@ -104,4 +105,39 @@ test('Committee deep links preserve combined filters, reset defaults, and year s
   assert.match(page, /data-default-year=\{defaultYear\}/);
   assert.match(page, /data-committee-year-switch/);
   assert.match(styles, /committee-master-rows article\{[^}]*grid-template-columns:minmax\(0,1fr\) 130px auto auto/);
+});
+
+
+test('Back to Committees URL clears both detail parameters and legacy hashes while preserving unrelated query state', () => {
+  const url = getCommitteeListingUrl('https://sihphirpresbyteriankohhran.org/committee?committee=pes&archive=pes-2025&year=2025#committee-detail-pes-2025');
+  assert.equal(url.pathname, '/committee');
+  assert.equal(url.searchParams.has('committee'), false);
+  assert.equal(url.searchParams.has('archive'), false);
+  assert.equal(url.searchParams.get('year'), '2025');
+  assert.equal(url.hash, '');
+});
+
+test('direct-entry Committee and archive links remain resolvable independently of Back to Committees', () => {
+  assert.equal(resolveCommitteeDeepLink(records, '?committee=pes')?.record.year, 2026);
+  assert.equal(resolveCommitteeDeepLink(records, '?archive=pes-2024')?.record.year, 2024);
+  assert.match(page, /syncFromLocation\(\);/);
+});
+
+test('archive year switching pushes the selected historical detail as a distinct browser history state', () => {
+  assert.match(page, /data-committee-year-switch[^]*?openDetail\(target,\{push:true\}\)/);
+});
+
+test('Back to Committees always pushes the clean listing state instead of calling history.back', () => {
+  const handler = page.match(/document\.querySelectorAll<HTMLButtonElement>\('\[data-close-committee\]'\)[^\n]+/)?.[0] ?? '';
+  assert.match(handler, /getCommitteeListingUrl\(window\.location\.href\)/);
+  assert.match(handler, /history\.pushState\(\{committeeListing:true\}/);
+  assert.match(handler, /showListing\(\)/);
+  assert.doesNotMatch(handler, /history\.back\(\)/);
+});
+
+test('browser Back and Forward continue to restore previously visited Committee states from the URL', () => {
+  assert.match(page, /window\.addEventListener\('popstate',syncFromLocation\)/);
+  assert.match(page, /history\.pushState\(\{committeeDetail:true\}/);
+  assert.match(page, /function syncFromLocation\(\)/);
+  assert.match(page, /resolveCommitteeDeepLink\(linkRecords,window\.location\.search\)/);
 });
