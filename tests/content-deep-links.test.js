@@ -37,6 +37,13 @@ test('Gallery direct links resolve by the collection entry ID and retain legacy 
   assert.ok(galleryPage.includes('Back to Gallery'));
 });
 
+test('Gallery internal album click handler passes its declared anchor trigger (no undefined card identifier)', () => {
+  const handler = galleryPage.match(/querySelectorAll<HTMLAnchorElement>\\('\[data-open-album\\]'\\)\\)\\.forEach\\(button => button\\.addEventListener\\('click', event => \\{([\\s\\S]*?)\\n  \\}\\)\\);/);
+  assert.ok(handler, 'internal album click handler should be present');
+  assert.match(handler[1], /openAlbumDetail\\(detail,\\s*'smooth',\\s*button\\)/);
+  assert.doesNotMatch(handler[1], /\\bcard\\b/, 'handler must not reference an undeclared card variable');
+});
+
 test('Gallery preserves external Google Photos and Drive navigation for zero-or-one unique photo albums', () => {
   assert.equal(shouldOpenExternalAlbum(0, 'https://drive.google.com/drive/folders/example'), true);
   assert.equal(shouldOpenExternalAlbum(1, 'https://photos.google.com/share/example'), true);
