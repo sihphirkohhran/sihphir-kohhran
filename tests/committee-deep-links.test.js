@@ -70,7 +70,7 @@ test('CMS Committee and archive Copy Link controls use permanent production URLs
 });
 
 test('Committee page script closing tag is well formed', () => {
-  assert.ok(page.includes('</script>\\n\\n<style>'));
+  const closingTag = page.slice(page.indexOf('</script'), page.indexOf('</script') + 9);\n  assert.equal(closingTag, '</script>');
   assert.equal(page.includes('</script>>'), false);
 });
 
