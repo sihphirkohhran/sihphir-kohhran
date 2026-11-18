@@ -20,8 +20,8 @@ test('Astro 4 Markdown collection IDs normalize to CMS path identifiers for real
   const savedGalleryPath = 'src/content/gallery/tumkau-ni-2026-2026.md';
   const astroDocumentEntryId = 'other/year-book-2025.md';
   const astroGalleryEntryId = 'tumkau-ni-2026-2026.md';
-  const cmsDocumentIdentifier = savedDocumentPath.replace('src/content/documents/', '').replace(/\\.md$/i, '');
-  const cmsGalleryIdentifier = savedGalleryPath.replace('src/content/gallery/', '').replace(/\\.md$/i, '');
+  const cmsDocumentIdentifier = savedDocumentPath.replace('src/content/documents/', '').replace(/\.md$/i, '');
+  const cmsGalleryIdentifier = savedGalleryPath.replace('src/content/gallery/', '').replace(/\.md$/i, '');
 
   assert.equal(normalizeContentEntryId(astroDocumentEntryId), cmsDocumentIdentifier);
   assert.equal(normalizeContentEntryId(astroGalleryEntryId), cmsGalleryIdentifier);
