@@ -12,7 +12,7 @@ function validateYear(value) {
 }
 
 test('Committee Archive Editor uses a manually editable four-digit numeric year input', () => {
-  assert.match(manager, /<label><span>Year<\/span><input name="year" type="number" inputmode="numeric" min="1000" max="9999" step="1" value="\\$\{esc\(data\.year\?\?''\)\}" placeholder="e\.g\. 2026" required><\/label>/);
+  assert.match(manager, /<label><span>Year<\/span><input name="year" type="number" inputmode="numeric" min="1000" max="9999" step="1" value="\$\{esc\(data\.year\?\?''\)\}" placeholder="e\.g\. 2026" required><\/label>/);
   assert.doesNotMatch(manager, /<select name="year"/);
   assert.doesNotMatch(manager, /yearOptions/);
 });
