@@ -36,3 +36,15 @@ export function resolveCommitteeDeepLink(records = [], search = '') {
   }
   return null;
 }
+
+/**
+ * Build the canonical Committee listing URL from the current location.
+ * Preserve unrelated query parameters, but remove detail selectors and legacy hashes.
+ */
+export function getCommitteeListingUrl(currentUrl) {
+  const url = new URL(currentUrl, 'https://sihphirpresbyteriankohhran.org');
+  url.searchParams.delete('committee');
+  url.searchParams.delete('archive');
+  url.hash = '';
+  return url;
+}
