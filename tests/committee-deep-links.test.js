@@ -70,17 +70,19 @@ test('CMS Committee and archive Copy Link controls use permanent production URLs
 });
 
 test('Committee page script closing tag is well formed', () => {
-  assert.match(page, /<script>[\\s\\S]*?<\\/script>\\s*<style>/);
-  assert.doesNotMatch(page, /<\\/script>>/);
+  assert.ok(page.includes('</script>\\n\\n<style>'));
+  assert.equal(page.includes('</script>>'), false);
 });
 
 test('CMS Committee Copy Link is enabled only for persisted master records', () => {
-  assert.match(manager, /savedMasterIds=new Set\\(masters\\.map\\(item=>item\\.id\\)\\.filter\\(Boolean\\)\\)/);
-  assert.match(manager, /savedMasterIds\\.has\\(item\\.id\\)\\?/);
-  assert.match(manager, /Save the Committee List before copying a link\\./);
-  assert.match(manager, /savedMasterIds=new Set\\(cleaned\\.map\\(item=>item\\.id\\)\\.filter\\(Boolean\\)\\)/);
-  assert.match(manager, /if\\(!savedMasterIds\\.has\\(item\\.id\\)\\)return notification/);
-  assert.match(manager, /await api\\('\\/api\\/admin\\/content'/);
+  assert.ok(manager.includes('savedMasterIds=new Set(masters.map(item=>item.id).filter(Boolean))'));
+  assert.ok(manager.includes("savedMasterIds.has(item.id)?'':'disabled title=\"Save the Committee List before copying a link.\"'"));
+  assert.ok(manager.includes('Save the Committee List before copying this link.'));
+  assert.ok(manager.includes('savedMasterIds=new Set(cleaned.map(item=>item.id).filter(Boolean))'));
+  assert.ok(manager.includes('if(!savedMasterIds.has(item.id))return notification'));
+  const successfulSave = manager.indexOf("await api('/api/admin/content'");
+  const enableAfterSave = manager.indexOf('savedMasterIds=new Set(cleaned.map(item=>item.id).filter(Boolean))');
+  assert.ok(successfulSave >= 0 && enableAfterSave > successfulSave);
 });
 
 test('public page exposes normalized stable archive IDs and resolves direct links on load and history navigation', () => {
