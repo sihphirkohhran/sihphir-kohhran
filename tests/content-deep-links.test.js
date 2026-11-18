@@ -66,6 +66,8 @@ test('Document direct multi-file links open the existing accessible file dialog 
   assert.ok(documentPage.includes("window.addEventListener('popstate'"));
   assert.ok(documentPage.includes('clearDocumentDeepLink()'));
   assert.ok(documentPage.includes('lastFocusedRow?.focus()'));
+  assert.ok(documentPage.includes('if (hasDocumentLink && history.state?.documentDialog) {\n      history.back();'));
+
 });
 
 test('invalid or deleted content identifiers are removed without breaking the listing', () => {
