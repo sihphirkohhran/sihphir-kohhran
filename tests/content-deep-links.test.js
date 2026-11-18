@@ -44,7 +44,7 @@ test('deep-link helpers create absolute production URLs with stable encoded iden
 });
 
 test('Gallery direct links resolve by the collection entry ID and retain legacy album fragments', () => {
-  assert.ok(galleryPage.includes('contentId: entry.id'));
+  assert.ok(galleryPage.includes('contentId: normalizeContentEntryId(entry.id)'));
   assert.ok(galleryPage.includes('data-album-key={album.contentId}'));
   assert.ok(galleryPage.includes("new URLSearchParams(window.location.search).get('album')"));
   assert.match(galleryPage, /findAlbumDetail = \(key: string\) => albumDetails\.find\(detail => detail\.dataset\.albumKey === key\)/);
