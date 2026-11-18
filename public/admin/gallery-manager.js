@@ -148,9 +148,9 @@
         form.onsubmit=saveGallery; document.querySelector('#gallery-delete').onclick=deleteGallery;
         document.querySelector('#gallery-copy-link').onclick=async()=>{
           if(!selected||selected.isNew||!selected.path)return;
-          const identifier=selected.path.startsWith(GALLERY_ROOT)?selected.path.slice(GALLERY_ROOT.length).replace(/\\.md$/,''): '';
+          const identifier=selected.path.startsWith(GALLERY_ROOT)?selected.path.slice(GALLERY_ROOT.length).replace(/\.md$/,''): '';
           if(!identifier)return notification('This gallery has no stable saved identifier.','error');
-          const saved=JSON.parse(baseline||'{}'), savedPhotos=Array.isArray(saved.photos)?saved.photos:[], uniqueSources=new Set(savedPhotos.map(photo=>typeof photo==='string'?photo:photo?.src).filter(Boolean));
+          const saved=JSON.parse(baseline||'{}'), savedPhotos=Array.isArray(saved.photos)?saved.photos:[], uniqueSources=new Set([...savedPhotos.map(photo=>typeof photo==='string'?photo:photo?.src),saved.data?.photo].filter(Boolean));
           const externalUrl=String(saved.data?.album_url||'').trim();
           let validExternal=false;
           try{const parsed=new URL(externalUrl);validExternal=['http:','https:'].includes(parsed.protocol)&&Boolean(parsed.hostname);}catch{}
