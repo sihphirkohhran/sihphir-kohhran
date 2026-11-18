@@ -61,3 +61,43 @@ test('Committee public output uses the existing safe rich-text sanitizer', () =>
   assert.match(sanitizer, /https\?:|mailto:/);
   assert.match(sanitizer, /renderSafeRichText/);
 });
+
+const schoolManager = read('../public/admin/school-manager.js');
+const schoolData = read('../src/content/settings/school.json');
+
+test('shared rich-text editor exposes the PES field and mount API', () => {
+  assert.match(helper, /const field=\(\{key,label,value='?'\}\)=>/);
+  assert.match(helper, /const mount=\(host,onChange=\(\)=>\{\}\)=>/);
+  assert.match(helper, /const read=host=>Object\.fromEntries/);
+  assert.match(helper, /data-rich-editor/);
+  assert.match(helper, /data-rich-command/);
+  assert.match(helper, /window\.SihphirRichTextEditor=\{safeUrl,sanitizeHtml,bindPaste,field,mount,read\}/);
+  assert.match(schoolManager, /rich\.field\(/);
+  assert.match(schoolManager, /rich\.mount\(/);
+});
+
+test('PES CMS renders all nine editing sections and keeps rich HTML fields', () => {
+  for (const heading of ['School Page Settings','School Information','History & Vision / Mission','Management Committee','Headmaster / Principal','Teachers','Gallery','Contact']) {
+    assert.ok(schoolManager.includes(heading), `missing PES section ${heading}`);
+  }
+  assert.match(schoolManager, /data\.history/);
+  assert.match(schoolManager, /data\.vision_mission/);
+  assert.match(schoolManager, /data\[key\]=value/);
+  assert.match(schoolManager, /JSON\.stringify\(data,null,2\)/);
+});
+
+test('PES school data remains untouched and contains existing HTML content', () => {
+  const data = JSON.parse(schoolData);
+  assert.equal(data.information.establishment_year, '2014');
+  assert.ok(data.history.includes('<h2>'));
+  assert.ok(data.history.includes('<a href='));
+  assert.equal(data.vision_mission, 'Test');
+  assert.equal(data.management.members[0].name, 'Test');
+});
+
+test('PES loading failures show a recoverable Admin Panel error instead of a blank workspace', () => {
+  const app = read('../public/admin/app.js');
+  assert.match(app, /Presbyterian English School editor could not load/);
+  assert.match(app, /school-retry/);
+  assert.match(app, /role="alert"/);
+});
