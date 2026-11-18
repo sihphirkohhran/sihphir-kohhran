@@ -357,7 +357,10 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     else dialog?.close();
   });
   dialog?.addEventListener('close', () => {
-    if (new URLSearchParams(window.location.search).has('document') && !history.state?.documentDialog) clearDocumentDeepLink();
+    if (new URLSearchParams(window.location.search).has('document') && !history.state?.documentDialog) {
+      clearDocumentDeepLink();
+      applyFilters();
+    }
     lastFocusedRow?.focus();
   });
   window.addEventListener('popstate', () => {
