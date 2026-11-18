@@ -357,7 +357,12 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     else dialog?.close();
   });
   dialog?.addEventListener('close', () => {
-    if (new URLSearchParams(window.location.search).has('document') && !history.state?.documentDialog) {
+    const hasDocumentLink = new URLSearchParams(window.location.search).has('document');
+    if (hasDocumentLink && history.state?.documentDialog) {
+      history.back();
+      return;
+    }
+    if (hasDocumentLink) {
       clearDocumentDeepLink();
       applyFilters();
     }
