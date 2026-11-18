@@ -38,10 +38,12 @@ test('Gallery direct links resolve by the collection entry ID and retain legacy 
 });
 
 test('Gallery internal album click handler passes its declared anchor trigger (no undefined card identifier)', () => {
-  const handler = galleryPage.match(/querySelectorAll<HTMLAnchorElement>\\('\[data-open-album\\]'\\)\\)\\.forEach\\(button => button\\.addEventListener\\('click', event => \\{([\\s\\S]*?)\\n  \\}\\)\\);/);
-  assert.ok(handler, 'internal album click handler should be present');
-  assert.match(handler[1], /openAlbumDetail\\(detail,\\s*'smooth',\\s*button\\)/);
-  assert.doesNotMatch(handler[1], /\\bcard\\b/, 'handler must not reference an undeclared card variable');
+  const handlerStart = galleryPage.indexOf("document.querySelectorAll<HTMLAnchorElement>('[data-open-album]')");
+  const handlerEnd = galleryPage.indexOf("document.querySelectorAll<HTMLButtonElement>('[data-close-album]')", handlerStart);
+  assert.ok(handlerStart >= 0 && handlerEnd > handlerStart, 'internal album click handler should be present');
+  const handler = galleryPage.slice(handlerStart, handlerEnd);
+  assert.match(handler, /openAlbumDetail\(detail,\s*'smooth',\s*button\)/);
+  assert.doesNotMatch(handler, /\bcard\b/, 'handler must not reference an undeclared card variable');
 });
 
 test('Gallery preserves external Google Photos and Drive navigation for zero-or-one unique photo albums', () => {
