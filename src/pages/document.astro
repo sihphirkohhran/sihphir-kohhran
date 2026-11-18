@@ -363,8 +363,8 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
       clearDocumentDeepLink();
       applyFilters();
     }
-    lastFocusedRow?.focus();
   });
+  dialog?.addEventListener('close', () => lastFocusedRow?.focus());
   window.addEventListener('popstate', () => {
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) { if (dialog?.open) dialog.close(); else lastFocusedRow?.focus(); return; }
@@ -382,8 +382,8 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     if (sort) sort.value = 'newest';
     applyFilters(); search?.focus();
   });
-  applyFilters();
   syncDocumentDeepLink();
+  applyFilters();
 </script>
 
 <style>
