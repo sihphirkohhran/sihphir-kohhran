@@ -9,5 +9,7 @@ published: true
 display_order: 16
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1913
-date_of_death_precision: "unknown"
+date_of_death_precision: "year_only"
+photo: "/images/1795169545484-upa-rualkhuma.jpg"
+date_of_death_year: 1978
 ---
