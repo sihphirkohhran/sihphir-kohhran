@@ -10,4 +10,5 @@ display_order: 17
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1915
 date_of_death_precision: "unknown"
+photo: "/images/1795169585752-upa-sapchhawna.jpg"
 ---
