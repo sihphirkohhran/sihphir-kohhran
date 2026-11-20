@@ -10,4 +10,5 @@ display_order: 10
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1921
 date_of_death_precision: "unknown"
+photo: "/images/1795169290049-upa-thankima.jpg"
 ---
