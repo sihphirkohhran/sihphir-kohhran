@@ -10,4 +10,5 @@ display_order: 13
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1920
 date_of_death_precision: "unknown"
+photo: "/images/1795169394284-upa-mawivela.jpg"
 ---
