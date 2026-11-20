@@ -10,4 +10,5 @@ display_order: 15
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1912
 date_of_death_precision: "unknown"
+photo: "/images/1795169491158-upa-vanlalthanga.jpg"
 ---
