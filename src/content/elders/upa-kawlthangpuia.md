@@ -9,5 +9,7 @@ published: true
 display_order: 8
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1906
-date_of_death_precision: "unknown"
+date_of_death_precision: "year_only"
+photo: "/images/1795169019262-upa-kawlthangpuia.jpg"
+date_of_death_year: 1990
 ---
