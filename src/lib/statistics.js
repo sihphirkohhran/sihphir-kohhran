@@ -1,6 +1,6 @@
 export const FIXED_INDICATORS = [
   { key: 'familiesChurch', label: 'Kohhran mi awm hlangna chhungkaw zat', group: 'Chhungkaw zat', path: ['households', 'church'] },
-  { key: 'familiesMixed', label: 'Inawmpawlhna chhungkaw zat', group: 'Chhungkaw zat', path: ['households', 'mixed'] },
+  { key: 'familiesMixed', label: 'Inawm pawlhna chhungkaw zat', group: 'Chhungkaw zat', path: ['households', 'mixed'] },
   { key: 'familiesTotal', label: 'Chhungkua zawng zawng zat', group: 'Chhungkaw zat', path: ['households', 'total'] },
   { key: 'membersMale', label: 'Member zat — Mipa', group: 'Member zat', path: ['members', 'male'] },
   { key: 'membersFemale', label: 'Member zat — Hmeichhia', group: 'Member zat', path: ['members', 'female'] },
@@ -17,7 +17,7 @@ export const FIXED_INDICATORS = [
 ];
 
 export const OVERVIEW_GROUPS = [
-  { id: 'households', title: 'Chhungkaw zat', rows: [['Kohhran mi awm hlangna', 'church'], ['Inawmpawlhna', 'mixed'], ['Chhungkua zawng zawng', 'total']] },
+  { id: 'households', title: 'Chhungkaw zat', rows: [['Kohhran mi awm hlangna', 'church'], ['Inawm pawlhna', 'mixed'], ['Chhungkua zawng zawng', 'total']] },
   { id: 'members', title: 'Member zat', rows: [['Mipa', 'male'], ['Hmeichhia', 'female'], ['Total', 'total']] },
   { id: 'communicants', title: 'Dan Zawh Kim', rows: [['Mipa', 'male'], ['Hmeichhia', 'female'], ['Total', 'total']] },
   { id: 'births', title: 'Nau piang', rows: [['Mipa', 'male'], ['Hmeichhia', 'female'], ['Total', 'total']] },
