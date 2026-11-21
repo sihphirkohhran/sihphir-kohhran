@@ -157,3 +157,62 @@ test('homepage link, navigation and statistics typography remain integrated', as
   assert.match(manager,/Original Report URL \/ Document Reference \(Optional\)/);
   assert.doesNotMatch(manager,/Source URL or document reference is required before publishing/);
 });
+
+
+test('all five fixed Total indicators resolve through stable group and key metadata', async () => {
+  const { FIXED_INDICATORS, OVERVIEW_GROUPS } = await import('../src/lib/statistics.js');
+  const expected=['households','members','communicants','births','deaths'];
+  for (const group of expected) {
+    const totals=FIXED_INDICATORS.filter(item=>item.path[0]===group&&item.path[1]==='total');
+    assert.equal(totals.length,1,group);
+    assert.equal(OVERVIEW_GROUPS.find(item=>item.id===group)?.rows.at(-1)?.[1],'total');
+  }
+  assert.equal(FIXED_INDICATORS.find(item=>item.key==='familiesMixed')?.path[1],'mixed');
+});
+
+test('comparison and detail tables keep native aligned cells and metadata-driven Total rows', async () => {
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  assert.match(script,/FIXED_INDICATORS\.find\(fixed=>fixed\.key===item\.key\)\?\.path/);
+  assert.match(script,/path\[1\]==='total'/);
+  assert.match(script,/tr\.classList\.add\('statistics-total-row'\)/);
+  assert.match(script,/document\.createElement\('tr'\)/);
+  assert.match(script,/document\.createElement\(index===0\?'th':'td'\)/);
+  assert.match(script,/if\(index>=numericStart\)td\.classList\.add\('num'\)/);
+  assert.match(script,/\['Indicator',String\(a\.year\),String\(b\.year\),'Change','Change %'\],rows/);
+  assert.match(script,/\['Category','Indicator',String\(record\.year\)\].*\),2\);/);
+  assert.match(script,/compareIndicator\(a,b,item\.key\)/);
+  assert.match(script,/result\.percentage\.toFixed\(1\)/);
+  assert.doesNotMatch(script,/statistics-total-row.*display:\s*(flex|grid)/);
+});
+
+test('five category accents, tints, restrained totals and right-aligned numbers are scoped to tables', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const colors={
+    households:['#A77B38','#F8F3E9'],
+    members:['#315D86','#EDF3F8'],
+    communicants:['#55765F','#EFF4EF'],
+    births:['#9B6B7D','#F9F0F3'],
+    deaths:['#726788','#F2EFF6']
+  };
+  for(const [category,[accent,tint]] of Object.entries(colors)){
+    assert.ok(css.includes('tr.statistics-category-'+category+'{--st-row-accent:'+accent+';--st-row-tint:'+tint+'}'),category);
+  }
+  assert.match(css,/tr\.statistics-total-row\{background:var\(--st-row-tint\)/);
+  assert.match(css,/tr\.statistics-total-row th\[scope="row"\]/);
+  assert.match(css,/font-family:'Poppins',sans-serif;font-weight:600/);
+  assert.match(css,/tr\.statistics-total-row td\.num\{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;text-align:right/);
+  assert.match(css,/\.statistics-table-wrap td\.num,[\s\S]*?\.statistics-table-wrap th\.num\{text-align:right/);
+  assert.match(css,/\.statistics-table-wrap\{width:100%;overflow-x:auto\}/);
+});
+
+test('Inawm pawlhna appears in public metadata, Overview and CMS without changing mixed identifiers', async () => {
+  const lib=await readFile(new URL('../src/lib/statistics.js',import.meta.url),'utf8');
+  const cms=await readFile(new URL('../public/admin/statistics-manager.js',import.meta.url),'utf8');
+  assert.match(lib,/Inawm pawlhna chhungkaw zat/);
+  assert.match(lib,/\['Inawm pawlhna', 'mixed'\]/);
+  assert.match(cms,/Inawm pawlhna chhungkaw zat/);
+  assert.match(cms,/numberInput\('households','mixed','Inawm pawlhna'/);
+  assert.doesNotMatch(lib+cms,/Inawmpawlhna/);
+  assert.match(lib,/familiesMixed.*path: \['households', 'mixed'\]/);
+  assert.match(cms,/households:\{church:null,mixed:null,total:null\}/);
+});
