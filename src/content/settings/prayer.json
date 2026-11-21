@@ -1,22 +1,5 @@
 {
-  "topics": [
-    {
-      "topic": "Hetah hian tawngtai thupui pakhatna a awm ang.",
-      "display_order": 0
-    },
-    {
-      "topic": "Hetah hian tawngtai thupui pahnihna a awm leh ang.",
-      "display_order": 1
-    },
-    {
-      "topic": "Pathum thleng pawh a awm thei",
-      "display_order": 2
-    },
-    {
-      "topic": "A aia tam daih pawh a dah theih",
-      "display_order": 3
-    }
-  ],
+  "topics": [],
   "enabled": false,
   "heading": "Tawngtai Thupui",
   "subtitle": "",
