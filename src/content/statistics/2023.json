@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "year": 2023,
+  "status": "published",
+  "reportingPeriod": {
+    "start": "1 September 2022",
+    "end": "31 August 2023",
+    "label": "1 September 2022 – 31 August 2023"
+  },
+  "households": {
+    "church": null,
+    "mixed": null,
+    "total": 500
+  },
+  "members": {
+    "male": 1131,
+    "female": 1136,
+    "total": 2267
+  },
+  "communicants": {
+    "male": null,
+    "female": null,
+    "total": 1677
+  },
+  "births": {
+    "male": 12,
+    "female": 14,
+    "total": 26
+  },
+  "deaths": {
+    "male": 14,
+    "female": 1,
+    "total": 15
+  },
+  "additionalIndicators": [],
+  "source": {
+    "title": "Kohhran inchhiarna 2024",
+    "reportYear": 2023,
+    "reference": "",
+    "notes": "",
+    "verificationStatus": "verified"
+  },
+  "notes": "",
+  "comparabilityNotes": "",
+  "revisionMetadata": {
+    "updatedAt": "2026-11-21T15:47:46.437Z"
+  }
+}
