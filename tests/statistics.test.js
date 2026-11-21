@@ -191,7 +191,7 @@ test('neutral comparison and detail tables use bold Poppins totals without categ
   const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
   const marker='/* Comparison and Detailed Table: neutral rows';
   assert.ok(css.includes(marker), 'neutral table CSS section exists');
-  const tableCss=css.slice(css.indexOf(marker));
+  const tableCss=css.slice(css.indexOf(marker),css.indexOf('/* Comparison: balanced five-column table'));
 
   // Total labels and every numerical cell retain the same table structure, size and bold weight.
   assert.ok(tableCss.includes('tr.statistics-total-row th[scope="row"]'), 'Total label selector remains');
@@ -247,7 +247,7 @@ test('comparison and detailed indicators keep natural Mizo casing and canonical 
 test('comparison uses 40/15/15/15/15 column widths without disturbing table alignment', async () => {
   const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
   const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
-  const tableCss=css.slice(css.indexOf('/* Comparison: balanced five-column table'));
+  const tableCss=css.slice(css.indexOf('/* Comparison: balanced five-column table'),css.indexOf('/* Uniform, accessible Comparison and Detailed Table typography'));
   assert.ok(tableCss.startsWith('/* Comparison: balanced five-column table'));
   assert.ok(tableCss.includes('#statistics-compare-table table{table-layout:fixed;min-width:650px}'));
   assert.ok(tableCss.includes('tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}'));
@@ -260,4 +260,27 @@ test('comparison uses 40/15/15/15/15 column widths without disturbing table alig
   assert.ok(script.includes("if(index>=numericStart)td.classList.add('num')"));
   assert.ok(script.includes("tr.classList.add('statistics-total-row')"));
   assert.doesNotMatch(tableCss,/--st-row-accent|--st-row-tint|background:|box-shadow:/);
+});
+
+
+test('Comparison and Detailed Table body cells share white backgrounds and readable Poppins sizes', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  const marker='/* Uniform, accessible Comparison and Detailed Table typography';
+  assert.ok(css.includes(marker), 'table-only readability rules exist');
+  const tableCss=css.slice(css.indexOf(marker));
+  assert.match(tableCss,/\.statistics-table-wrap tbody th,[\s\S]*?\.statistics-table-wrap tbody td\s*\{\s*background:#fff;/);
+  assert.match(tableCss,/font-family:'Poppins',sans-serif;\s*font-size:14px;/);
+  assert.match(tableCss,/\.statistics-table-wrap tbody tr:hover th,[\s\S]*?tbody tr:hover td\{background:#fff\}/);
+  assert.match(tableCss,/\.statistics-table-wrap thead th\{\s*font-family:'Poppins',sans-serif;\s*font-size:12px;\s*font-weight:600;/);
+  assert.match(tableCss,/tbody th\[scope="row"\]\{\s*font-weight:400;\s*text-transform:none;\s*letter-spacing:normal;\s*overflow-wrap:break-word;\s*white-space:normal;/);
+  assert.match(tableCss,/tbody tr\.statistics-total-row th\[scope="row"\],[\s\S]*?tbody tr\.statistics-total-row td\{font-weight:700\}/);
+  assert.doesNotMatch(tableCss,/background:(?!#fff)|border-(?:left|top):|--st-row-(?:accent|tint)/);
+  assert.ok(css.includes('#statistics-compare-table tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}'));
+  assert.ok(css.includes('#statistics-compare-table tr > :nth-child(n+2){width:15%}'));
+  assert.ok(css.includes('.statistics-table-wrap{width:100%;overflow-x:auto}'));
+  assert.ok(script.includes("if(index>=numericStart)td.classList.add('num')"));
+  assert.ok(script.includes("tr.classList.add('statistics-total-row')"));
+  assert.ok(script.includes("['Indicator',String(a.year),String(b.year),'Change','Change %']"));
+  assert.ok(script.includes("['Category','Indicator',String(record.year)]"));
 });
