@@ -185,24 +185,22 @@ test('comparison and detail tables keep native aligned cells and metadata-driven
   assert.doesNotMatch(script,/statistics-total-row.*display:\s*(flex|grid)/);
 });
 
-test('five category accents, tints, restrained totals and right-aligned numbers are scoped to tables', async () => {
+test('neutral comparison and detail tables use bold Poppins totals without category colours', async () => {
   const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
-  const colors={
-    households:['#A77B38','#F8F3E9'],
-    members:['#315D86','#EDF3F8'],
-    communicants:['#55765F','#EFF4EF'],
-    births:['#9B6B7D','#F9F0F3'],
-    deaths:['#726788','#F2EFF6']
-  };
-  for(const [category,[accent,tint]] of Object.entries(colors)){
-    assert.ok(css.includes('tr.statistics-category-'+category+'{--st-row-accent:'+accent+';--st-row-tint:'+tint+'}'),category);
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  const tableCss=css.slice(css.indexOf('/* Comparison and Detailed Table: neutral rows'));
+  assert.ok(tableCss.length>0);
+  assert.match(tableCss,/tr\\.statistics-total-row th\\[scope="row"\\],[\\s\\S]*?tr\\.statistics-total-row td\\{font-family:'Poppins',sans-serif;font-weight:700\\}/);
+  assert.match(tableCss,/\\.statistics-table-wrap td\\.num,[\\s\\S]*?\\.statistics-table-wrap th\\.num\\{text-align:right/);
+  assert.match(css,/\\.statistics-table-wrap\\{width:100%;overflow-x:auto\\}/);
+  assert.match(script,/tr\\.classList\\.add\\('statistics-total-row'\\)/);
+  assert.match(script,/if\\(index>=numericStart\\)td\\.classList\\.add\\('num'\\)/);
+  assert.match(script,/\\['Category','Indicator',String\\(record\\.year\\)\\].*\\),2\\);/);
+  assert.doesNotMatch(tableCss,/statistics-category-(?:households|members|communicants|births|deaths)/);
+  assert.doesNotMatch(tableCss,/--st-row-(?:accent|tint)|background:|box-shadow:|border-top:|border-left:/);
+  for (const color of ['#A77B38','#F8F3E9','#315D86','#EDF3F8','#55765F','#EFF4EF','#9B6B7D','#F9F0F3','#726788','#F2EFF6']) {
+    assert.ok(!tableCss.includes(color),color);
   }
-  assert.match(css,/tr\.statistics-total-row\{background:var\(--st-row-tint\)/);
-  assert.match(css,/tr\.statistics-total-row th\[scope="row"\]/);
-  assert.match(css,/font-family:'Poppins',sans-serif;font-weight:600/);
-  assert.match(css,/tr\.statistics-total-row td\.num\{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;text-align:right/);
-  assert.match(css,/\.statistics-table-wrap td\.num,[\s\S]*?\.statistics-table-wrap th\.num\{text-align:right/);
-  assert.match(css,/\.statistics-table-wrap\{width:100%;overflow-x:auto\}/);
 });
 
 test('Inawm pawlhna appears in public metadata, Overview and CMS without changing mixed identifiers', async () => {
