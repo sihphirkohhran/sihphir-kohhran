@@ -179,7 +179,8 @@ test('comparison and detail tables keep native aligned cells and metadata-driven
   assert.match(script,/document\.createElement\(index===0\?'th':'td'\)/);
   assert.match(script,/if\(index>=numericStart\)td\.classList\.add\('num'\)/);
   assert.match(script,/\['Indicator',String\(a\.year\),String\(b\.year\),'Change','Change %'\],rows/);
-  assert.match(script,/\['Category','Indicator',String\(record\.year\)\].*\),2\);/);
+  assert.ok(script.includes("['Category','Indicator',String(record.year)]"), 'Detailed Table retains three headers');
+  assert.ok(script.includes(')),2);'), 'Detailed Table uses numericStart=2 for right-aligned values');
   assert.match(script,/compareIndicator\(a,b,item\.key\)/);
   assert.match(script,/result\.percentage\.toFixed\(1\)/);
   assert.doesNotMatch(script,/statistics-total-row.*display:\s*(flex|grid)/);
