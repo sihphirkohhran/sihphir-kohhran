@@ -58,11 +58,23 @@ test('public records must be published and source verified', () => {
 });
 test('publish validation requires verified source, matching year, and a statistic', () => {
   const record=createEmptyRecord(2026);record.status='published';
-  assert.ok(validateAnnualRecord(record).errors.length>=4);
+  const initial = validateAnnualRecord(record);
+  assert.equal(initial.valid, false);
+  assert.ok(initial.errors.some(e => e.includes('Source document title is required')));
+  assert.ok(initial.errors.some(e => e.includes('Source must be marked Verified')));
+  assert.ok(initial.errors.some(e => e.includes('Source reporting year must match')));
+  assert.ok(initial.errors.some(e => e.includes('At least one statistic must be recorded')));
   record.source=verified(2025);record.members.total=1;
   assert.ok(validateAnnualRecord(record).errors.some(e=>e.includes('match the record year')));
   record.source=verified(2026);
+  record.source.reference='';
   assert.equal(validateAnnualRecord(record).valid,true);
+  assert.deepEqual(getPublishedRecords([record]).map(r => r.year), [2026]);
+  record.source.verificationStatus='unverified';
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source must be marked Verified')));
+  record.source.verificationStatus='verified';
+  record.source.title='';
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source document title is required')));
 });
 test('comparison computes difference and percentage and suppresses percentage for zero baseline', () => {
   const a=published(2025,10),b=published(2026,15);
