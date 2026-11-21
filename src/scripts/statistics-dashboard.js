@@ -1,4 +1,4 @@
-import { OVERVIEW_GROUPS, compareIndicator, getReportingPeriod, getTrendSeries, getValue, csvString } from '../lib/statistics.js';
+import { FIXED_INDICATORS, OVERVIEW_GROUPS, compareIndicator, getReportingPeriod, getTrendSeries, getValue, csvString } from '../lib/statistics.js';
 const dataNode = document.getElementById('statistics-records');
 if (dataNode) {
   const records = JSON.parse(dataNode.textContent || '[]');
@@ -35,11 +35,10 @@ function initStatisticsDashboard(records, indicators) {
   }
   // Use fixed indicator paths, not translated display labels, for category and Total styling.
   const categoryIds=new Set(['households','members','communicants','births','deaths']);
-  const tableRow=(item,cells)=>({
-    cells,
-    category:!item.custom&&categoryIds.has(item.path?.[0])?item.path[0]:null,
-    total:!item.custom&&categoryIds.has(item.path?.[0])&&item.path[1]==='total'
-  });
+  const tableRow=(item,cells)=>{
+    const path=!item.custom?FIXED_INDICATORS.find(fixed=>fixed.key===item.key)?.path:null;
+    return {cells,category:categoryIds.has(path?.[0])?path[0]:null,total:categoryIds.has(path?.[0])&&path[1]==='total'};
+  };
   function renderTable(host,columns,rows,numericStart=1){
     const table=document.createElement('table'),thead=document.createElement('thead'),tr=document.createElement('tr');
     columns.forEach((column,index)=>{const th=document.createElement('th');th.textContent=column;if(index>=numericStart)th.className='num';th.scope='col';tr.append(th);});thead.append(tr);table.append(thead);
