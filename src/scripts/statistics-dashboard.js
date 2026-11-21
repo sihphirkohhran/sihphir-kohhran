@@ -1,4 +1,4 @@
-import { OVERVIEW_GROUPS, compareIndicator, getReportingPeriod, getTrendSeries, getValue, csvString } from '../lib/statistics.js';
+import { FIXED_INDICATORS, OVERVIEW_GROUPS, compareIndicator, getReportingPeriod, getTrendSeries, getValue, csvString } from '../lib/statistics.js';
 const dataNode = document.getElementById('statistics-records');
 if (dataNode) {
   const records = JSON.parse(dataNode.textContent || '[]');
@@ -33,18 +33,45 @@ function initStatisticsDashboard(records, indicators) {
       });card.append(rows);host.append(card);
     });
   }
-  function renderTable(host,columns,rows){
+  // Use fixed indicator paths, not translated display labels, for category and Total styling.
+  const categoryIds=new Set(['households','members','communicants','births','deaths']);
+  const tableRow=(item,cells)=>{
+    const path=!item.custom?FIXED_INDICATORS.find(fixed=>fixed.key===item.key)?.path:null;
+    return {cells,category:categoryIds.has(path?.[0])?path[0]:null,total:categoryIds.has(path?.[0])&&path[1]==='total'};
+  };
+  function renderTable(host,columns,rows,numericStart=1){
     const table=document.createElement('table'),thead=document.createElement('thead'),tr=document.createElement('tr');
-    columns.forEach((column,index)=>{const th=document.createElement('th');th.textContent=column;if(index>0)th.className='num';tr.append(th);});thead.append(tr);table.append(thead);
-    const tbody=document.createElement('tbody');rows.forEach(row=>{const tr=document.createElement('tr');row.forEach((cell,index)=>{const td=document.createElement('td');td.textContent=String(cell??'');if(index>0)td.className='num';tr.append(td);});tbody.append(tr);});table.append(tbody);host.replaceChildren(table);
+    columns.forEach((column,index)=>{const th=document.createElement('th');th.textContent=column;if(index>=numericStart)th.className='num';th.scope='col';tr.append(th);});thead.append(tr);table.append(thead);
+    const tbody=document.createElement('tbody');
+    rows.forEach(row=>{
+      const tr=document.createElement('tr');
+      if(row.category)tr.classList.add('statistics-category-'+row.category);
+      if(row.total)tr.classList.add('statistics-total-row');
+      row.cells.forEach((cell,index)=>{
+        const td=document.createElement(index===0?'th':'td');
+        if(index===0)td.scope='row';
+        td.textContent=String(cell??'');
+        if(index>=numericStart)td.classList.add('num');
+        if(row.category&&index===0)td.classList.add('statistics-category-label');
+        tr.append(td);
+      });
+      tbody.append(tr);
+    });
+    table.append(tbody);host.replaceChildren(table);
   }
   function syncCompareYears(){const from=Number($('statistics-compare-from').value),to=$('statistics-compare-to'),previous=Number(to.value);fillYears(to,years.filter(y=>y>=from));to.value=String(years.includes(previous)&&previous>=from?previous:from);}
   function renderComparison(){
     const a=recordFor($('statistics-compare-from').value),b=recordFor($('statistics-compare-to').value);
-    const rows=indicators.map(item=>{const result=compareIndicator(a,b,item.key);if(item.custom&&!item.comparable)return[item.label,fmt(result.from),fmt(result.to),'—','—'];return[item.label,fmt(result.from),fmt(result.to),result.difference===null?'—':`${result.difference>0?'+':''}${fmt(result.difference)}`,result.percentage===null?'—':`${result.percentage>0?'+':''}${result.percentage.toFixed(1)}%`];});
+    const rows=indicators.map(item=>{
+      const result=compareIndicator(a,b,item.key);
+      const cells=item.custom&&!item.comparable
+        ? [item.label,fmt(result.from),fmt(result.to),'—','—']
+        : [item.label,fmt(result.from),fmt(result.to),result.difference===null?'—':`${result.difference>0?'+':''}${fmt(result.difference)}`,result.percentage===null?'—':`${result.percentage>0?'+':''}${result.percentage.toFixed(1)}%`];
+      return tableRow(item,cells);
+    });
     renderTable($('statistics-compare-table'),['Indicator',String(a.year),String(b.year),'Change','Change %'],rows);
   }
-  function renderDetails(){const record=recordFor($('statistics-detail-year').value);setPeriod($('statistics-detail-period'),record.year);renderTable($('statistics-detail-table'),['Category','Indicator',String(record.year)],indicators.map(item=>[item.group,item.label,fmt(getValue(record,item.key))]));}
+  function renderDetails(){const record=recordFor($('statistics-detail-year').value);setPeriod($('statistics-detail-period'),record.year);renderTable($('statistics-detail-table'),['Category','Indicator',String(record.year)],indicators.map(item=>tableRow(item,[item.group,item.label,fmt(getValue(record,item.key))])),2);}
   function renderTrends(){
     const key=$('statistics-trend-indicator').value,indicator=indicators.find(item=>item.key===key),from=Number($('statistics-trend-from').value),to=Number($('statistics-trend-to').value),root=$('statistics-trend-chart');root.replaceChildren();$('statistics-trend-title').textContent=indicator?.label||'';const note=$('statistics-comparability-note');const notes=records.filter(r=>Number(r.year)>=from&&Number(r.year)<=to&&r.comparabilityNotes?.trim()).map(r=>`${r.year}: ${r.comparabilityNotes.trim()}`);note.textContent=notes.length?`Comparability notes — ${notes.join(' · ')}`:'';note.classList.toggle('statistics-hidden',notes.length===0);
     if(from>to){root.textContent='From Year must not exceed To Year.';return;}if(indicator?.custom&&!indicator.comparable){root.textContent='This indicator is not marked comparable across years.';return;}
