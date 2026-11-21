@@ -62,8 +62,10 @@ test('publish validation requires verified source, matching year, and a statisti
   assert.equal(initial.valid, false);
   assert.ok(initial.errors.some(e => e.includes('Source document title is required')));
   assert.ok(initial.errors.some(e => e.includes('Source must be marked Verified')));
-  assert.ok(initial.errors.some(e => e.includes('Source reporting year must match')));
   assert.ok(initial.errors.some(e => e.includes('At least one statistic must be recorded')));
+  record.source.reportYear=null;
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source reporting year must match')));
+  record.source.reportYear=2026;
   record.source=verified(2025);record.members.total=1;
   assert.ok(validateAnnualRecord(record).errors.some(e=>e.includes('match the record year')));
   record.source=verified(2026);
