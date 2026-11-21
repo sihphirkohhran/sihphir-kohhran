@@ -54,3 +54,47 @@
 }
 .statistics-page .statistics-table-wrap tbody tr.statistics-total-row th[scope="row"],
 .statistics-page .statistics-table-wrap tbody tr.statistics-total-row td{font-weight:700}
+
+/* Mobile Comparison only: freeze the row labels while numerical columns scroll. */
+@media(max-width:750px){
+  .statistics-page #statistics-compare-table table{
+    width:480px;
+    min-width:480px;
+    table-layout:fixed;
+  }
+  .statistics-page #statistics-compare-table tr > :first-child{
+    width:160px;
+    min-width:160px;
+    max-width:160px;
+    position:sticky;
+    left:0;
+    z-index:2;
+    background:#fff;
+    white-space:normal;
+    overflow-wrap:break-word;
+    word-break:normal;
+  }
+  .statistics-page #statistics-compare-table thead tr > :first-child{
+    z-index:3;
+    background:#f7f8fa;
+  }
+  .statistics-page #statistics-compare-table tr > :nth-child(n+2){
+    width:80px;
+    min-width:80px;
+  }
+  .statistics-page #statistics-compare-table th,
+  .statistics-page #statistics-compare-table td{padding-left:6px;padding-right:6px}
+  .statistics-page #statistics-compare-table tbody tr:hover > :first-child{background:#fff}
+}
+@media(max-width:430px){
+  .statistics-page #statistics-compare-table table{width:428px;min-width:428px}
+  .statistics-page #statistics-compare-table tr > :first-child{
+    width:140px;
+    min-width:140px;
+    max-width:140px;
+  }
+  .statistics-page #statistics-compare-table tr > :nth-child(n+2){
+    width:72px;
+    min-width:72px;
+  }
+}
