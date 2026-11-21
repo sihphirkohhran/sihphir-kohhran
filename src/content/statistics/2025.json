@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "year": 2025,
+  "status": "published",
+  "reportingPeriod": {
+    "start": "1 September 2024",
+    "end": "31 August 2025",
+    "label": "1 September 2024 – 31 August 2025"
+  },
+  "households": {
+    "church": null,
+    "mixed": null,
+    "total": 497
+  },
+  "members": {
+    "male": 1114,
+    "female": 1137,
+    "total": 2251
+  },
+  "communicants": {
+    "male": null,
+    "female": null,
+    "total": 1691
+  },
+  "births": {
+    "male": 5,
+    "female": 13,
+    "total": 18
+  },
+  "deaths": {
+    "male": 15,
+    "female": 5,
+    "total": 20
+  },
+  "additionalIndicators": [
+    {
+      "key": "puitling_baptisma",
+      "label": "Puitling Baptisma chang, Dan la zawh kim lo",
+      "group": "Other Statistics",
+      "value": 6,
+      "comparable": true
+    },
+    {
+      "key": "naupang_baptisma",
+      "label": "Kum 14 hnuai lam  Baptisma chang lo",
+      "group": "Other Statistics",
+      "value": 19,
+      "comparable": true
+    }
+  ],
+  "source": {
+    "title": "Kohran inchhiarna 2025",
+    "reportYear": 2025,
+    "reference": "",
+    "notes": "",
+    "verificationStatus": "verified"
+  },
+  "notes": "",
+  "comparabilityNotes": "",
+  "revisionMetadata": {
+    "updatedAt": "2026-11-21T15:43:58.506Z"
+  }
+}
