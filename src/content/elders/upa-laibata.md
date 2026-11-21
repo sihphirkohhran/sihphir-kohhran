@@ -10,4 +10,5 @@ display_order: 21
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1937
 date_of_death_precision: "unknown"
+photo: "/images/1795281530473-upa-laibata.jpg"
 ---
