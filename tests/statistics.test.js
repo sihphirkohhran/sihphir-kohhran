@@ -224,3 +224,40 @@ test('Inawm pawlhna appears in public metadata, Overview and CMS without changin
   assert.match(lib,/familiesMixed.*path: \['households', 'mixed'\]/);
   assert.match(cms,/households:\{church:null,mixed:null,total:null\}/);
 });
+
+
+test('comparison and detailed indicators keep natural Mizo casing and canonical labels', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  const { FIXED_INDICATORS }=await import('../src/lib/statistics.js');
+  const labels=new Map(FIXED_INDICATORS.map(item=>[item.key,item.label]));
+  assert.equal(labels.get('familiesChurch'),'Kohhran mi awm hlangna chhungkaw zat');
+  assert.equal(labels.get('familiesMixed'),'Inawm pawlhna chhungkaw zat');
+  assert.equal(labels.get('membersMale'),'Member zat — Mipa');
+  assert.equal(labels.get('membersFemale'),'Member zat — Hmeichhia');
+  assert.equal(labels.get('membersTotal'),'Member zat — Total');
+  assert.ok(css.includes('.statistics-table-wrap th[scope="row"]{font-weight:400;text-align:left;text-transform:none;letter-spacing:normal}'));
+  assert.ok(script.includes("td.textContent=String(cell??'')"), 'table uses original indicator label text');
+  assert.ok(script.includes("document.createElement(index===0?'th':'td')"), 'row label is semantic table heading');
+  assert.ok(script.includes("indicators.map(item=>tableRow(item,[item.group,item.label"), 'detailed table uses canonical indicator labels');
+  assert.ok(script.includes('[item.label,fmt(result.from),fmt(result.to)'), 'comparison uses canonical indicator labels');
+  assert.equal(labels.get('familiesMixed').includes('Inawmpawlhna'),false);
+});
+
+test('comparison uses 40/15/15/15/15 column widths without disturbing table alignment', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  const tableCss=css.slice(css.indexOf('/* Comparison: balanced five-column table'));
+  assert.ok(tableCss.startsWith('/* Comparison: balanced five-column table'));
+  assert.ok(tableCss.includes('#statistics-compare-table table{table-layout:fixed;min-width:650px}'));
+  assert.ok(tableCss.includes('tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}'));
+  assert.ok(tableCss.includes('tr > :nth-child(n+2){width:15%}'));
+  assert.ok(css.includes('.statistics-table-wrap{width:100%;overflow-x:auto}'));
+  assert.ok(css.includes("tr.statistics-total-row td{font-family:'Poppins',sans-serif;font-weight:700}"));
+  assert.ok(css.includes('tr.statistics-total-row th[scope="row"]'));
+  assert.ok(css.includes('th.num{text-align:right;font-variant-numeric:tabular-nums}'));
+  assert.ok(script.includes("['Indicator',String(a.year),String(b.year),'Change','Change %']"));
+  assert.ok(script.includes("if(index>=numericStart)td.classList.add('num')"));
+  assert.ok(script.includes("tr.classList.add('statistics-total-row')"));
+  assert.doesNotMatch(tableCss,/--st-row-accent|--st-row-tint|background:|box-shadow:/);
+});
