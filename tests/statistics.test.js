@@ -268,7 +268,7 @@ test('Comparison and Detailed Table body cells share white backgrounds and reada
   const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
   const marker='/* Uniform, accessible Comparison and Detailed Table typography';
   assert.ok(css.includes(marker), 'table-only readability rules exist');
-  const tableCss=css.slice(css.indexOf(marker));
+  const tableCss=css.slice(css.indexOf(marker),css.indexOf('/* Mobile Comparison only: freeze the row labels'));
   assert.match(tableCss,/\.statistics-table-wrap tbody th,[\s\S]*?\.statistics-table-wrap tbody td\s*\{\s*background:#fff;/);
   assert.match(tableCss,/font-family:'Poppins',sans-serif;\s*font-size:14px;/);
   assert.match(tableCss,/\.statistics-table-wrap tbody tr:hover th,[\s\S]*?tbody tr:hover td\{background:#fff\}/);
