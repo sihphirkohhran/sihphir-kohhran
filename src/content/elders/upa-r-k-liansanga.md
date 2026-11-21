@@ -10,4 +10,5 @@ display_order: 25
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1946
 date_of_death_precision: "unknown"
+photo: "/images/1795281574842-upa-r.k.-liansanga.jpg"
 ---
