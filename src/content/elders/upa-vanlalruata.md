@@ -9,5 +9,7 @@ published: true
 display_order: 24
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1935
-date_of_death_precision: "unknown"
+date_of_death_precision: "year_only"
+photo: "/images/1795281426995-upa-vanlalruata.jpg"
+date_of_death_year: 2013
 ---
