@@ -3,7 +3,7 @@
   const root = document.querySelector('#admin-app');
   const menuGroups = [
     ['Website', [['home','Home','⌂'],['hun-ruatna','Hun Ruatna','▤'],['thlabi-mawhphurtu','Thlabi Mawhphurtu','♫'],['notices','Notices','▱'],['gallery','Gallery','▧'],['documents','Documents','▱']]],
-    ['Church', [['committee','Committee','♙'],['fellowship','Fellowship','◌']]],
+    ['Church', [['committee','Committee','♙'],['fellowship','Fellowship','◌'],['statistics','Kohhran Inchhiarna','▥']]],
     ['Rawngbawltute', [['pastors','Pastor','✦'],['probationary-pastors','Pro Pastor','✦'],['elders','Kohhran Upa','✦'],['missionaries','Missionary','✦']]],
     ['Settings', [['navigation','Navigation','☰'],['quick-access','Quick Access','↗'],['site-settings','Site Settings','⚙']]],
   ];
@@ -12,7 +12,7 @@
   menuGroups[1][1].push(['school','Presbyterian English School','S']);
   const modules = [['dashboard', 'Dashboard', '▦'], ...menuGroups.flatMap(([, entries]) => entries)];
   const labels = Object.fromEntries(modules.map(x => [x[0], x[1]]));
-  const paths = { pages:'src/content/pages/', gallery:'src/content/gallery/', documents:'src/content/documents/other/', committee:'src/content/committee/', pastors:'src/content/pastoral/', missionaries:'src/content/missionaries/', elders:'src/content/elders/', fellowship:'src/content/fellowship/' };
+  const paths = { pages:'src/content/pages/', gallery:'src/content/gallery/', documents:'src/content/documents/other/', committee:'src/content/committee/', pastors:'src/content/pastoral/', missionaries:'src/content/missionaries/', elders:'src/content/elders/', fellowship:'src/content/fellowship/', statistics:'src/content/statistics/' };
   menuGroups[0][1].splice(1,0,['pages','Pages','P']);
   labels.pages='Pages';
   const templates = {
@@ -35,7 +35,7 @@
   }
   const actionButton = () => '';
   function pagePlaceholder(){document.querySelector('#view').innerHTML=`<section class="panel page-placeholder"><i>✦</i><h2>${esc(labels[area])}</h2><p>This page editor is being prepared for the Church Management CMS.</p><small>No content editor is enabled in Step 1.</small></section>`;}
-  async function render() { layout(); try { if(area==='dashboard') return dashboard(); if(area==='home') return homeEditor(); if(area==='hun-ruatna') return worshipEditor(); if(area==='thlabi-mawhphurtu') return monthlyEditor(); if(area==='committee') return committeeManager(); if(['documents','gallery','pastors','elders','missionaries'].includes(area)) return load(); if(['navigation','quick-access','site-settings'].includes(area))return structureManager(area); pagePlaceholder(); } catch(e) { document.querySelector('#view').innerHTML=`<div class="empty"><h2>Couldn’t load this module</h2><p>${esc(e.message)}</p><button onclick="location.reload()">Try again</button></div>`; } }
+  async function render() { layout(); try { if(area==='dashboard') return dashboard(); if(area==='home') return homeEditor(); if(area==='hun-ruatna') return worshipEditor(); if(area==='thlabi-mawhphurtu') return monthlyEditor(); if(area==='committee') return committeeManager(); if(area==='statistics') return window.SihphirStatisticsManager({api,notification}); if(['documents','gallery','pastors','elders','missionaries'].includes(area)) return load(); if(['navigation','quick-access','site-settings'].includes(area))return structureManager(area); pagePlaceholder(); } catch(e) { document.querySelector('#view').innerHTML=`<div class="empty"><h2>Couldn’t load this module</h2><p>${esc(e.message)}</p><button onclick="location.reload()">Try again</button></div>`; } }
   const settingPath=name=>`src/content/settings/${name}.json`;
   const readSetting=async name=>JSON.parse((await api('/api/admin/content?path='+encodeURIComponent(settingPath(name)))).content);
   const writeSetting=(name,value)=>api('/api/admin/content',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({path:settingPath(name),content:JSON.stringify(value,null,2)+'\n',message:'admin: update home '+name})});
