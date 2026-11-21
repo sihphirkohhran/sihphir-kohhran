@@ -196,7 +196,7 @@ test('neutral comparison and detail tables use bold Poppins totals without categ
   // Total labels and every numerical cell retain the same table structure, size and bold weight.
   assert.ok(tableCss.includes('tr.statistics-total-row th[scope="row"]'), 'Total label selector remains');
   assert.ok(tableCss.includes("tr.statistics-total-row td{font-family:'Poppins',sans-serif;font-weight:700}"), 'every Total cell uses Poppins Bold');
-  assert.ok(tableCss.includes('th[scope="row"]{font-weight:400;text-align:left}'), 'ordinary row labels remain regular weight');
+  assert.ok(tableCss.includes('th[scope="row"]{font-weight:400;text-align:left;text-transform:none;letter-spacing:normal}'), 'ordinary row labels remain regular weight and natural case');
   assert.ok(tableCss.includes('th.num{text-align:right;font-variant-numeric:tabular-nums}'), 'numeric headings remain right-aligned');
   assert.ok(tableCss.includes('td.num,'), 'numeric cells retain the shared right-aligned rule');
   assert.ok(css.includes('.statistics-table-wrap{width:100%;overflow-x:auto}'), 'tables remain horizontally scrollable');
