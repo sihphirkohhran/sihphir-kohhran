@@ -17,6 +17,7 @@ import { buildHomeDocumentSections } from '../lib/documents';
 import { normalizeContact } from '../lib/contact';
 import { getPageSettings } from '../lib/page-settings';
 import { normalizeNotice, noticeIsActive, sortNotices } from '../lib/notices';
+import { getHomepageStatistics } from '../lib/statistics.js';
 
 const heroEntry = await getEntry('settings', 'hero');
 const quickLinksEntry = await getEntry('settings', 'quick-links');
@@ -29,9 +30,10 @@ const generalEntry = await getEntry('settings', 'general');
 const homeEntry = await getEntry('settings', 'home');
 
 const statsSettings = statsEntry?.data ?? {};
-const stats = (statsSettings.stats ?? [])
+const legacyStats = (statsSettings.stats ?? [])
   .filter((stat) => stat.enabled !== false)
   .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+const stats = getHomepageStatistics(legacyStats, (await getCollection('statistics')).map(entry => entry.data));
 const pastor = pastorEntry?.data ?? {};
 const history = historyEntry?.data ?? {};
 const heroSlides = heroEntry?.data.slides ?? [];
@@ -147,7 +149,6 @@ const announcements = await Promise.all(
 
 const historyFullHtml = renderMarkdown(history.full ?? '');
 const pastorMessageHtml = renderMarkdown(pastor.message ?? '');
-const lookerUrl = statsSettings.looker_url ?? generalEntry?.data.looker_url ?? 'https://lookerstudio.google.com';
 
 type QuickLinkData = {
   label: string;
@@ -244,9 +245,7 @@ const highlightItems = normalizeHighlights(
       </div>
       <div class="flex justify-center">
         <a
-          href={lookerUrl}
-          target={statsSettings.looker_new_tab === false ? undefined : '_blank'}
-          rel="noopener"
+          href="/statistics/"
           class="reveal inline-flex items-center justify-center gap-2 rounded bg-navy px-4 py-2.5 font-body text-sm font-semibold tracking-wide text-gold-pale transition-colors hover:bg-navy-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
