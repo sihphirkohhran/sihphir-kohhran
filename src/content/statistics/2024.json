@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "year": 2024,
+  "status": "published",
+  "reportingPeriod": {
+    "start": "1 September 2023",
+    "end": "31 August 2024",
+    "label": "1 September 2023 – 31 August 2024"
+  },
+  "households": {
+    "church": null,
+    "mixed": null,
+    "total": 503
+  },
+  "members": {
+    "male": 1151,
+    "female": 1142,
+    "total": 2293
+  },
+  "communicants": {
+    "male": null,
+    "female": null,
+    "total": 1721
+  },
+  "births": {
+    "male": 19,
+    "female": 13,
+    "total": 32
+  },
+  "deaths": {
+    "male": 14,
+    "female": 8,
+    "total": 22
+  },
+  "additionalIndicators": [
+    {
+      "key": "puitling_baptisma",
+      "label": "Puitling Baptisma chang, Dan la zawh kim lo",
+      "group": "Other Statistics",
+      "value": 1,
+      "comparable": true
+    },
+    {
+      "key": "naupang_baptisma",
+      "label": "Kum 14 hnuai lam  Baptisma chang lo",
+      "group": "Other Statistics",
+      "value": 28,
+      "comparable": true
+    }
+  ],
+  "source": {
+    "title": "Kohhran inchhiarna 2024",
+    "reportYear": 2024,
+    "reference": "",
+    "notes": "",
+    "verificationStatus": "verified"
+  },
+  "notes": "",
+  "comparabilityNotes": "",
+  "revisionMetadata": {
+    "updatedAt": "2026-11-21T15:46:33.801Z"
+  }
+}
