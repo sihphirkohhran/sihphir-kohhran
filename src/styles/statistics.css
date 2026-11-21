@@ -19,8 +19,13 @@
 
 /* Comparison and Detailed Table: neutral rows, with typographic emphasis only for fixed totals. */
 .statistics-page .statistics-table-wrap table{border-collapse:collapse;width:100%}
-.statistics-page .statistics-table-wrap th[scope="row"]{font-weight:400;text-align:left}
+.statistics-page .statistics-table-wrap th[scope="row"]{font-weight:400;text-align:left;text-transform:none;letter-spacing:normal}
 .statistics-page .statistics-table-wrap tr.statistics-total-row th[scope="row"],
 .statistics-page .statistics-table-wrap tr.statistics-total-row td{font-family:'Poppins',sans-serif;font-weight:700}
 .statistics-page .statistics-table-wrap td.num,
 .statistics-page .statistics-table-wrap th.num{text-align:right;font-variant-numeric:tabular-nums}
+
+/* Comparison: balanced five-column table, with natural wrapping and aligned numbers. */
+.statistics-page #statistics-compare-table table{table-layout:fixed;min-width:650px}
+.statistics-page #statistics-compare-table tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}
+.statistics-page #statistics-compare-table tr > :nth-child(n+2){width:15%}
