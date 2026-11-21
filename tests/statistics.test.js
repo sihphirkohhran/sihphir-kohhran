@@ -268,7 +268,7 @@ test('Comparison and Detailed Table body cells share white backgrounds and reada
   const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
   const marker='/* Uniform, accessible Comparison and Detailed Table typography';
   assert.ok(css.includes(marker), 'table-only readability rules exist');
-  const tableCss=css.slice(css.indexOf(marker));
+  const tableCss=css.slice(css.indexOf(marker),css.indexOf('/* Mobile Comparison only: freeze the row labels'));
   assert.match(tableCss,/\.statistics-table-wrap tbody th,[\s\S]*?\.statistics-table-wrap tbody td\s*\{\s*background:#fff;/);
   assert.match(tableCss,/font-family:'Poppins',sans-serif;\s*font-size:14px;/);
   assert.match(tableCss,/\.statistics-table-wrap tbody tr:hover th,[\s\S]*?tbody tr:hover td\{background:#fff\}/);
@@ -283,4 +283,44 @@ test('Comparison and Detailed Table body cells share white backgrounds and reada
   assert.ok(script.includes("tr.classList.add('statistics-total-row')"));
   assert.ok(script.includes("['Indicator',String(a.year),String(b.year),'Change','Change %']"));
   assert.ok(script.includes("['Category','Indicator',String(record.year)]"));
+});
+
+
+test('mobile Comparison freezes only Indicator with opaque stacked cells and scrollable numeric columns', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const page=await readFile(new URL('../src/pages/statistics/index.astro',import.meta.url),'utf8');
+  const script=await readFile(new URL('../src/scripts/statistics-dashboard.js',import.meta.url),'utf8');
+  const marker='/* Mobile Comparison only: freeze the row labels while numerical columns scroll. */';
+  assert.ok(css.includes(marker));
+  const mobile=css.slice(css.indexOf(marker));
+  assert.match(mobile,/@media\(max-width:750px\)/);
+  assert.match(mobile,/#statistics-compare-table tr > :first-child\{[\s\S]*?position:sticky;\s*left:0;\s*z-index:2;\s*background:#fff;/);
+  assert.match(mobile,/#statistics-compare-table thead tr > :first-child\{\s*z-index:3;\s*background:#f7f8fa;/);
+  assert.match(mobile,/#statistics-compare-table tbody tr:hover > :first-child\{background:#fff\}/);
+  assert.doesNotMatch(mobile,/#statistics-compare-table tr > :nth-child\(n\+2\)\{[^}]*position:sticky/);
+  assert.doesNotMatch(mobile,/#statistics-detail-table|#statistics-overview|#statistics-trend/);
+  assert.ok(css.includes('.statistics-table-wrap{width:100%;overflow-x:auto}'));
+  assert.ok(page.includes('class="statistics-table-wrap" id="statistics-compare-table"'));
+  assert.ok(script.includes("document.createElement(index===0?'th':'td')"));
+  assert.ok(script.includes("['Indicator',String(a.year),String(b.year),'Change','Change %']"));
+});
+
+test('mobile Comparison column widths fit two years where possible and keep natural wrapping', async () => {
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const mobile=css.slice(css.indexOf('/* Mobile Comparison only: freeze'));
+  assert.match(mobile,/#statistics-compare-table table\{\s*width:480px;\s*min-width:480px;\s*table-layout:fixed;/);
+  assert.match(mobile,/#statistics-compare-table tr > :first-child\{\s*width:160px;\s*min-width:160px;\s*max-width:160px;/);
+  assert.match(mobile,/#statistics-compare-table tr > :nth-child\(n\+2\)\{\s*width:80px;\s*min-width:80px;/);
+  assert.match(mobile,/@media\(max-width:430px\)/);
+  assert.match(mobile,/#statistics-compare-table table\{width:428px;min-width:428px\}/);
+  assert.match(mobile,/#statistics-compare-table tr > :first-child\{\s*width:140px;\s*min-width:140px;\s*max-width:140px;/);
+  assert.match(mobile,/#statistics-compare-table tr > :nth-child\(n\+2\)\{\s*width:72px;\s*min-width:72px;/);
+  assert.match(mobile,/white-space:normal;\s*overflow-wrap:break-word;\s*word-break:normal;/);
+  assert.doesNotMatch(mobile,/text-overflow:ellipsis|overflow:hidden|height:\s*\d+px/);
+  assert.ok(css.includes('#statistics-compare-table tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}'), 'desktop proportions unchanged');
+  assert.ok(css.includes('#statistics-compare-table tr > :nth-child(n+2){width:15%}'), 'desktop numeric proportions unchanged');
+  assert.ok(css.includes('tr.statistics-total-row td{font-family:\'Poppins\',sans-serif;font-weight:700}'));
+  assert.ok(css.includes('tbody tr.statistics-total-row td{font-weight:700}'));
+  assert.ok(css.includes('th.num{text-align:right;font-variant-numeric:tabular-nums}'));
+  assert.ok(css.includes('font-size:14px;'), 'table font remains readable');
 });
