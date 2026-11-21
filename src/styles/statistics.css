@@ -29,3 +29,28 @@
 .statistics-page #statistics-compare-table table{table-layout:fixed;min-width:650px}
 .statistics-page #statistics-compare-table tr > :first-child{width:40%;overflow-wrap:break-word;white-space:normal}
 .statistics-page #statistics-compare-table tr > :nth-child(n+2){width:15%}
+
+/* Uniform, accessible Comparison and Detailed Table typography without altering table geometry. */
+.statistics-page .statistics-table-wrap tbody th,
+.statistics-page .statistics-table-wrap tbody td{
+  background:#fff;
+  color:var(--st-ink);
+  font-family:'Poppins',sans-serif;
+  font-size:14px;
+}
+.statistics-page .statistics-table-wrap tbody tr:hover th,
+.statistics-page .statistics-table-wrap tbody tr:hover td{background:#fff}
+.statistics-page .statistics-table-wrap thead th{
+  font-family:'Poppins',sans-serif;
+  font-size:12px;
+  font-weight:600;
+}
+.statistics-page .statistics-table-wrap tbody th[scope="row"]{
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:normal;
+  overflow-wrap:break-word;
+  white-space:normal;
+}
+.statistics-page .statistics-table-wrap tbody tr.statistics-total-row th[scope="row"],
+.statistics-page .statistics-table-wrap tbody tr.statistics-total-row td{font-weight:700}
