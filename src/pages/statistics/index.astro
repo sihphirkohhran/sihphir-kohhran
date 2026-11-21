@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPublishedRecords, listIndicators } from '../../lib/statistics.js';
+import '../../styles/statistics.css';
+const allRecords = (await getCollection('statistics')).map(entry => entry.data);
+const records = getPublishedRecords(allRecords);
+const indicators = listIndicators(records);
+const safeJson = value => JSON.stringify(value).replace(/</g, '\\u003c');
+---
+<BaseLayout title="Kohhran Inchhiarna" description="Historical annual statistics of Sihphir Presbyterian Kohhran." activePage="statistics">
+  <div class="statistics-page">
+    <header class="statistics-top">
+      <div class="statistics-kicker">SIHPHIR PRESBYTERIAN KOHHRAN</div>
+      <h1>Kohhran Inchhiarna</h1>
+      <p class="statistics-period" id="statistics-period">Historical annual statistics</p>
+    </header>
+    <main class="statistics-shell">
+      {records.length === 0 ? (
+        <section class="statistics-empty" aria-live="polite">
+          <h2>Historical Statistics</h2>
+          <p>No published annual records are available yet.</p>
+        </section>
+      ) : (
+        <>
+          <div class="statistics-tools">
+            <div class="statistics-select"><label for="statistics-year">Reporting Year</label><select id="statistics-year"></select></div>
+          </div>
+          <nav class="statistics-tabs" aria-label="Statistics views">
+            <button class="statistics-tab" data-tab="overview" aria-selected="true">Overview</button>
+            <button class="statistics-tab" data-tab="comparison" aria-selected="false">Comparison</button>
+            <button class="statistics-tab" data-tab="trends" aria-selected="false">Trends</button>
+            <button class="statistics-tab" data-tab="details" aria-selected="false">Detailed Table</button>
+          </nav>
+          <section id="statistics-overview">
+            <div class="statistics-overview-title"><h2 class="statistics-h2">Annual Overview</h2></div>
+            <div id="statistics-cards" class="statistics-cards"></div>
+          </section>
+          <section id="statistics-comparison" class="statistics-hidden">
+            <div class="statistics-panel statistics-table-panel">
+              <h2 class="statistics-h2">Year Comparison</h2>
+              <div class="statistics-compare-tools">
+                <div class="statistics-select"><label for="statistics-compare-from">From Year</label><select id="statistics-compare-from"></select></div>
+                <div class="statistics-select"><label for="statistics-compare-to">To Year</label><select id="statistics-compare-to"></select></div>
+              </div>
+              <div class="statistics-table-wrap" id="statistics-compare-table"></div>
+            </div>
+          </section>
+          <section id="statistics-trends" class="statistics-hidden">
+            <div class="statistics-panel statistics-trend-panel">
+              <h2 class="statistics-h2">Historical Trends</h2>
+              <div class="statistics-compare-tools">
+                <div class="statistics-select"><label for="statistics-trend-indicator">Indicator</label><select id="statistics-trend-indicator"></select></div>
+                <div class="statistics-select"><label for="statistics-trend-from">From Year</label><select id="statistics-trend-from"></select></div>
+                <div class="statistics-select"><label for="statistics-trend-to">To Year</label><select id="statistics-trend-to"></select></div>
+              </div>
+              <h3 class="statistics-trend-title" id="statistics-trend-title"></h3>
+              <div id="statistics-trend-chart" role="region" aria-label="Historical trend chart"></div>
+              <div id="statistics-comparability-note" class="statistics-comparability-note statistics-hidden"></div>
+            </div>
+          </section>
+          <section id="statistics-details" class="statistics-hidden">
+            <div class="statistics-panel statistics-table-panel">
+              <div class="statistics-panel-top"><h2 class="statistics-h2">Detailed Table</h2><button class="statistics-btn" id="statistics-download" type="button">Download CSV</button></div>
+              <div class="statistics-compare-tools"><div class="statistics-select"><label for="statistics-detail-year">Reporting Year</label><select id="statistics-detail-year"></select></div><p class="statistics-period" id="statistics-detail-period"></p></div>
+              <div class="statistics-table-wrap" id="statistics-detail-table"></div>
+            </div>
+          </section>
+          <script type="application/json" id="statistics-records" set:html={safeJson(records)}></script>
+          <script type="application/json" id="statistics-indicators" set:html={safeJson(indicators)}></script>
+        </>
+      )}
+    </main>
+  </div>
+</BaseLayout>
+<script src="../../scripts/statistics-dashboard.js"></script>

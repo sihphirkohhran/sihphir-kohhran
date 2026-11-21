@@ -118,6 +118,23 @@ const settings = defineCollection({
     .passthrough(),
 });
 
+const statisticCount = z.number().int().min(0).nullable().optional();
+const statistics = defineCollection({
+  type: 'data',
+  schema: z.object({
+    schemaVersion: z.number().int().optional(), year: z.number().int().min(1800).max(9999), status: z.enum(['draft','published']),
+    reportingPeriod: z.object({ start: z.string(), end: z.string(), label: z.string() }).optional(),
+    households: z.object({ church: statisticCount, mixed: statisticCount, total: statisticCount }).optional(),
+    members: z.object({ male: statisticCount, female: statisticCount, total: statisticCount }).optional(),
+    communicants: z.object({ male: statisticCount, female: statisticCount, total: statisticCount }).optional(),
+    births: z.object({ male: statisticCount, female: statisticCount, total: statisticCount }).optional(),
+    deaths: z.object({ male: statisticCount, female: statisticCount, total: statisticCount }).optional(),
+    additionalIndicators: z.array(z.object({ key: z.string(), label: z.string(), group: z.string().optional(), value: statisticCount, comparable: z.boolean().optional() })).optional(),
+    source: z.object({ title: z.string().optional(), reportYear: z.number().int().nullable().optional(), reference: z.string().optional(), notes: z.string().optional(), verificationStatus: z.enum(['unverified','verified']).optional() }).optional(),
+    notes: z.string().optional(), comparabilityNotes: z.string().optional(), revisionMetadata: z.object({ updatedAt: z.string().optional() }).optional(),
+  }).passthrough(),
+});
+
 const fellowship = defineCollection({
   type: 'data',
   schema: z.object({
@@ -380,6 +397,7 @@ const documents = defineCollection({
 
 export const collections = {
   settings,
+  statistics,
   fellowship,
   committee,
   pastoral,
