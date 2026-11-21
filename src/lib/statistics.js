@@ -78,7 +78,6 @@ export function validateAnnualRecord(record, existingYears = []) {
   if (record?.source?.reportYear !== undefined && record?.source?.reportYear !== null && year !== Number(record.source.reportYear)) warnings.push('Source reporting year differs from the record year.');
   if (record?.status==='published') {
     if (!record?.source?.title?.trim()) errors.push('Source document title is required before publishing.');
-    if (!record?.source?.reference?.trim()) errors.push('Source reference or report URL is required before publishing.');
     if (record?.source?.verificationStatus!=='verified') errors.push('Source must be marked Verified before publishing.');
     if (year!==Number(record?.source?.reportYear)) errors.push('Source reporting year must match the record year.');
     const recorded = FIXED_INDICATORS.some(item => typeof get(record,item.path[0],item.path[1]) === 'number') || (record?.additionalIndicators||[]).some(item=>typeof item.value==='number');
@@ -89,7 +88,7 @@ export function validateAnnualRecord(record, existingYears = []) {
   return {valid:errors.length===0,errors,warnings};
 }
 export function getPublishedRecords(records) {
-  const eligible=(records||[]).filter(r=>r?.status==='published'&&r?.source?.verificationStatus==='verified'&&r?.source?.title?.trim()&&r?.source?.reference?.trim()&&Number(r?.source?.reportYear)===Number(r?.year)&&(FIXED_INDICATORS.some(item=>typeof get(r,item.path[0],item.path[1])==='number')||(r?.additionalIndicators||[]).some(item=>typeof item.value==='number')));
+  const eligible=(records||[]).filter(r=>r?.status==='published'&&r?.source?.verificationStatus==='verified'&&r?.source?.title?.trim()&&Number(r?.source?.reportYear)===Number(r?.year)&&(FIXED_INDICATORS.some(item=>typeof get(r,item.path[0],item.path[1])==='number')||(r?.additionalIndicators||[]).some(item=>typeof item.value==='number')));
   eligible.sort((a,b)=>String(b?.revisionMetadata?.updatedAt||'').localeCompare(String(a?.revisionMetadata?.updatedAt||''))||Number(a.year)-Number(b.year));
   const seen=new Set();return eligible.filter(record=>{const year=Number(record.year);if(seen.has(year))return false;seen.add(year);return true;}).sort((a,b)=>Number(a.year)-Number(b.year));
 }
@@ -128,4 +127,22 @@ export function csvRows(record,indicators=listIndicators([record])) {
 export function csvString(record,indicators=listIndicators([record])) {
   const quote=value=>`"${String(value??'').replaceAll('"','""')}"`;
   return '\ufeff'+csvRows(record,indicators).map(row=>row.map(quote).join(',')).join('\r\n');
+}
+
+/** Apply the latest eligible annual report to the existing homepage cards. */
+export function getHomepageStatistics(fallbackStats, records) {
+  const eligible = getPublishedRecords(records);
+  const latest = eligible.at(-1);
+  if (!latest) return fallbackStats;
+  const mapping = [
+    [/^chhungkaw zat$/i, latest.households?.total],
+    [/^member zat$/i, latest.members?.total],
+    [/^dan zawh kim$/i, latest.communicants?.total],
+  ];
+  return fallbackStats.map(stat => {
+    const match = mapping.find(([pattern]) => pattern.test(String(stat.label || '').trim()));
+    if (!match) return stat;
+    const value = match[1];
+    return { ...stat, value: typeof value === 'number' && Number.isInteger(value) && value >= 0 ? value.toLocaleString('en-IN') : 'Unavailable' };
+  });
 }

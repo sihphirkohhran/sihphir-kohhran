@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { createEmptyRecord, getReportingPeriod, validateAnnualRecord, getPublishedRecords, getValue, listIndicators, compareIndicator, getTrendSeries, csvString } from '../src/lib/statistics.js';
+import { createEmptyRecord, getReportingPeriod, validateAnnualRecord, getPublishedRecords, getValue, listIndicators, compareIndicator, getTrendSeries, csvString, getHomepageStatistics } from '../src/lib/statistics.js';
 
 const verified = year => ({ title: 'Presbytery Inkhawmpui Annual Report', reportYear: year, reference: `official-report-${year}`, verificationStatus: 'verified' });
 const published = (year, memberTotal, overrides={}) => ({ ...createEmptyRecord(year), status: 'published', source: verified(year), members: { male: null, female: null, total: memberTotal }, ...overrides });
@@ -58,11 +58,25 @@ test('public records must be published and source verified', () => {
 });
 test('publish validation requires verified source, matching year, and a statistic', () => {
   const record=createEmptyRecord(2026);record.status='published';
-  assert.ok(validateAnnualRecord(record).errors.length>=4);
+  const initial = validateAnnualRecord(record);
+  assert.equal(initial.valid, false);
+  assert.ok(initial.errors.some(e => e.includes('Source document title is required')));
+  assert.ok(initial.errors.some(e => e.includes('Source must be marked Verified')));
+  assert.ok(initial.errors.some(e => e.includes('At least one statistic must be recorded')));
+  record.source.reportYear=null;
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source reporting year must match')));
+  record.source.reportYear=2026;
   record.source=verified(2025);record.members.total=1;
   assert.ok(validateAnnualRecord(record).errors.some(e=>e.includes('match the record year')));
   record.source=verified(2026);
+  record.source.reference='';
   assert.equal(validateAnnualRecord(record).valid,true);
+  assert.deepEqual(getPublishedRecords([record]).map(r => r.year), [2026]);
+  record.source.verificationStatus='unverified';
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source must be marked Verified')));
+  record.source.verificationStatus='verified';
+  record.source.title='';
+  assert.ok(validateAnnualRecord(record).errors.some(e => e.includes('Source document title is required')));
 });
 test('comparison computes difference and percentage and suppresses percentage for zero baseline', () => {
   const a=published(2025,10),b=published(2026,15);
@@ -110,4 +124,36 @@ test('dashboard page and CMS wiring do not include prototype sample values', asy
   assert.ok(cms.includes('verificationStatus'));
   assert.ok(cms.includes('Save Draft'));
   assert.ok(cms.includes('Publish'));
+});
+
+test('homepage uses latest verified published year and preserves fallback without records', () => {
+  const fallback=[{label:'Chhungkaw zat',value:'497'},{label:'Member zat',value:'2,251'},{label:'Dan zawh kim',value:'1,691'}];
+  assert.deepEqual(getHomepageStatistics(fallback,[]),fallback);
+  const old=published(2024,100);old.households.total=20;old.communicants.total=70;
+  const latest=published(2026,1234);latest.households.total=321;
+  const unverified=published(2027,9999);unverified.source.verificationStatus='unverified';
+  const draft=published(2028,9999);draft.status='draft';
+  assert.deepEqual(getHomepageStatistics(fallback,[latest,old,unverified,draft]).map(s=>s.value),['321','1,234','Unavailable']);
+  assert.equal(getHomepageStatistics(fallback,[old])[2].value,'70');
+});
+test('blank optional report reference permits verified publication and public visibility', () => {
+  const record=published(2026,12);record.source.reference='';
+  assert.equal(validateAnnualRecord(record).valid,true);
+  assert.deepEqual(getPublishedRecords([record]).map(r=>r.year),[2026]);
+  record.source.title='';assert.equal(validateAnnualRecord(record).valid,false);
+  record.source.title='Annual report';record.source.reportYear=2025;assert.equal(getPublishedRecords([record]).length,0);
+});
+test('homepage link, navigation and statistics typography remain integrated', async () => {
+  const home=await readFile(new URL('../src/pages/index.astro',import.meta.url),'utf8');
+  const nav=JSON.parse(await readFile(new URL('../src/content/settings/navigation.json',import.meta.url),'utf8'));
+  const css=await readFile(new URL('../src/styles/statistics.css',import.meta.url),'utf8');
+  const manager=await readFile(new URL('../public/admin/statistics-manager.js',import.meta.url),'utf8');
+  assert.match(home,/href="\/statistics\/"/);
+  assert.doesNotMatch(home,/href=\{lookerUrl\}/);
+  assert.match(home,/getHomepageStatistics\(legacyStats/);
+  assert.equal(nav.items.some(item=>item.key==='statistics'),false);
+  assert.match(css,/statistics-heading\{font-family:'Poppins',sans-serif;font-size:15px/);
+  assert.match(css,/statistics-top h1,.statistics-h2.*EB Garamond/);
+  assert.match(manager,/Original Report URL \/ Document Reference \(Optional\)/);
+  assert.doesNotMatch(manager,/Source URL or document reference is required before publishing/);
 });

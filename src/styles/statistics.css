@@ -4,3 +4,15 @@
 @media(max-width:430px){.statistics-cards{grid-template-columns:1fr}.statistics-card:first-child{grid-column:auto}.statistics-tools{align-items:stretch}.statistics-select{width:100%}.statistics-select select{width:100%}.statistics-tab{padding:11px 9px;font-size:12px}}
 
 .statistics-comparability-note{margin-top:12px;border-left:2px solid var(--statistics-gold);padding:8px 12px;color:#68758a;font-size:12px;line-height:1.6}
+
+/* Site typography: reuse the Poppins and EB Garamond fonts loaded by global.css. */
+.statistics-page{font-family:'Poppins',sans-serif;font-size:14px}
+.statistics-top h1,.statistics-h2,.statistics-panel h3,.statistics-trend-title,.statistics-empty h2{font-family:'EB Garamond',serif}
+.statistics-page .statistics-heading{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600}
+.statistics-page .statistics-row{font-family:'Poppins',sans-serif;font-size:14px}
+.statistics-page .statistics-row .value{font-size:16px;font-weight:600}
+.statistics-page .statistics-row.total{font-weight:600;font-size:14px}
+.statistics-page .statistics-row.total .value{font-size:20px;font-weight:700}
+.statistics-page .statistics-tab,.statistics-page .statistics-select,.statistics-page .statistics-btn,.statistics-page .statistics-filter,.statistics-page th,.statistics-page td{font-family:'Poppins',sans-serif}
+.statistics-page th,.statistics-page td{font-size:13px}
+@media(max-width:430px){.statistics-page .statistics-card{padding:16px 14px}.statistics-page .statistics-row{gap:8px;font-size:13px}.statistics-page .statistics-row .value{font-size:15px}.statistics-page .statistics-row.total .value{font-size:19px}}
