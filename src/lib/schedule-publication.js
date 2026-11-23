@@ -1,7 +1,11 @@
 /** Legacy schedule publication semantics shared by CMS and public pages. */
 export const scheduleIsPublic = record => record?.published !== false && record?.status !== 'draft';
 export const schedulePublication = record => scheduleIsPublic(record) ? 'published' : 'draft';
-export const kolkataToday = (now=new Date()) => new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(now);
+export const kolkataToday = (now=new Date()) => {
+  const parts=new Intl.DateTimeFormat('en-US',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+  const part=type=>parts.find(value=>value.type===type)?.value||'';
+  return part('year')+'-'+part('month')+'-'+part('day');
+};
 export const scheduleMonth = value => {
   const raw=String(value||'').trim();
   if(/^\d{4}-(0[1-9]|1[0-2])$/.test(raw))return raw;
