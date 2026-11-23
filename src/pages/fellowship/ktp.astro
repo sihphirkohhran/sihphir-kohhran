@@ -18,6 +18,7 @@ const data = record.data;
   abbr={meta.abbr}
   subtitle={meta.subtitle}
   accentColor={meta.accentColor}
+  variant="ktp"
   logo={data.logo}
   groupPhotos={resolveGroupPhotos({ ...data, group_photo: data.cover_photo ?? data.banner_image ?? data.group_photo })}
   history={data.description ?? data.history_short}
