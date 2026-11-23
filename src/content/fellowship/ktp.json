@@ -23,20 +23,12 @@
       "display_order": 3
     },
     {
-      "role": "Treasurer",
-      "name": "Tv. Lalthachungnunga",
-      "photo": "/images/1786002521517-4-leitan-bial-pastor.jpg",
-      "phone": "",
-      "email": "",
-      "display_order": 4
-    },
-    {
       "role": "Fin. Secretary",
       "name": "Pu R.K. Malsawmzuala",
       "photo": "",
       "phone": "",
       "email": "",
-      "display_order": 5
+      "display_order": 4
     }
   ],
   "members": [],
@@ -46,20 +38,17 @@
   "category": "Fellowship",
   "short_description": "",
   "full_history": "",
-  "cover_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
+  "cover_photo": "",
   "published": true,
   "display_order": 0,
   "related_galleries": [
-    "src/content/gallery/gallery-2026.md",
-    "src/content/gallery/zan-ven-inkhawm-2025-2025.md"
+    "src/content/gallery/gallery-2026.md"
   ],
-  "related_documents": [
-    "src/content/documents/other/year-book-2025.md"
-  ],
+  "related_documents": [],
   "motto": "",
   "description": "",
-  "banner_image": "/images/1785955608452-screenshot-2025-09-01-125203.png",
-  "group_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
+  "banner_image": "",
+  "group_photo": "",
   "homepage_order": 0,
   "homepage_visible": true,
   "status": "current"
