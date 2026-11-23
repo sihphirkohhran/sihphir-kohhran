@@ -13,6 +13,24 @@
     if(value.startsWith('[')||value.startsWith('{'))return JSON.parse(value);
     return value.replace(/\s+#.*$/,'');
   };
+  // Older monthly files use indented YAML arrays instead of inline JSON.
+  function legacySections(lines,start){
+    const sections=[];let section=null,duty=null,i=start;
+    for(;i<lines.length;i++){
+      const line=lines[i];if(!line.trim())continue;
+      if(!/^\s/.test(line))break;
+      let m=line.match(/^  - title:\s*(.*)$/);
+      if(m){section={title:scalar(m[1]),duties:[]};sections.push(section);duty=null;continue;}
+      if(/^    duties:\s*$/.test(line)&&section)continue;
+      m=line.match(/^      - (role|name):\s*(.*)$/);
+      if(m&&section){duty={[m[1]]:scalar(m[2])};section.duties.push(duty);continue;}
+      m=line.match(/^        (role|name):\s*(.*)$/);
+      if(m&&duty){duty[m[1]]=scalar(m[2]);continue;}
+      throw Error('Unsupported legacy roster YAML on line '+(i+1)+'. Record was not changed.');
+    }
+    if(!sections.length||sections.some(section=>section.duties.some(d=>typeof d.name!=='string'||typeof d.role!=='string')))throw Error('Legacy roster has incomplete duties; record was not changed.');
+    return {sections,end:i-1};
+  }
   // Fail closed on unfamiliar YAML instead of silently replacing old records.
   function parse(content,key){
     const match=content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/);
@@ -23,7 +41,10 @@
       const field=line.match(/^([a-zA-Z_][\w-]*):\s*(.*)$/);
       if(!field)throw Error('Unsupported YAML structure on line '+(i+1)+'. Record was not changed.');
       if(Object.hasOwn(data,field[1]))throw Error('Duplicate field '+field[1]);
-      if(!field[2].trim())throw Error('Unsupported multiline field '+field[1]+'. Record was not changed.');
+      if(!field[2].trim()){
+        if(field[1]==='sections'&&key==='sections'){const legacy=legacySections(lines,i+1);data.sections=legacy.sections;i=legacy.end;continue;}
+        throw Error('Unsupported multiline field '+field[1]+'. Record was not changed.');
+      }
       try{data[field[1]]=scalar(field[2]);}catch{throw Error('Cannot parse '+field[1]+'. Record was not changed.');}
     }
     if(!Array.isArray(data[key]))throw Error('Missing or invalid '+key+' array. Record was not changed.');
@@ -69,7 +90,7 @@
       if(!mounted)return;
       const data=record?.data,sections=data?.[config.key]||[];
       const label=area==='hun-ruatna'?'day':'title';
-      host.innerHTML='<div class="worship-layout"><section class="panel worship-weeks"><div class="panel-head"><div><h2>'+config.label+'s</h2><p>Published and archived records remain editable.</p></div><button type="button" id="schedule-new">'+config.newLabel+'</button></div><div id="week-list">'+(files.map(f=>'<button type="button" data-schedule="'+esc(f.path)+'" class="'+(f.path===selected?'selected':'')+'">'+esc(f.label.replace(/\.md$/,''))+'</button>').join('')||'<p class="muted">No saved records.</p>')+'</div></section><section class="panel worship-form">'+(loadError?'<p role="alert" class="schedule-error">'+esc(loadError)+'</p>':'')+(record?'<form id="schedule-form"><div class="edit-head"><div><span class="status" id="schedule-save-state">'+(dirty?'Unsaved changes':'Saved record / ready to edit')+'</span><h2>'+config.title+'</h2></div><div><button type="button" id="schedule-duplicate">Duplicate</button><button type="button" id="schedule-archive">'+(data.status==='archived'?'Restore':'Archive')+'</button><button class="gold" type="submit" '+(busy?'disabled':'')+'>Save '+config.label.toLowerCase()+'</button></div></div><div class="home-fields"><label>'+config.label+' <input name="'+config.identity+'" type="'+(area==='hun-ruatna'?'date':'month')+'" required value="'+esc(data[config.identity]||'')+'"></label>'+(area==='hun-ruatna'?'<label>Week end <input name="week_end" type="date" value="'+esc(data.week_end||'')+'"></label>':'')+'<label>Status <select name="status">'+['current','upcoming','archived'].map(x=>'<option value="'+x+'" '+(data.status===x?'selected':'')+'>'+x+'</option>').join('')+'</select></label></div><div id="schedule-sections">'+sections.map((section,i)=>'<section class="programme-section"><div><input data-section="'+i+'" value="'+esc(section[label]||'')+'" placeholder="Programme section"><button type="button" data-remove-section="'+i+'" class="danger">Remove section</button></div><div class="programme-items">'+section.duties.map((duty,j)=>'<article class="programme-row">'+(area==='hun-ruatna'?['time','title','person_responsible','speaker','bible_text','notes']:['name','role']).map(field=>'<label>'+field.replace(/_/g,' ')+'<input data-duty="'+i+':'+j+'" data-field="'+field+'" value="'+esc(duty[field]??(field==='title'?duty.role:field==='person_responsible'?duty.name:''))+'"></label>').join('')+'<button type="button" data-duplicate-duty="'+i+':'+j+'">Duplicate</button><button type="button" class="danger" data-remove-duty="'+i+':'+j+'">Remove</button></article>').join('')+'<button type="button" data-add-duty="'+i+'">Add row</button></div></section>').join('')+'<button type="button" id="schedule-add-section">Add section</button></div></form>':'<p class="muted">Select a saved record or create a new one.</p>')+'</section></div>';
+      host.innerHTML='<div class="worship-layout"><section class="panel worship-weeks"><div class="panel-head"><div><h2>'+config.label+'s</h2><p>Published and archived records remain editable.</p></div><button type="button" id="schedule-new">'+config.newLabel+'</button></div><div id="week-list">'+(files.map(f=>'<button type="button" data-schedule="'+esc(f.path)+'" class="'+(f.path===selected?'selected':'')+'">'+esc(f.label.replace(/\.md$/,''))+'</button>').join('')||'<p class="muted">No saved records.</p>')+'</div></section><section class="panel worship-form">'+(loadError?'<p role="alert" class="schedule-error">'+esc(loadError)+'</p>':'')+(record?'<form id="schedule-form"><div class="edit-head"><div><span class="status" id="schedule-save-state">'+(dirty?'Unsaved changes':'Saved record / ready to edit')+'</span><h2>'+config.title+'</h2></div><div><button type="button" id="schedule-duplicate">Duplicate</button><button type="button" id="schedule-archive">'+(data.status==='archived'?'Restore':'Archive')+'</button><button class="gold" type="submit" '+(busy?'disabled':'')+'>Save '+config.label.toLowerCase()+'</button></div></div><div class="home-fields"><label>'+config.label+' <input name="'+config.identity+'" type="'+(area==='hun-ruatna'?'date':'text')+'" required value="'+esc(data[config.identity]||'')+'"></label>'+(area==='hun-ruatna'?'<label>Week end <input name="week_end" type="date" value="'+esc(data.week_end||'')+'"></label>':'')+'<label>Status <select name="status">'+['current','upcoming','archived'].map(x=>'<option value="'+x+'" '+(data.status===x?'selected':'')+'>'+x+'</option>').join('')+'</select></label></div><div id="schedule-sections">'+sections.map((section,i)=>'<section class="programme-section"><div><input data-section="'+i+'" value="'+esc(section[label]||'')+'" placeholder="Programme section"><button type="button" data-remove-section="'+i+'" class="danger">Remove section</button></div><div class="programme-items">'+section.duties.map((duty,j)=>'<article class="programme-row">'+(area==='hun-ruatna'?['time','title','person_responsible','speaker','bible_text','notes']:['name','role']).map(field=>'<label>'+field.replace(/_/g,' ')+'<input data-duty="'+i+':'+j+'" data-field="'+field+'" value="'+esc(duty[field]??(field==='title'?duty.role:field==='person_responsible'?duty.name:''))+'"></label>').join('')+'<button type="button" data-duplicate-duty="'+i+':'+j+'">Duplicate</button><button type="button" class="danger" data-remove-duty="'+i+':'+j+'">Remove</button></article>').join('')+'<button type="button" data-add-duty="'+i+'">Add row</button></div></section>').join('')+'<button type="button" id="schedule-add-section">Add section</button></div></form>':'<p class="muted">Select a saved record or create a new one.</p>')+'</section></div>';
       host.querySelectorAll('[data-schedule]').forEach(button=>button.onclick=()=>{collect();load(button.dataset.schedule);});
       host.querySelector('#schedule-new').onclick=()=>{collect();if(!confirmDiscard())return;selected=null;sha=null;record=fresh();dirty=false;loadError='';draw();};
       if(!record)return;
