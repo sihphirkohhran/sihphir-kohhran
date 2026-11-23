@@ -14,7 +14,7 @@ test('weekly and monthly CMS mount dedicated selectable record editors',async()=
   assert.match(manager,/querySelectorAll\('\[data-schedule\]'\)/);
   assert.match(manager,/load\(button\.dataset\.schedule\)/);
   assert.match(manager,/await api\('\/api\/admin\/content\?path='\+encodeURIComponent\(path\)\)/);
-  assert.match(manager,/selected=path;sha=response\.sha;dirty=false/);
+  assert.match(manager,/sha=response\.sha;selected=path;dirty=false/);
   assert.match(manager,/await refresh\(\)/);
   assert.match(manager,/record=parse\(saved\.content,config\.key\);sha=saved\.sha;draw\(\)/);
 });
