@@ -56,6 +56,7 @@ const albumLink = (id: string) => `/fellowship/${encodeURIComponent(fellowshipSl
 
 <script>
   import { contentEntryIdMatches } from '../lib/content-deep-links';
+  import { archiveRecordMatches, compareArchiveAlbums } from '../lib/owner-archive-behavior';
   const galleryRoot = document.querySelector<HTMLElement>('[data-owner-gallery]');
   if (galleryRoot) {
     const listing = galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-listing]')!;
@@ -73,18 +74,12 @@ const albumLink = (id: string) => `/fellowship/${encodeURIComponent(fellowshipSl
       const term=search.value.trim().toLowerCase();
       let total=0;
       cards.forEach(card=>{
-        const show=(!term||(card.dataset.search||'').includes(term))&&(category.value==='all'||card.dataset.category===category.value)&&(year.value==='all'||card.dataset.year===year.value);
+        const show=archiveRecordMatches(card.dataset,{search:term,category:category.value,year:year.value});
         card.hidden=!show;if(show)total++;
       });
       const grid=galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-grid]');
       if(grid) {
-        cards.sort((a,b)=>{
-          if(sort.value==='az'||sort.value==='za'){const cmp=(a.dataset.title||'').localeCompare(b.dataset.title||'');return sort.value==='za'?-cmp:cmp;}
-          if(sort.value==='photos')return Number(b.dataset.photoCount)-Number(a.dataset.photoCount);
-          const ay=a.dataset.sortYear===''?null:Number(a.dataset.sortYear),by=b.dataset.sortYear===''?null:Number(b.dataset.sortYear);
-          if(ay===null||by===null) return ay===by?0:ay===null?1:-1;
-          return sort.value==='oldest'?ay-by:by-ay;
-        }).forEach(card=>grid.append(card));
+        cards.sort((a,b)=>compareArchiveAlbums(a.dataset,b.dataset,sort.value)).forEach(card=>grid.append(card));
       }
       count.textContent=`${total} ${total===1?'album':'albums'}`;
       noResults.hidden=total>0 || cards.length===0;
