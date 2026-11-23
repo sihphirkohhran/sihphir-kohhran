@@ -78,7 +78,7 @@
         ${field('ordination_year','Ordination Year','number')}
         ${field('start_year','Start Year','number')}
         ${field('end_year','End Year','number')}
-        <label><span>Current / Former</span><select name="record_status"><option value="Current" ${recordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${recordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
+        <label><span>Current / Former</span><select name="record_status"><option value="Current" ${(selected.data.record_status||(!selected.data.end_year?'Current':'Former'))==='Current'?'selected':''}>Current</option><option value="Former" ${(selected.data.record_status||(!selected.data.end_year?'Current':'Former'))==='Former'?'selected':''}>Former</option></select></label>
         <div class="wide ministry-checks">${checks()}<span>Uncheck to save as Draft (not visible publicly).</span></div>
       </div>
       ${assetEditor('photo','Profile Photo',false)}
