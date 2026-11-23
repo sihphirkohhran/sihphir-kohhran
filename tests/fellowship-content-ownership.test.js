@@ -63,7 +63,7 @@ test('Document serializes owner independently of category and keeps source metad
   assert.match(saved,/category: Annual Report/);
   assert.match(saved,/document_source: external/);
   // The serializer quotes URLs containing a colon; parse the serialized value instead of asserting its presentation.
-  const serializedUrl = saved.match(/^pdf_external:\\s*(.+)$/m)?.[1];
+  const serializedUrl = saved.match(/^pdf_external:\s*(.+)$/m)?.[1];
   assert.ok(serializedUrl, 'serialized external URL is present');
   const restoredUrl = serializedUrl.startsWith('"') ? JSON.parse(serializedUrl) : serializedUrl;
   assert.equal(restoredUrl, 'https://example.org/report');
