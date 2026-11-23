@@ -76,6 +76,8 @@ test('Notices editor keeps published records editable, saves drafts safely and p
   assert.match(manager,/notice-save-state/);
   assert.match(manager,/notice-search/);
   assert.match(manager,/notice-filter/);
+  assert.match(manager,/Missing or malformed notice frontmatter/);
+  assert.match(manager,/Unsupported notice frontmatter/);
 });
 
 test('public notices exclude drafts and expired entries while retaining stable links',async()=>{
