@@ -98,7 +98,7 @@ test('legacy monthly YAML and modern weekly JSON reopen without losing names, ro
   const source=await read('../public/admin/schedule-manager.js');
   const context={window:{}};runInNewContext(source,context);
   const manager=context.window.SihphirScheduleManager;
-  const oldMonthly='---\\nmonth: "May 2026"\\nsections:\\n  - title: "Inkhawm Hruaitu"\\n    duties:\\n      - role: "Thla chawhma"\\n        name: "Pu Inkhawmhruaitu1"\\n  - title: "Section 2"\\n    duties:\\n      - role: "Role 2"\\n        name: "Person 2"\\n  - title: "Section 3"\\n    duties:\\n      - role: "Role 3"\\n        name: "Person 3"\\n  - title: "Section 4"\\n    duties:\\n      - role: "Role 4"\\n        name: "Person 4"\\n  - title: "Section 5"\\n    duties:\\n      - role: "Role 5"\\n        name: "Person 5"\\n---\\n';
+  const oldMonthly='---\nmonth: "May 2026"\nsections:\n  - title: "Inkhawm Hruaitu"\n    duties:\n      - role: "Thla chawhma"\n        name: "Pu Inkhawmhruaitu1"\n  - title: "Section 2"\n    duties:\n      - role: "Role 2"\n        name: "Person 2"\n  - title: "Section 3"\n    duties:\n      - role: "Role 3"\n        name: "Person 3"\n  - title: "Section 4"\n    duties:\n      - role: "Role 4"\n        name: "Person 4"\n  - title: "Section 5"\n    duties:\n      - role: "Role 5"\n        name: "Person 5"\n---\n';
   const parsedMonthly=manager.parse(oldMonthly,'sections');
   assert.equal(parsedMonthly.data.month,'May 2026');
   assert.equal(parsedMonthly.data.sections.length,5);
