@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
+import {runInNewContext} from 'node:vm';
 
 const read=path=>readFile(new URL(path,import.meta.url),'utf8');
 
@@ -83,4 +84,27 @@ test('public notices exclude drafts and expired entries while retaining stable l
   assert.match(normalize,/noticeIsActive/);
   assert.match(archive,/\.filter\(\(notice\) => notice\.published\)/);
   assert.match(archive,/href: \`\/notices\/\$\{notice\.slug\}\`/);
+});
+
+test('legacy monthly YAML and modern weekly JSON reopen without losing names, roles or dates',async()=>{
+  const source=await read('../public/admin/schedule-manager.js');
+  const context={window:{}};runInNewContext(source,context);
+  const manager=context.window.SihphirScheduleManager;
+  const oldMonthly=await read('../src/content/notices/monthly/2026-05.md');
+  const parsedMonthly=manager.parse(oldMonthly,'sections');
+  assert.equal(parsedMonthly.data.month,'May 2026');
+  assert.equal(parsedMonthly.data.sections.length,5);
+  assert.equal(parsedMonthly.data.sections[0].duties[0].name,'Pu Inkhawmhruaitu1');
+  assert.equal(parsedMonthly.data.sections[0].duties[0].role,'Thla chawhma');
+  const savedMonthly=manager.parse(manager.serialize(parsedMonthly),'sections');
+  assert.equal(savedMonthly.data.sections[4].duties.length,6);
+  assert.equal(savedMonthly.data.sections[4].duties[5].name,'Tv. Thawhlawmkhawntu6');
+
+  const weekly=await read('../src/content/notices/weekly/2026-11-11.md');
+  const parsedWeekly=manager.parse(weekly,'days');
+  assert.equal(parsedWeekly.data.status,'current');
+  assert.equal(parsedWeekly.data.days[0].duties[0].name,'Pu R. Lalthanmawia');
+  const savedWeekly=manager.parse(manager.serialize(parsedWeekly),'days');
+  assert.equal(savedWeekly.data.days[0].duties[0].name,'Pu R. Lalthanmawia');
+  assert.throws(()=>manager.parse('---\nmonth: "2026-11"\nsections:\n  - unexpected: "bad"\n---\n','sections'),/Unsupported legacy roster YAML/);
 });
