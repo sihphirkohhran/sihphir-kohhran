@@ -94,14 +94,16 @@
       form.onsubmit=async event=>{
         event.preventDefault();if(busy)return;collect();
         const identity=record.data[config.identity];
-        if(!/^\d{4}-\d{2}(-\d{2})?$/.test(identity))return notification('Choose a valid '+config.label.toLowerCase()+'.','error');
+        if(!selected&&!/^\d{4}-\d{2}(-\d{2})?$/.test(identity))return notification('Choose a valid '+config.label.toLowerCase()+'.','error');
         const path=selected||config.root+identity+'.md';
         if(!selected&&files.some(f=>f.path===path))return notification('This '+config.label.toLowerCase()+' already exists. Select it to edit instead.','error');
         busy=true;
         try{
           const result=await api('/api/admin/content',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({path,expectedSha:sha,content:serialize(record),message:'admin: save '+config.title})});
           selected=path;sha=result.sha;dirty=false;notification(config.title+' saved.');
-          await refresh();await load(path);
+          await refresh();
+          const saved=await api('/api/admin/content?path='+encodeURIComponent(path));
+          record=parse(saved.content,config.key);sha=saved.sha;draw();
         }catch(error){notification(error.message,'error');mark();draw();}
         finally{busy=false;}
       };
