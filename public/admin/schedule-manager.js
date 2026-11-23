@@ -134,16 +134,17 @@
           : 'Month '+monthLabel(record.data.month);
         // Freeze the exact selected file before the asynchronous confirmation.
         busy=true;deleteButton.disabled=true;
+        let deleted=false;
         try{
           const confirmed=await window.SihphirConfirmRecordDelete({title:'Delete '+config.label+'?',description:identity});
           if(!confirmed)return;
           if(selected!==path||sha!==expectedSha)throw Error('The selected record changed. Delete was cancelled.');
           await api('/api/admin/content',{method:'DELETE',headers:{'content-type':'application/json'},body:JSON.stringify({path,expectedSha})});
-          selected=null;sha=null;savedIdentity=null;record=null;dirty=false;saveState='saved';loadError='';
+          selected=null;sha=null;savedIdentity=null;record=null;dirty=false;saveState='saved';loadError='';deleted=true;
           await refresh();
           notification(config.title+' deleted permanently. The public website will update after deployment.');
         }catch(error){notification('Delete failed: '+error.message,'error');}
-        finally{busy=false;draw();}
+        finally{busy=false;if(deleted)draw();else deleteButton.disabled=false;}
       };
       host.querySelector('#schedule-archive').onclick=()=>{if(busy)return;collect();record.data.status=record.data.status==='archived'?'upcoming':'archived';mark();draw();};
       host.querySelector('#schedule-duplicate').onclick=()=>{if(busy)return;collect();if(!confirmDiscard())return;record=clone(record);record.data=clone(record.data);record.data[config.identity]=config.defaultValue();record.data.status='upcoming';selected=null;sha=null;savedIdentity=null;dirty=true;saveState='dirty';draw();};
