@@ -20,20 +20,15 @@ function expression(source, start, end, context = {}) {
 }
 const owners = ['kohhran','ktp','kohhran-hmeichhia','kpp','masihi-sangati'];
 
-test('Gallery and Document owner options select saved values and default legacy records to Kohhran', () => {
+test('Gallery and Document owner selectors use the shared CMS-derived registry', () => {
   for (const source of [gallery, documents]) {
-    const code = source.slice(source.indexOf('const CONTENT_OWNERS ='), source.indexOf('const serialize', source.indexOf('const CONTENT_OWNERS =')));
-    const options = vm.runInNewContext(code + '; ownerOptions', {});
-    for (const owner of owners) {
-      const html = options(owner, value => value);
-      assert.match(html, new RegExp('value="' + owner + '" selected'));
-      assert.equal((html.match(/ selected/g) || []).length, 1);
-    }
-    assert.match(options(undefined, value => value), /value="kohhran" selected/);
+    assert.match(source, /import\('\/admin\/content-owners\.js'\)/);
+    assert.match(source, /loadContentOwners\(api\)/);
+    assert.match(source, /renderOwnerOptions\(contentOwners, value, escape\)/);
     assert.match(source, /<select name="owner" required>/);
     assert.match(source, /selected\.data\.owner=String\(values\.get\('owner'\)\|\|'kohhran'\)/);
     assert.match(source, /selected\.data\.category=String\(values\.get\('category'\)\|\|'Other'\)/);
-    assert.match(source, /CONTENT_OWNERS\.some/);
+    assert.match(source, /canSaveOwner\(contentOwners,selected\.data\.owner,selected\.originalOwner\)/);
   }
 });
 
@@ -70,8 +65,8 @@ test('Document serializes owner independently of category and keeps source metad
   assert.match(saved,/files: \[/);
 });
 
-test('Schema supplies legacy Kohhran default without modifying historical content', () => {
-  assert.equal((schema.match(/owner: z\.enum\(\['kohhran', 'ktp', 'kohhran-hmeichhia', 'kpp', 'masihi-sangati'\]\)\.optional\(\)\.default\('kohhran'\)/g)||[]).length,2);
+test('Schema supplies legacy Kohhran default and validates dynamic slug IDs', () => {
+  assert.equal((schema.match(/owner: z\.string\(\)\.regex\(\/\^\[a-z0-9\]/g)||[]).length,2);
   assert.match(gallery,/owner:'kohhran'/);
   assert.match(documents,/owner:'kohhran'/);
 });
