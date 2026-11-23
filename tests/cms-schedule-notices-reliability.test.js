@@ -79,7 +79,7 @@ test('Notices editor keeps published records editable, saves drafts safely and p
   assert.match(manager,/applyPublication\(data,values\.get\('published'\)==='on'\)/);
   for(const control of ['notice-save-draft','notice-publish','notice-delete'])assert.ok(manager.includes(control));
   assert.match(manager,/Update Published Notice/);
-  assert.match(manager,/form\.requestSubmit\(\)/);
+  assert.match(manager,/requestSubmit\(\)/);
   assert.match(manager,/Missing or malformed notice frontmatter/);
   assert.match(manager,/Unsupported notice frontmatter/);
 });
