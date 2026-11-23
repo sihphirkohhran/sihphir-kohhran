@@ -28,7 +28,8 @@ test('Pastor CMS retains legacy data on save and warns about legacy fields', () 
 test('Pastor public page is separate, minimal and mobile-responsive', () => {
   assert.match(route, /import PastorDetail/);
   assert.doesNotMatch(route, /MinistryDetail/);
-  assert.match(detail, /Back to Pastor listing/);
+  assert.match(detail, /listingLabel = isProPastor \? 'Pro Pastor' : 'Pastor'/);
+  assert.match(detail, /Back to \{listingLabel\} listing/);
   for (const label of ['Service Period','Date of Birth','Ordination Year','Status','Biography']) assert.ok(detail.includes(label), label);
   for (const label of ['Timeline','Related Profiles','Related Documents','Pastor’s Message','Family Information','Church Served']) assert.ok(!detail.includes(label), label);
   assert.match(detail, /@media\(max-width:760px\)/);
