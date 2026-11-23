@@ -62,6 +62,7 @@ const isImage = (type:string) => ['jpg','jpeg','png','gif','webp','avif','svg'].
 
 <script>
   import { contentEntryIdMatches } from '../lib/content-deep-links';
+  import { archiveRecordMatches, compareArchiveDocuments } from '../lib/owner-archive-behavior';
   const docRoot = document.querySelector<HTMLElement>('[data-owner-documents]');
   if (docRoot) {
     const listing=docRoot.querySelector<HTMLElement>('[data-owner-document-listing]')!;
@@ -79,11 +80,11 @@ const isImage = (type:string) => ['jpg','jpeg','png','gif','webp','avif','svg'].
       const term=search.value.trim().toLowerCase();
       let visible=0;
       rows.forEach(row=>{
-        const show=(!term||(row.dataset.search||'').includes(term))&&(category.value==='all'||row.dataset.category===category.value)&&(year.value==='all'||row.dataset.year===year.value);
+        const show=archiveRecordMatches(row.dataset,{search:term,category:category.value,year:year.value});
         row.hidden=!show;if(show)visible++;
       });
       const grid=docRoot.querySelector<HTMLElement>('[data-owner-document-list]');
-      if(grid)rows.sort((a,b)=>sort.value==='title'?(a.dataset.sortTitle||'').localeCompare(b.dataset.sortTitle||''):sort.value==='oldest'?(a.dataset.sortDate||'').localeCompare(b.dataset.sortDate||''):(b.dataset.sortDate||'').localeCompare(a.dataset.sortDate||'')).forEach(row=>grid.append(row));
+      if(grid)rows.sort((a,b)=>compareArchiveDocuments(a.dataset,b.dataset,sort.value)).forEach(row=>grid.append(row));
       count.textContent=`${visible} ${visible===1?'document':'documents'}`;
       noResults.hidden=visible>0||rows.length===0;
     };
