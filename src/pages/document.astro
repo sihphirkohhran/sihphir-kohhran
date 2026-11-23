@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
+import { ownedBy } from '../lib/content-ownership';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
@@ -13,7 +14,7 @@ const pageEntry=await getEntry('settings','document-page');
 const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const categoryRegistry = await getEntry('settings', 'document-categories');
 const registeredCategories = categoryRegistry?.data.categories ?? [];
-const entries = await getCollection('documents');
+const entries = ownedBy(await getCollection('documents'), 'kohhran');
 
 const fileExtension = (value: string) => {
   const clean = value.split(/[?#]/)[0];
