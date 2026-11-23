@@ -1,0 +1,155 @@
+---
+import type { buildOwnerAlbums } from '../lib/owner-archives';
+type Album = ReturnType<typeof buildOwnerAlbums>[number];
+interface Props { albums: Album[]; fellowshipSlug: string }
+const { albums, fellowshipSlug } = Astro.props;
+const years = [...new Set(albums.map(album => album.year).filter((year): year is number => year != null))].sort((a,b)=>b-a);
+const categories = [...new Set(albums.map(album=>album.category))].sort();
+const hasUnknown = albums.some(album=>album.yearType==='unspecified');
+const albumLink = (id: string) => `/fellowship/${encodeURIComponent(fellowshipSlug)}?tab=gallery&album=${encodeURIComponent(id)}`;
+---
+<div class="owner-gallery" data-owner-gallery>
+  <div data-owner-gallery-listing>
+    <div class="owner-toolbar" aria-label="Fellowship album filters">
+      <label>Search albums<input data-owner-gallery-search type="search" placeholder="Search albums and descriptions" /></label>
+      <label>Category<select data-owner-gallery-category><option value="all">All categories</option>{categories.map(category=><option value={category}>{category}</option>)}</select></label>
+      <label>Year<select data-owner-gallery-year><option value="all">All years</option>{years.map(year=><option value={year}>{year}</option>)}{hasUnknown && <option value="unspecified">Year Unspecified</option>}</select></label>
+      <label>Sort<select data-owner-gallery-sort><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="az">A–Z</option><option value="za">Z–A</option><option value="photos">Most photos</option></select></label>
+    </div>
+    <p class="owner-count" data-owner-gallery-count aria-live="polite">{albums.length} albums</p>
+    {albums.length > 0 ? (
+      <div class="owner-album-grid" data-owner-gallery-grid>
+        {albums.map(album => (
+          <a href={album.externalNavigation ? album.albumUrl : albumLink(album.id)}
+            target={album.externalNavigation ? '_blank' : undefined}
+            rel={album.externalNavigation ? 'noopener noreferrer' : undefined}
+            class="owner-album-card"
+            data-owner-album-card data-owner-album-open={!album.externalNavigation ? album.id : undefined}
+            data-album-id={album.id} data-search={`${album.title} ${album.description} ${album.category} ${album.yearLabel}`.toLowerCase()}
+            data-category={album.category} data-year={album.yearFilterValue} data-sort-year={album.year ?? ''} data-title={album.title.toLowerCase()} data-photo-count={album.photos.length}>
+            <div class="owner-album-cover"><img src={album.cover} alt={`${album.title} cover photograph`} loading="lazy" data-owner-cover data-owner-cover-alt={album.photos.find(p=>p.src!==album.cover)?.src || '/images/profile-placeholder.svg'} /><span>{album.yearLabel}</span></div>
+            <div class="owner-album-copy"><p class="owner-album-meta">{album.category} · {album.photos.length} {album.photos.length===1?'photo':'photos'}{album.featured?' · Featured':''}</p><h3>{album.title}</h3>{album.description && <p>{album.description}</p>}<span class="owner-album-action">{album.externalNavigation?'View External Album ↗':'View Album →'}</span></div>
+          </a>
+        ))}
+      </div>
+    ) : <p class="owner-empty">No albums are currently published for this Fellowship.</p>}
+    <p class="owner-empty" data-owner-gallery-no-results hidden>No albums match those filters. Try another search or year.</p>
+  </div>
+  <p class="owner-empty" data-owner-gallery-invalid hidden>This album is not available in this Fellowship archive. <button type="button" data-owner-album-back>Back to Gallery</button></p>
+  {albums.map(album=>(
+    <article class="owner-album-detail" data-owner-album-detail={album.id} hidden>
+      <button class="owner-back" type="button" data-owner-album-back>← Back to Gallery</button>
+      <div class="owner-detail-heading"><p>{album.category} · {album.yearLabel}</p><h2>{album.title}</h2>{album.description && <p>{album.description}</p>}<small>{album.photos.length} photographs</small></div>
+      {album.photos.length ? <div class="owner-photo-grid">{album.photos.map((photo,index)=>
+        <button type="button" data-owner-photo data-owner-album={album.id} data-photo-index={index} data-photo-src={photo.src} data-photo-caption={photo.caption} data-photo-alt={photo.alt} aria-label={`View photograph ${index+1} of ${album.photos.length}`}>
+          <img src={photo.src} alt={photo.alt || `${album.title} photograph ${index+1}`} loading="lazy" />
+        </button>
+      )}</div> : <p class="owner-empty">No internal photographs are attached to this album.</p>}
+      {album.albumUrl && <p class="owner-full-album"><a href={album.albumUrl} target="_blank" rel="noopener noreferrer">View Full Album ↗</a></p>}
+    </article>
+  ))}
+  <dialog class="owner-photo-dialog" data-owner-photo-dialog aria-label="Gallery photograph viewer">
+    <div class="owner-photo-dialog-top"><span data-owner-photo-counter></span><span data-owner-photo-caption></span><a data-owner-photo-download href="" download>Download</a><button type="button" data-owner-photo-close aria-label="Close photo viewer">×</button></div>
+    <div class="owner-photo-dialog-body"><button type="button" data-owner-photo-prev aria-label="Previous photograph">‹</button><img alt="" /><button type="button" data-owner-photo-next aria-label="Next photograph">›</button></div>
+  </dialog>
+</div>
+
+<script>
+  import { contentEntryIdMatches } from '../lib/content-deep-links';
+  const galleryRoot = document.querySelector<HTMLElement>('[data-owner-gallery]');
+  if (galleryRoot) {
+    const listing = galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-listing]')!;
+    const invalid = galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-invalid]')!;
+    const details = [...galleryRoot.querySelectorAll<HTMLElement>('[data-owner-album-detail]')];
+    const cards = [...galleryRoot.querySelectorAll<HTMLElement>('[data-owner-album-card]')];
+    const search = galleryRoot.querySelector<HTMLInputElement>('[data-owner-gallery-search]')!;
+    const category = galleryRoot.querySelector<HTMLSelectElement>('[data-owner-gallery-category]')!;
+    const year = galleryRoot.querySelector<HTMLSelectElement>('[data-owner-gallery-year]')!;
+    const sort = galleryRoot.querySelector<HTMLSelectElement>('[data-owner-gallery-sort]')!;
+    const count = galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-count]')!;
+    const noResults = galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-no-results]')!;
+    let lastTrigger: HTMLAnchorElement | null = null;
+    const applyFilters = () => {
+      const term=search.value.trim().toLowerCase();
+      let total=0;
+      cards.forEach(card=>{
+        const show=(!term||(card.dataset.search||'').includes(term))&&(category.value==='all'||card.dataset.category===category.value)&&(year.value==='all'||card.dataset.year===year.value);
+        card.hidden=!show;if(show)total++;
+      });
+      const grid=galleryRoot.querySelector<HTMLElement>('[data-owner-gallery-grid]');
+      if(grid) {
+        cards.sort((a,b)=>{
+          if(sort.value==='az'||sort.value==='za'){const cmp=(a.dataset.title||'').localeCompare(b.dataset.title||'');return sort.value==='za'?-cmp:cmp;}
+          if(sort.value==='photos')return Number(b.dataset.photoCount)-Number(a.dataset.photoCount);
+          const ay=a.dataset.sortYear===''?null:Number(a.dataset.sortYear),by=b.dataset.sortYear===''?null:Number(b.dataset.sortYear);
+          if(ay===null||by===null) return ay===by?0:ay===null?1:-1;
+          return sort.value==='oldest'?ay-by:by-ay;
+        }).forEach(card=>grid.append(card));
+      }
+      count.textContent=`${total} ${total===1?'album':'albums'}`;
+      noResults.hidden=total>0 || cards.length===0;
+    };
+    [search,category,year,sort].forEach(el=>el.addEventListener(el===search?'input':'change',applyFilters));
+    galleryRoot.querySelectorAll<HTMLImageElement>('[data-owner-cover]').forEach(image=>{
+      image.addEventListener('error',()=>{
+        const fallback=image.dataset.ownerCoverAlt||'/images/profile-placeholder.svg';
+        image.dataset.ownerCoverAlt='/images/profile-placeholder.svg';
+        if(image.src!==new URL(fallback,location.href).href)image.src=fallback;
+      });
+    });
+    const syncFromUrl=()=>{
+      const id=new URL(location.href).searchParams.get('album');
+      const detail=id?details.find(item=>contentEntryIdMatches(item.dataset.ownerAlbumDetail||'',id)):undefined;
+      listing.hidden=Boolean(id);
+      invalid.hidden=!id||Boolean(detail);
+      details.forEach(item=>item.hidden=item!==detail);
+      if(!id) applyFilters();
+    };
+    galleryRoot.querySelectorAll<HTMLAnchorElement>('[data-owner-album-open]').forEach(link=>link.addEventListener('click',event=>{
+      event.preventDefault();
+      const id=link.dataset.ownerAlbumOpen;
+      if(!id)return;
+      lastTrigger=link;
+      const url=new URL(location.href);url.searchParams.set('tab','gallery');url.searchParams.set('album',id);url.searchParams.delete('document');
+      if(url.href!==location.href)history.pushState({...(history.state||{}),fellowshipAlbum:id},'',url);
+      syncFromUrl();
+      galleryRoot.querySelector<HTMLElement>('[data-owner-album-detail]:not([hidden])')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }));
+    galleryRoot.querySelectorAll<HTMLButtonElement>('[data-owner-album-back]').forEach(button=>button.addEventListener('click',()=>{
+      const current=new URL(location.href).searchParams.get('album');
+      if(current && history.state?.fellowshipAlbum===current){history.back();return;}
+      const url=new URL(location.href);url.searchParams.delete('album');history.replaceState(history.state,'',url);syncFromUrl();lastTrigger?.focus();
+    }));
+    window.addEventListener('popstate',syncFromUrl);
+    window.addEventListener('fellowship:location',syncFromUrl);
+    syncFromUrl();
+    const dialog=galleryRoot.querySelector<HTMLDialogElement>('[data-owner-photo-dialog]')!;
+    const photo=dialog.querySelector<HTMLImageElement>('img')!;
+    const counter=dialog.querySelector<HTMLElement>('[data-owner-photo-counter]')!;
+    const caption=dialog.querySelector<HTMLElement>('[data-owner-photo-caption]')!;
+    const download=dialog.querySelector<HTMLAnchorElement>('[data-owner-photo-download]')!;
+    let active:HTMLButtonElement[]=[],index=0,lastPhoto:HTMLButtonElement|null=null;
+    const showPhoto=(next:number)=>{
+      if(!active.length)return;
+      index=(next+active.length)%active.length;
+      const item=active[index];photo.src=item.dataset.photoSrc||'';photo.alt=item.dataset.photoAlt||item.dataset.photoCaption||'Gallery photograph';
+      counter.textContent=`${index+1} / ${active.length}`;caption.textContent=item.dataset.photoCaption||'';download.href=item.dataset.photoSrc||'';
+    };
+    galleryRoot.querySelectorAll<HTMLButtonElement>('[data-owner-photo]').forEach(button=>button.addEventListener('click',()=>{
+      active=[...galleryRoot.querySelectorAll<HTMLButtonElement>('[data-owner-photo]')].filter(item=>item.dataset.ownerAlbum===button.dataset.ownerAlbum);
+      lastPhoto=button;showPhoto(Number(button.dataset.photoIndex||0));dialog.showModal();
+    }));
+    dialog.querySelector('[data-owner-photo-prev]')?.addEventListener('click',()=>showPhoto(index-1));
+    dialog.querySelector('[data-owner-photo-next]')?.addEventListener('click',()=>showPhoto(index+1));
+    dialog.querySelector('[data-owner-photo-close]')?.addEventListener('click',()=>dialog.close());
+    dialog.addEventListener('close',()=>lastPhoto?.focus());
+    dialog.addEventListener('keydown',event=>{
+      if(event.key==='ArrowLeft'){event.preventDefault();showPhoto(index-1);}
+      if(event.key==='ArrowRight'){event.preventDefault();showPhoto(index+1);}
+    });
+  }
+</script>
+
+<style>
+.owner-gallery{color:#172941}.owner-toolbar{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:.7rem;align-items:end;margin-bottom:1rem}.owner-toolbar label{font:600 .72rem Poppins,sans-serif;display:grid;gap:.35rem;color:#34465c}.owner-toolbar select,.owner-toolbar input{width:100%;border:1px solid #d7d0bd;border-radius:5px;background:#fffdf8;padding:.7rem;color:#172941;font:400 .83rem Poppins,sans-serif;min-width:0}.owner-toolbar :focus-visible,.owner-gallery a:focus-visible,.owner-gallery button:focus-visible{outline:3px solid #29B9F2;outline-offset:2px}.owner-count,.owner-album-meta{font:.75rem Poppins,sans-serif;color:#536275}.owner-count{margin-bottom:1rem}.owner-album-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}.owner-album-card{border:1px solid #e0dccf;border-radius:7px;overflow:hidden;background:#fffdf8;text-decoration:none;color:inherit;transition:box-shadow .2s,transform .2s}.owner-album-card:hover{box-shadow:0 7px 24px rgba(23,41,65,.12);transform:translateY(-2px)}.owner-album-cover{position:relative;aspect-ratio:4/3;background:#e6e3db}.owner-album-cover img{height:100%;width:100%;object-fit:cover}.owner-album-cover span{position:absolute;bottom:.5rem;left:.6rem;padding:.3rem .5rem;background:#172941;color:#fff;border-radius:3px;font-size:.7rem}.owner-album-copy{padding:1rem}.owner-album-copy h3{font:700 1rem Poppins,sans-serif;margin:.35rem 0}.owner-album-copy>p:not(.owner-album-meta){font:400 1rem/1.5 'EB Garamond',serif;color:#4b5563}.owner-album-action{display:block;margin-top:.8rem;font:600 .75rem 'EB Garamond',serif;color:#8e691d}.owner-detail-heading{background:#fffdf8;border:1px solid #e0dccf;border-radius:6px;padding:1.3rem;margin:.8rem 0 1.2rem}.owner-detail-heading h2{font:700 1.35rem Poppins,sans-serif}.owner-detail-heading p{font:1rem/1.5 'EB Garamond',serif}.owner-detail-heading small{display:block;margin-top:.5rem;color:#536275}.owner-back{font:600 .85rem Poppins,sans-serif;color:#172941;text-decoration:underline}.owner-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem}.owner-photo-grid button{aspect-ratio:4/3;overflow:hidden;border-radius:5px;background:#ddd}.owner-photo-grid img{width:100%;height:100%;object-fit:cover}.owner-full-album{text-align:center;margin:1.5rem}.owner-full-album a{display:inline-block;background:#172941;color:white;border-radius:5px;padding:.7rem 1.2rem;font:600 .8rem Poppins,sans-serif}.owner-empty{text-align:center;padding:1.6rem;border:1px dashed #d7d0bd;border-radius:6px;font:1rem 'EB Garamond',serif}.owner-photo-dialog{position:fixed;inset:0;max-width:95vw;max-height:92vh;width:min(1100px,95vw);border:0;background:#10243f;color:white;padding:.8rem}.owner-photo-dialog::backdrop{background:rgba(5,13,25,.9)}.owner-photo-dialog-top{display:flex;gap:1rem;align-items:center;justify-content:flex-end;font:.8rem Poppins,sans-serif}.owner-photo-dialog-top [data-owner-photo-caption]{margin-right:auto}.owner-photo-dialog-top button{font-size:1.7rem}.owner-photo-dialog-body{display:grid;grid-template-columns:2rem minmax(0,1fr) 2rem;align-items:center;gap:.5rem;margin-top:.8rem}.owner-photo-dialog-body img{max-height:75vh;width:100%;object-fit:contain}.owner-photo-dialog-body button{font-size:2rem}[hidden]{display:none!important}@media(max-width:700px){.owner-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-toolbar label:first-child{grid-column:1/-1}.owner-album-grid{gap:.55rem}.owner-album-copy{padding:.75rem}.owner-album-copy h3{font-size:.86rem}.owner-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:360px){.owner-album-grid{grid-template-columns:1fr}}
+</style>
