@@ -48,7 +48,11 @@ test('Homepage resolves active external or upload source and retains legacy fall
   assert.match(urls,/data\.document_source === 'upload'/);
   assert.match(urls,/return resolveDocumentUrl\(uploaded, external\)/);
   assert.equal((cms.match(/pdf_url: resolvePreferredDocumentUrl\(e\.data\)/g)||[]).length,2);
-  assert.match(read('src/components/FellowshipPage.astro'),/href=\{document\.url\}/);
+  const fellowshipPage = read('src/components/FellowshipPage.astro');
+  assert.match(fellowshipPage,/id="fellowship-panel-documents"/);
+  assert.match(fellowshipPage,/Fellowship documents will be available here soon\./);
+  assert.doesNotMatch(fellowshipPage,/href=\{document\.url\}/);
+  assert.doesNotMatch(fellowshipPage,/relatedDocuments\.map/);
 });
 
 test('CMS Preview and Copy Document Link remain available for external-only records',()=>{
