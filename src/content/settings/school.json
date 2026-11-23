@@ -12,39 +12,39 @@
     "establishment_year": "2014",
     "motto": "Light of the world",
     "address": "Sihphir, Mizoram",
-    "contact_number": "9876543210",
+    "contact_number": "",
     "email": "sihphirkohhran@gmail.com",
     "website": ""
   },
   "history": "Kum 2014 atangin Presbyterian English School din-in, tunah hian Class VIII thleng hawn tawh a ni a. Zirtirtu 13-in zirlai 245 an enkawl mek a. Kohhran hma lam hun atan rawngbawltu leh kohhran mi chher chhuahna pawimawh tak a nih zui ngei kan beisei.\n\tSynod Inkhawmpuiin Kohhran te leh harsa dawmchhuah nise a tih kalpuiin Sihphir Kohhran in a enkawl chu Damdep II Branch Church a ni a. Biak In thutthleng leh Sound System te leisakin, theih ang tawkin a enkawl mek.<div><br></div><div><h2><b><a href=\"https://www.youtube.com/@PresbyterianEnglishSchoolSihph\">PES YOUTUBE CHANNEL</a></b></h2><br></div>",
-  "vision_mission": "Test",
+  "vision_mission": "",
   "management": {
     "chairman": {
-      "name": "Chairman hming",
+      "name": "",
       "photo": "/images/1786095298748-secy-jr.jpeg",
       "designation": "Chairman"
     },
     "secretary": {
-      "name": "Secy hming",
+      "name": "",
       "photo": "",
       "designation": "Secretary"
     },
     "members": [
       {
-        "name": "Test",
+        "name": "",
         "designation": "Member",
         "photo": "/images/1786095318424-statistician.jpeg",
         "subject": "",
-        "biography": "aasdas",
+        "biography": "",
         "display_order": 0
       }
     ]
   },
   "principal": {
     "photo": "/images/1786095290150-pu-bela-picsart-aiimageenhancer.jpg",
-    "name": "Hming",
+    "name": "",
     "designation": "Headmaster / Principal",
-    "biography": "sdfdsfds fdsfds fdsfdsfd fwefdsdsd fdsfsdf dsfdsfds fdsf dsfdsf dsf dsfdsf ds fdsfdsfds sfdfdsfsdfsdf ds"
+    "biography": ""
   },
   "teachers": [
     {
@@ -52,7 +52,7 @@
       "designation": "Teacher",
       "photo": "/images/1786095286825-treasurer.jpeg",
       "subject": "",
-      "biography": "v dsfdf dsf",
+      "biography": "",
       "display_order": 0
     },
     {
@@ -60,32 +60,32 @@
       "designation": "Teacher",
       "photo": "/images/1786095652424-secy-sr.png",
       "subject": "",
-      "biography": "sfdsk fjdf sdf",
+      "biography": "",
       "display_order": 1
     }
   ],
   "gallery": [
     {
       "image": "/images/1786097994345-whatsapp-image-2025-09-05-at-9.00.47-pm.jpeg",
-      "caption": "Test",
+      "caption": "",
       "year": 2026,
       "display_order": 0,
       "album_url": "https://drive.google.com/drive/u/0/folders/13B0tjZWuErNrNchHcHc563mFXMjTe4FD",
       "external_image_url": "",
-      "category": "Category test"
+      "category": ""
     },
     {
       "image": "/images/1786095697987-whatsapp-image-2025-09-05-at-9.00.43-pm.jpeg",
-      "caption": "Test 2",
+      "caption": "",
       "year": 2026,
       "display_order": 1,
       "external_image_url": "https://drive.google.com/drive/u/0/folders/13B0tjZWuErNrNchHcHc563mFXMjTe4FD",
-      "category": "Category test 2"
+      "category": ""
     }
   ],
   "contact": {
     "address": "Sihphir, Mizoram",
-    "phone": "9876543210",
+    "phone": "",
     "email": "sihphirkohhran@gmail.com",
     "google_map_link": "https://www.google.com/maps/place/Sihphir+Presbyterian+Church/@23.8171475,92.7321846,17z/data=!3m1!4b1!4m6!3m5!1s0x374debcc6e82a861:0xaffd73c2975cb46c!8m2!3d23.8171426!4d92.7347595!16s%2Fg%2F11c74x_l6w?entry=ttu&g_ep=EgoyMDI2MDgwNC4wIKXMDSoASAFQAw%3D%3D"
   }
