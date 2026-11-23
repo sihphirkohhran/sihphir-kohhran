@@ -97,3 +97,56 @@ test('public archive and homepage use same legacy visibility, retain date picker
   assert.match(home,/notice-accordion-show-more/);
   assert.match(home,/period:isoDate\(notice\.publishDate\)/);
 });
+
+
+test('homepage weekly and monthly paths filter with shared publication helper before generating selectors',()=>{
+  const home=read('../src/pages/index.astro');
+  const weekly=home.match(/const weeklyRecords\s*=\s*\(await getWeeklySchedules\(\)\)\.filter\(([^;]+)\);/);
+  const monthly=home.match(/const monthlyRecords\s*=\s*\(await getMonthlyDuties\(\)\)\.filter\(([^;]+)\);/);
+  assert.ok(weekly,'weekly records have a homepage publication filter');
+  assert.ok(monthly,'monthly records have a homepage publication filter');
+  assert.equal(weekly[1].replaceAll(' ','').trim(),'record=>scheduleIsPublic(record)');
+  assert.equal(monthly[1].replaceAll(' ','').trim(),'record=>scheduleIsPublic(record)');
+  assert.match(home,/const monthlyBrowse=monthlyRecords\.map\(record=>/);
+  assert.match(home,/const weeklyBrowse=weeklyRecords\.map\(record=>/);
+  assert.match(home,/monthlyBrowse\.map\(record=>\(/);
+  assert.match(home,/weeklyBrowse\.map\(record=>\(/);
+});
+
+test('monthly records with explicit unpublish or draft cannot enter selectors or default selection',()=>{
+  const monthly=[
+    {id:'current-hidden',month:'2026-11',status:'current',published:false},
+    {id:'archived-hidden',month:'2026-10',status:'archived',published:false},
+    {id:'published-hidden',month:'2026-12',status:'published',published:false},
+    {id:'draft-hidden',month:'2026-09',status:'draft',published:true},
+    {id:'archived-legacy',month:'2026-08',status:'archived'},
+    {id:'published-public',month:'2026-07',status:'published',published:true},
+    {id:'unspecified-legacy',month:'2026-06'},
+    {id:'upcoming-legacy',month:'2027-01',status:'upcoming'},
+  ];
+  const eligible=monthly.filter(record=>scheduleIsPublic(record));
+  assert.deepEqual(eligible.map(record=>record.id),['archived-legacy','published-public','unspecified-legacy','upcoming-legacy']);
+  assert.deepEqual([...new Set(eligible.map(record=>scheduleMonth(record.month)))].sort(),['2026-06','2026-07','2026-08','2027-01']);
+  assert.equal(selectMonthly(eligible,'2026-11-23')?.id,'upcoming-legacy');
+  assert.equal(selectMonthly(monthly,'2026-11-23')?.id,'upcoming-legacy','direct selector must also reject unpublished months');
+  assert.equal(selectMonthly(eligible,'2026-10-15')?.id,'upcoming-legacy');
+  assert.equal(selectMonthly(eligible,'2028-01-01')?.id,'upcoming-legacy');
+  for(const privateId of ['current-hidden','archived-hidden','published-hidden','draft-hidden']){
+    assert.equal(eligible.some(record=>record.id===privateId),false,privateId);
+  }
+});
+
+test('weekly and monthly public records share the same explicit-unpublish safeguards',()=>{
+  const records=[
+    {status:'current',published:false},
+    {status:'archived',published:false},
+    {status:'published',published:false},
+    {status:'draft',published:true},
+    {status:'archived'},
+    {status:'published',published:true},
+    {status:'current'},
+    {status:'upcoming'},
+    {},
+  ];
+  assert.deepEqual(records.map(scheduleIsPublic),[false,false,false,false,true,true,true,true,true]);
+});
