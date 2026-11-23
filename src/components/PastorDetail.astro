@@ -1,8 +1,13 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import type { MinistryProfile } from '../lib/ministry-profile';
-interface Props { profile: MinistryProfile }
-const { profile } = Astro.props;
+interface Props { profile: MinistryProfile; variant?: 'pastor' | 'pro-pastor' }
+const { profile, variant = 'pastor' } = Astro.props;
+const isProPastor = variant === 'pro-pastor';
+const listingUrl = isProPastor ? '/probationary-pastor' : '/bialtu-pastor';
+const listingLabel = isProPastor ? 'Pro Pastor' : 'Pastor';
+const pageTitle = isProPastor ? 'Pro Pastor' : 'Bialtu Pastor';
+const activePage = isProPastor ? 'pro-pastor' : 'bialtu-pastor';
 const formatDate = (value: string) => {
   if (/^\d{4}$/.test(value)) return value;
   const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -13,9 +18,9 @@ const formatDate = (value: string) => {
 const birthDisplay = profile.dateOfBirth ? formatDate(profile.dateOfBirth) : '';
 const servicePeriod = profile.startYear ? `${profile.startYear}–${profile.endYear || (profile.current ? 'Present' : '—')}` : '';
 ---
-<BaseLayout title={profile.name + " — Bialtu Pastor"} activePage="bialtu-pastor">
+<BaseLayout title={profile.name + " — " + pageTitle} activePage={activePage}>
   <main class="elder-detail max-w-7xl mx-auto px-4 py-7 sm:py-10">
-    <a class="elder-back" href="/bialtu-pastor">← Back to Pastor listing</a>
+    <a class="elder-back" href={listingUrl}>← Back to {listingLabel} listing</a>
     <section class="elder-profile">
       <div class="elder-portrait"><img src={profile.photo || '/images/profile-placeholder.svg'} alt={profile.name} /></div>
       <div class="elder-facts">
