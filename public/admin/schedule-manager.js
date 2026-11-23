@@ -128,6 +128,8 @@
       const deleteButton=host.querySelector('#schedule-delete');
       if(deleteButton)deleteButton.onclick=async()=>{
         if(busy||!selected||!sha||!record)return;
+        // Unsaved form edits must not be discarded without their own explicit warning.
+        if(!confirmDiscard())return;
         const path=selected,expectedSha=sha;
         const identity=area==='hun-ruatna'
           ? 'Week '+String(record.data.week_start||'')+' — '+String(record.data.week_end||'')
