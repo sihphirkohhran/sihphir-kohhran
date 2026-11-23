@@ -29,7 +29,7 @@
 
   function layout() {
     root.innerHTML = `<div class="app"><aside class="side"><a href="/" class="logo">SPK <span>ADMIN</span></a><nav><button class="${area==='dashboard'?'on':''}" data-go="dashboard"><i>▦</i>Dashboard</button>${menuGroups.map(([group,entries])=>`<div class="nav-group"><span>${group}</span>${entries.map(([id,name,icon])=>`<button class="${area===id?'on':''}" data-go="${id}"><i>${icon}</i>${name}</button>`).join('')}</div>`).join('')}</nav><div class="profile"><b>Administrator</b><small>Secure session active</small><button id="logout">Sign out</button></div></aside><main><header class="top"><button class="mobile-menu" aria-label="Open navigation">☰</button><div><p class="crumb">SIHPHIR PRESBYTERIAN KOHHRAN</p><h1>${labels[area]}</h1></div><div class="top-actions"><a href="/" target="_blank">View website ↗</a></div></header><div id="toast" role="status"></div><section id="view"></section></main></div>`;
-    root.querySelectorAll('[data-go]').forEach(b => b.onclick=()=>{ area=b.dataset.go; current=null; search=''; render(); });
+    root.querySelectorAll('[data-go]').forEach(b => b.onclick=()=>{ if(window.__sihphirScheduleCleanup?.()===false||window.__sihphirNoticeCleanup?.()===false)return; area=b.dataset.go; current=null; search=''; render(); });
     root.querySelector('#logout').onclick=async()=>{ await fetch('/api/auth/logout',{method:'POST'}); location.assign('/admin/login'); };
     root.querySelector('.mobile-menu').onclick=()=>root.querySelector('.side').classList.toggle('open');
   }
@@ -246,6 +246,15 @@
   const legacyRender=render;
   render=async function(){if(area!=='documents')window.__sihphirDocumentCleanup?.();if(area!=='committee')window.__sihphirCommitteeCleanup?.();if(area!=='fellowship')window.__sihphirFellowshipCleanup?.();if(!['pastors','probationary-pastors','elders','missionaries'].includes(area))window.__sihphirMinistryCleanup?.();if(area==='gallery')return window.SihphirGalleryManager.mount({api,esc,slug,notification,readUpload});if(area==='documents')return window.SihphirDocumentManager.mount({api,esc,slug,notification,readUpload});if(area==='committee')return window.SihphirCommitteeManager.mount({api,esc,slug,notification,readUpload});if(area==='fellowship')return window.SihphirFellowshipManager.mount({api,esc,slug,notification,readUpload});if(area==='notices')return window.SihphirNoticeManager.mount({api,esc,slug,notification,readUpload});if(area==='site-settings')return window.SihphirSiteSettingsManager.mount({api,esc,notification});if(['pastors','probationary-pastors','elders','missionaries'].includes(area))return window.SihphirMinistryManager.mount({area,api,esc,slug,notification,readUpload});return legacyRender();};
   document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'&&current){e.preventDefault();document.querySelector('#form')?.requestSubmit();document.querySelector('#settings-form')?.requestSubmit();document.querySelector('#nav-form')?.requestSubmit();}});
+  const scheduleAwareRender=render;
+  render=async function(){
+    if(['hun-ruatna','thlabi-mawhphurtu'].includes(area)){
+      layout();
+      try{return await window.SihphirScheduleManager.mount({area,api,esc,notification});}
+      catch(error){document.querySelector('#view').innerHTML='<section class="panel empty" role="alert">'+esc(error.message)+'</section>';notification(error.message,'error');}
+    }
+    return scheduleAwareRender();
+  };
   const noticeAwareRender=render;
   render=async function(){if(area==='pages'){layout();return window.SihphirPageManager.mount({api,esc,slug,notification,readUpload});}return noticeAwareRender();};
   const schoolAwareRender=render;
