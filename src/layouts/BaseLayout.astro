@@ -22,11 +22,11 @@ const general = await getEntry('settings', 'general');
 const contact = normalizeContact(general?.data);
 const homeUi=await getPageSettings('home',{footer_heading:contact.churchName,footer_description:'Mizoram Presbyterian Kohhran · Presbyterian Church of India'});
 const navEntry = await getEntry('settings', 'navigation');
-const pageNavItems = await getPagesForNav();
+const [pageNavItems, fellowshipNavItems] = await Promise.all([getPagesForNav(), getFellowshipNavItems()]);
 const managedNavItems = navEntry?.data.items as NavItem[] | undefined;
 const navItems = mergeNavWithPages(normalizeNavItems(managedNavItems), [
   ...pageNavItems,
-  ...getFellowshipNavItems(),
+  ...fellowshipNavItems,
 ]);
 const navTree = buildNavTree(navItems);
 
