@@ -12,7 +12,7 @@ export async function loadContentOwners(api) {
       const file = await api('/api/admin/content?path=' + encodeURIComponent(item.path));
       const data = JSON.parse(file.content);
       // Use the stored slug, not the display name. Legacy files fall back to their filename.
-      const id = String(data.slug || item.path.split('/').pop().replace(/\\.json$/i, '').replace(/-\\d{4}$/, '')).trim();
+      const id = String(data.slug || item.path.split('/').pop().replace(/\.json$/i, '').replace(/-\d{4}$/, '')).trim();
       if (!validOwnerId(id) || id === CHURCH_OWNER) continue;
       owners.set(id, String(data.fellowship_name || data.name || id).trim() || id);
     } catch {
