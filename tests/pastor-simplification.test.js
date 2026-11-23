@@ -44,3 +44,45 @@ test('Pastor historical records and their slugs remain present', () => {
   assert.ok(records.length >= 16);
   assert.ok(records.includes('pastor-r-c-lalthavul.md'));
 });
+
+test('Pastor Published checkbox reflects Draft and Published records and stays in the minimal editor', () => {
+  const editor = manager.split('const pastorEditorMarkup=()=>')[1].split('const editorMarkup=')[0];
+  assert.match(editor, /\$\{checks\(\)\}/);
+  assert.match(editor, /Uncheck to save as Draft/);
+  const checkboxSource = manager.match(/const checks=\(\)=>`([^`]+)`;/)?.[1];
+  assert.ok(checkboxSource, 'shared publication checkbox must exist');
+  const checkbox = new Function('selected', 'return `' + checkboxSource + '`;');
+  assert.match(checkbox({data:{published:false}}), /name="published"/);
+  assert.doesNotMatch(checkbox({data:{published:false}}), /checked/);
+  assert.match(checkbox({data:{published:true}}), /checked/);
+  assert.match(checkbox({data:{}}), /checked/, 'legacy unspecified publication stays published');
+});
+test('Pastor publication toggle saves Draft → Published and Published → Draft without changing other fields', () => {
+  const syncSource = manager.split('const sync=form=>{')[1].split('const bind=')[0];
+  assert.ok(syncSource, 'CMS sync handler exists');
+  const FormData = class {
+    constructor(form) { this.form=form; }
+    forEach(callback) { for(const [key,value] of Object.entries(this.form.fields)) callback(value,key); }
+  };
+  const run = (initialPublished,checked) => {
+    const selected={data:{name:'Pastor Example',start_year:2020,published:initialPublished,notes:'Preserved legacy note',biography:'<p>Biography</p>'},body:'<p>Biography</p>'};
+    const sync=new Function('selected','FormData','area','window','return form=>{' + syncSource);
+    const form={fields:{name:'Pastor Example'},querySelectorAll(selector) {
+      if(selector==='input[type=checkbox]')return [{name:'published',checked}];
+      return [];
+    }};
+    sync(selected,FormData,'pastors',{SihphirRichTextEditor:{sanitizeHtml:value=>value}})(form);
+    return selected.data;
+  };
+  const published=run(false,true);
+  assert.equal(published.published,true);
+  assert.equal(published.notes,'Preserved legacy note');
+  assert.equal(published.start_year,2020);
+  const draft=run(true,false);
+  assert.equal(draft.published,false);
+  assert.equal(draft.biography,'<p>Biography</p>');
+  const unchangedDraft=run(false,false);
+  assert.equal(unchangedDraft.published,false);
+  const unchangedPublished=run(true,true);
+  assert.equal(unchangedPublished.published,true);
+});
