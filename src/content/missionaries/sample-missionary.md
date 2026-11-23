@@ -6,7 +6,7 @@ status: "Active"
 notes: "Add missionary biography and ministry updates here."
 record_status: "Current"
 short_description: "Add missionary biography and ministry updates here."
-published: true
+published: false
 biography: "Add missionary biography and ministry updates here."
 ---
 Add missionary biography and ministry updates here.

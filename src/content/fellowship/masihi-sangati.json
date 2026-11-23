@@ -1,56 +1,24 @@
 {
-  "history_short": "Masihi Sangati chu askdjaskd",
-  "history_full": "Ziah tur hi lakkhawm chu a ngai dawn a ni",
-  "office_bearers": [
-    {
-      "role": "Chairman",
-      "name": "Pu/Pi President Hming",
-      "display_order": 0
-    },
-    {
-      "role": "Secretary",
-      "name": "Pu/Pi Secretary Hming",
-      "display_order": 1
-    },
-    {
-      "role": "Treasurer",
-      "name": "Pu/Pi Treasurer Hming",
-      "display_order": 2
-    }
-  ],
-  "members": [
-    {
-      "name": "Pu/Pi Member 1",
-      "role": "Member",
-      "display_order": 0
-    },
-    {
-      "name": "Pu/Pi Member 2",
-      "role": "Member",
-      "display_order": 1
-    },
-    {
-      "name": "Pu/Pi Member 3",
-      "role": "Member",
-      "display_order": 2
-    }
-  ],
+  "history_short": "",
+  "history_full": "",
+  "office_bearers": [],
+  "members": [],
   "logo": "/images/fellowship/sangati-logo.png",
   "fellowship_name": "masihi sangati",
   "slug": "masihi-sangati",
   "category": "Fellowship",
-  "short_description": "Masihi Sangati chu askdjaskd",
-  "full_history": "Ziah tur hi lakkhawm chu a ngai dawn a ni",
+  "short_description": "",
+  "full_history": "",
   "cover_photo": "",
   "published": true,
   "display_order": 0,
   "related_galleries": [],
   "related_documents": [],
   "motto": "",
-  "description": "Masihi Sangati chu askdjaskd",
+  "description": "",
   "banner_image": "",
   "group_photo": "",
   "homepage_order": 0,
-  "homepage_visible": true,
+  "homepage_visible": false,
   "status": "current"
 }

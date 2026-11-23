@@ -68,10 +68,10 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
   <div class="max-w-2xl mx-auto px-4 py-8 space-y-8">
 
     <!-- History -->
-    <div class="reveal">
+    {(history?.trim() || historyFull?.trim()) && <div class="reveal">
       <div class="gold-divider mb-4"><h2>{ui.history_title}</h2></div>
       <div class="border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
-        <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>
+        {history?.trim() && <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>}
         {historyFull && (
           <>
             <div id="history-full" class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-3 hidden">
@@ -83,10 +83,9 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
           </>
         )}
       </div>
-    </div>
-
+    </div>}
     <!-- Office Bearers -->
-    <div class="reveal">
+    {officeBearers.length > 0 && <div class="reveal">
       <div class="gold-divider mb-4"><h2>{ui.office_bearers_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         {officeBearers.map((ob, i) => (
@@ -99,10 +98,9 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
           </div>
         ))}
       </div>
-    </div>
-
+    </div>}
     <!-- Committee Members -->
-    <div class="reveal">
+    {committeeMembers.length > 0 && <div class="reveal">
       <div class="gold-divider mb-4"><h2>{ui.members_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         <table class="w-full">
@@ -126,6 +124,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
           </tbody>
         </table>
       </div>
+    </div>}
     {groupPhotos.length > 0 && (
       <section class="reveal fellowship-group-section" data-fellowship-name={name}>
         <div class="fellowship-group-panel">

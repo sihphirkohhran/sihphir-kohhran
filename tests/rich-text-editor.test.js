@@ -87,13 +87,17 @@ test('PES CMS renders all nine editing sections and keeps rich HTML fields', () 
   assert.match(schoolManager, /JSON\.stringify\(data,null,2\)/);
 });
 
-test('PES school data remains untouched and contains existing HTML content', () => {
+test('PES school data preserves authentic history while clearing public test content', () => {
   const data = JSON.parse(schoolData);
   assert.equal(data.information.establishment_year, '2014');
   assert.ok(data.history.includes('<h2>'));
   assert.ok(data.history.includes('<a href='));
-  assert.equal(data.vision_mission, 'Test');
-  assert.equal(data.management.members[0].name, 'Test');
+  assert.equal(data.vision_mission, '');
+  assert.equal(data.management.members[0].name, '');
+  assert.equal(data.information.contact_number, '');
+  assert.equal(data.contact.phone, '');
+  assert.ok(data.gallery.every(photo => !/test/i.test(`${photo.caption} ${photo.category}`)));
+  assert.ok(data.teachers.every(teacher => !teacher.biography));
 });
 
 test('PES loading failures show a recoverable Admin Panel error instead of a blank workspace', () => {

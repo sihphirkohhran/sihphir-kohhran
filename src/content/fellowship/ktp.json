@@ -1,6 +1,6 @@
 {
-  "history_short": "Hei pawh KTP chungchang ziahna",
-  "history_full": "Siihphir Branch KTP chungchang detail takin kan ziak ang",
+  "history_short": "",
+  "history_full": "",
   "office_bearers": [
     {
       "role": "Leader",
@@ -39,38 +39,13 @@
       "display_order": 5
     }
   ],
-  "members": [
-    {
-      "name": "Pu/Pi Member 2",
-      "role": "Committee Member",
-      "display_order": 0,
-      "designation": "Committee Member"
-    },
-    {
-      "name": "Pu/Pi Member 3",
-      "role": "Committee Member",
-      "display_order": 1,
-      "designation": "Committee Member"
-    },
-    {
-      "name": "Pu/Pi Member 4",
-      "role": "Committee Member",
-      "display_order": 2,
-      "designation": "Committee Member"
-    },
-    {
-      "name": "Pu/Pi Member 5",
-      "role": "Committee Member",
-      "display_order": 3,
-      "designation": "Committee Member"
-    }
-  ],
+  "members": [],
   "logo": "/images/fellowship/ktp-logo.png",
   "fellowship_name": "KTP",
   "slug": "ktp",
   "category": "Fellowship",
-  "short_description": "Hei pawh KTP chungchang ziahna",
-  "full_history": "Siihphir Branch KTP chungchang detail takin kan ziak ang",
+  "short_description": "",
+  "full_history": "",
   "cover_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "published": true,
   "display_order": 0,
@@ -82,7 +57,7 @@
     "src/content/documents/other/year-book-2025.md"
   ],
   "motto": "",
-  "description": "Hei pawh KTP chungchang ziahna",
+  "description": "",
   "banner_image": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "group_photo": "/images/1785955608452-screenshot-2025-09-01-125203.png",
   "homepage_order": 0,

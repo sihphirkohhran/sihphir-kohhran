@@ -12,7 +12,7 @@ const info = school.information;
 const management = school.management;
 const principal = school.principal;
 const teachers = [...(school.teachers || [])].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-const members = [...(management.members || [])].sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+const members = [...(management.members || [])].filter(item => String(item.name || '').trim()).sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 const gallery = [...(school.gallery || [])].sort((a, b) => (b.year ?? 0) - (a.year ?? 0));
 const person = (value: unknown, designation: string) => typeof value === 'string'
   ? { name: value, designation, photo: '' }
