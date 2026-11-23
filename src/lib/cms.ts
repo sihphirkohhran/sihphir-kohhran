@@ -21,11 +21,6 @@ function weeklyStartTimestamp(value: unknown, id: string): number {
   return Number.isNaN(timestamp) ? 0 : timestamp;
 }
 
-function weeklyStatusPriority(status: string | undefined): number {
-  if (status === 'current') return 0;
-  if (status === 'archived') return 2;
-  return 1;
-}
 
 function monthlyTimestamp(value: unknown, id: string): number {
   const month = String(value ?? '').trim();
@@ -45,8 +40,6 @@ export async function getWeeklySchedules() {
       body: e.body,
     }))
     .sort((a, b) => {
-      const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
-      if (statusDifference) return statusDifference;
       const dateDifference = weeklyStartTimestamp(b.week_start, b.id) - weeklyStartTimestamp(a.week_start, a.id);
       return dateDifference || a.id.localeCompare(b.id);
     });
@@ -62,8 +55,6 @@ export async function getMonthlyDuties() {
       body: e.body,
     }))
     .sort((a, b) => {
-      const statusDifference = weeklyStatusPriority(a.status) - weeklyStatusPriority(b.status);
-      if (statusDifference) return statusDifference;
       return monthlyTimestamp(b.month, b.id) - monthlyTimestamp(a.month, a.id);
     });
 }
