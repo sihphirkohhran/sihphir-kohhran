@@ -70,8 +70,8 @@ const galleryPhotos = home.galleryOrder === 'oldest'
     : [];
 
 // Historical records remain server-rendered; the homepage filters eligible records in place.
-const weeklyRecords = (await getWeeklySchedules()).filter(record => !['draft','archived'].includes(String(record.status||'')));
-const monthlyRecords = (await getMonthlyDuties()).filter(record => !['draft','archived'].includes(String(record.status||'')));
+const weeklyRecords = (await getWeeklySchedules()).filter(record => String(record.status||'')!=='draft');
+const monthlyRecords = (await getMonthlyDuties()).filter(record => String(record.status||'')!=='draft');
 const weeklyInitial = weeklyRecords.find(record => record.status === 'current') ?? weeklyRecords[0];
 const monthlyInitial = monthlyRecords.find(record => record.status === 'current') ?? monthlyRecords[0];
 const isoDate = (value: unknown): string => {
