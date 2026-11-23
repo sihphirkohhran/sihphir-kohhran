@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { normalizePdfUrl, resolveDocumentUrl } from './documents-url';
+import { normalizePdfUrl, resolvePreferredDocumentUrl } from './documents-url';
 import { renderMarkdown } from './markdown';
 
 function parseYearMonthFromId(id: string): { year: number | null; month: number | null } {
@@ -99,7 +99,7 @@ export async function getKtpInlengDocs(): Promise<KtpInlengDoc[]> {
         ...e.data,
         year,
         month,
-        pdf_url: resolveDocumentUrl(e.data.pdf_url, e.data.pdf_external),
+        pdf_url: resolvePreferredDocumentUrl(e.data),
         body: e.body,
       };
     })
@@ -116,7 +116,7 @@ export async function getOtherDocuments() {
       year: e.data.year ?? null,
       month: e.data.month ?? null,
       ...e.data,
-      pdf_url: resolveDocumentUrl(e.data.pdf_url, e.data.pdf_external),
+      pdf_url: resolvePreferredDocumentUrl(e.data),
       body: e.body,
     }))
     .filter((d) => d.status !== 'archived' && Boolean(d.pdf_url))
