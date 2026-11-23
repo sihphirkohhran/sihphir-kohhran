@@ -1,3 +1,4 @@
+import { resolvePreferredDocumentUrl } from './documents-url';
 export type FellowshipGroupPhoto = {
   year: number;
   photo: string;
@@ -32,7 +33,7 @@ export function resolveRelatedDocuments(entries: any[], paths: string[] = []) {
   const selected = new Set(paths.map(contentId));
   return entries.filter((entry) => selected.has(contentId(entry.id))).map((entry) => ({
     name: entry.data.name || entry.data.title || contentId(entry.id),
-    url: entry.data.pdf_url || entry.data.file_url || entry.data.url || '',
+    url: resolvePreferredDocumentUrl(entry.data) || (entry.data.document_source ? '' : entry.data.file_url || entry.data.url || ''),
     category: entry.data.category || 'Document',
   })).filter((document) => document.url);
 }
