@@ -67,4 +67,50 @@ import { SITE_ORIGIN } from '../lib/site';
   @media(prefers-color-scheme:dark){body{background:#111923;color:#e6edf7}.panel,.stat,.record{background:#182432;border-color:#29394b}.top-actions a,.record b,.edit input,.edit textarea,.rich{color:#e0e9f7}.record:hover,.record.selected{background:#222f3d}.list-tools,.rich-top,.preview{border-color:#2a394a;background:#17222f}.search,.edit input,.edit textarea,.rich-wrap,.nav-builder textarea{background:#111b27;border-color:#344456}.blank h2,.empty h2{color:#e5edf8}.side{background:#0c1621}}
   .school-leaders{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.school-leaders>article,.school-cms-row{border:1px solid #e2e7ed;border-radius:9px;padding:12px;background:#fff}.school-photo-control{display:flex;align-items:center;gap:12px;margin-bottom:11px}.school-photo-control img{width:72px;height:72px;border:1px solid #dce2e8;border-radius:7px;object-fit:cover;background:#f1f2f0}.school-photo-control>div{display:flex;flex-wrap:wrap;align-items:center;gap:7px}.school-photo-control b{width:100%;color:#66758c;font-size:10px;text-transform:uppercase}.school-photo-control button,.school-cms-actions button{border:1px solid #d6dde6;border-radius:6px;background:#fff;padding:7px;color:#52627a;font-size:11px}.school-photo-control .danger,.school-cms-actions .danger{color:#a94850}.school-cms-row{display:grid;grid-template-columns:190px minmax(0,1fr) auto;gap:13px;margin:0 23px 11px}.school-cms-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.school-cms-fields label{display:grid;gap:4px;color:#66758c;font-size:10px;font-weight:700;text-transform:uppercase}.school-cms-fields input,.school-cms-fields textarea,.school-leaders input,.school-leaders textarea{width:100%;border:1px solid #dbe1e9;border-radius:6px;padding:8px;color:#26364d;background:#fff;font-size:12px;text-transform:none}.school-cms-actions{display:flex;align-items:start;gap:4px}@media(max-width:900px){.school-cms-row{grid-template-columns:1fr;margin:0 15px 10px}.school-leaders{grid-template-columns:1fr}.school-cms-actions{justify-content:flex-end}}
 .rich ul,.rich ol{margin:.6em 0 1em;padding-left:1.5em}.rich ul{list-style:disc}.rich ol{list-style:decimal}.rich ul ul{list-style:circle}.rich ol ol{list-style:lower-alpha}.rich li{margin:.25em 0}.elder-date-field{align-content:start}.elder-date-field select{width:100%;border:1px solid #dbe1e9;border-radius:7px;padding:9px 10px;color:#26364d;background:#fff}.elder-date-field [hidden]{display:none!important}
+
+  /* Schedule CMS: compact, readable fields and responsive actions, scoped to the weekly/monthly editors. */
+  .worship-layout{grid-template-columns:220px minmax(0,1fr)}
+  .worship-form{min-width:0;padding:22px}
+  .schedule-editor-head{align-items:center;flex-wrap:wrap;margin-bottom:18px}
+  .schedule-editor-head h2{margin:0 0 5px;font-size:20px}
+  .schedule-editor-head .status{margin:0;color:#66758c;font-size:12px}
+  .schedule-editor-head .status[data-state="saved"]{color:#28744e}
+  .schedule-editor-head .status[data-state="error"]{color:#ac4850}
+  .schedule-header-actions{display:flex!important;gap:8px!important;align-items:center;flex-wrap:wrap}
+  .schedule-header-actions button{min-height:36px;padding:8px 12px;border:1px solid #d7dee7;border-radius:7px;background:#fff;color:#33445c;font-size:12px;font-weight:600}
+  .schedule-header-actions .schedule-primary-save{background:#172941;color:#fff;border-color:#172941;padding:9px 16px}
+  .schedule-header-actions button:disabled{opacity:.55;cursor:wait}
+  #schedule-form .home-fields{grid-template-columns:repeat(auto-fit,minmax(min(100%,175px),1fr));margin-bottom:14px}
+  #schedule-form .home-fields label{min-width:0}
+  #schedule-form .home-fields input,#schedule-form .home-fields select{min-height:38px;font-family:Poppins,sans-serif;font-size:13px}
+  #schedule-form .schedule-month-field{gap:5px}
+  #schedule-form .schedule-month-readable{font-size:12px;color:#52627a;text-transform:none;font-weight:500}
+  #schedule-form .schedule-month-fallback{display:flex;gap:6px}
+  #schedule-form .schedule-month-fallback[hidden]{display:none!important}
+  #schedule-form .schedule-month-fallback select,#schedule-form .schedule-month-fallback input{min-width:0;width:50%;border:1px solid #dbe1e9;border-radius:6px;padding:7px;background:#fff;color:#26364d}
+  #schedule-form .schedule-month-field input[hidden]{display:none!important}
+  #schedule-form .schedule-sections{display:grid;gap:14px}
+  #schedule-form .schedule-duty-section{margin:0;padding:14px 15px;border:1px solid #e4e9ee;border-radius:9px;background:#fff;min-width:0}
+  #schedule-form .schedule-section-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:0 0 11px}
+  #schedule-form .schedule-section-name{flex:1;min-width:0;display:grid;gap:4px;color:#738197;font-size:10px;font-weight:700;text-transform:uppercase}
+  #schedule-form .schedule-section-name input{min-width:0;width:100%;font-size:15px;font-weight:700;padding:6px 2px;border:0;border-bottom:1px solid #dce3ea;color:#25364d;background:transparent}
+  #schedule-form .schedule-remove-section{flex:none;border:0;background:transparent;color:#9d5058;font-size:11px;padding:7px}
+  #schedule-form .programme-items{display:grid;gap:0}
+  #schedule-form .programme-row{display:grid;align-items:end;gap:10px;min-width:0;padding:10px 0;border-top:1px solid #edf0f4}
+  #schedule-form .schedule-monthly-row{grid-template-columns:minmax(0,1.65fr) minmax(0,1fr) 86px}
+  #schedule-form .schedule-weekly-row{grid-template-columns:90px repeat(2,minmax(0,1fr)) 86px}
+  #schedule-form .schedule-weekly-row .schedule-field-bible_text,#schedule-form .schedule-weekly-row .schedule-field-notes{grid-column:span 1}
+  #schedule-form .schedule-field{display:grid;gap:5px;min-width:0;color:#65758c;font-size:11px;font-weight:600;text-transform:none}
+  #schedule-form .schedule-field input{box-sizing:border-box;display:block;min-width:0;width:100%;height:38px;padding:8px 10px;border:1px solid #dbe1e9;border-radius:6px;background:#fff;color:#26364d;font-family:Poppins,sans-serif;font-size:13px}
+  #schedule-form .schedule-field input:focus-visible,#schedule-form .schedule-section-name input:focus-visible{outline:2px solid #d7b56e;outline-offset:1px}
+  #schedule-form .schedule-row-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;min-width:0}
+  #schedule-form .schedule-icon-button{display:grid;place-items:center;flex:none;width:38px;height:38px;padding:8px;border:1px solid #dce3ea;border-radius:7px;background:#fff;color:#50627a}
+  #schedule-form .schedule-icon-button.danger{color:#a94850}
+  #schedule-form .schedule-icon-button svg{display:block;width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  #schedule-form .schedule-add-row,#schedule-form .schedule-add-section{justify-self:start;margin-top:10px;padding:8px 12px;border:1px solid #d7dee7;border-radius:7px;background:#fff;color:#435b78;font-size:12px}
+  #schedule-form .schedule-add-section{margin-top:0}
+  @media(max-width:1150px){.worship-layout{grid-template-columns:190px minmax(0,1fr)}#schedule-form .schedule-weekly-row{grid-template-columns:repeat(2,minmax(0,1fr)) 86px}#schedule-form .schedule-weekly-row .schedule-field-time{grid-column:span 1}}
+  @media(max-width:800px){.worship-layout{grid-template-columns:minmax(0,1fr)}.worship-weeks{min-height:0}.worship-weeks #week-list{max-height:220px;overflow:auto}.worship-form{padding:17px}#schedule-form .schedule-monthly-row{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) 86px}}
+  @media(max-width:550px){#schedule-form .schedule-monthly-row,#schedule-form .schedule-weekly-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}#schedule-form .schedule-field-name,#schedule-form .schedule-field-role,#schedule-form .schedule-field-person_responsible,#schedule-form .schedule-field-title{grid-column:1/-1}#schedule-form .schedule-row-actions{grid-column:1/-1;justify-content:flex-end}#schedule-form .schedule-section-head{align-items:start}#schedule-form .schedule-duty-section{padding:11px}#schedule-form .schedule-header-actions{width:100%}#schedule-form .schedule-primary-save{margin-left:auto}}
+
 </style>
