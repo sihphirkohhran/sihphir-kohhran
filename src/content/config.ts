@@ -373,6 +373,7 @@ const documents = defineCollection({
     date: z.string().optional(),
     pdf_url: z.string().optional(),
     pdf_external: z.string().optional(),
+    document_source: z.enum(['upload', 'external']).optional(),
     category: z.string().optional(),
     pinned: z.boolean().optional(),
     description: z.string().optional(),
