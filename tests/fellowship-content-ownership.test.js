@@ -80,7 +80,7 @@ test('Fellowship legacy people are not edited or changed during sync', () => {
   const FormData = class { constructor(form){this.form=form;} get(key){return this.form[key]??null;} };
   const document = {querySelector:()=>({innerHTML:'<p>History</p>'})};
   const window = {};
-  const fn = vm.runInNewContext(sync+'; sync',{selected,FormData,document,window});
+  const fn = vm.runInNewContext(sync+'; sync',{selected,FormData,document,window,slug:value=>value.toLowerCase()});
   fn({fellowship_name:'KTP',category:'Fellowship',published:'on'});
   assert.deepEqual(JSON.parse(JSON.stringify(selected.data.office_bearers)),people.office_bearers);
   assert.deepEqual(JSON.parse(JSON.stringify(selected.data.members)),people.members);
