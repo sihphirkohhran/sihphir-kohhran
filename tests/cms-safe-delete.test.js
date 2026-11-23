@@ -96,3 +96,36 @@ test('confirmation dialog resolves false on Cancel and true only on explicit del
   assert.equal(dialog.removed,true);
 });
 function dialogSource(){return dialog;}
+
+test('checked DELETE submits the exact SHA for all three record types and rejects stale records',async()=>{
+  const begin=backend.indexOf('async function deleteCheckedRecord(');
+  const end=backend.indexOf('async function readBase64File(',begin);
+  assert.ok(begin>=0&&end>begin);
+  const fn=backend.slice(begin,end)
+    .replace('env: Env','env')
+    .replace('path: string','path')
+    .replace('expectedSha: string','expectedSha');
+  const submitted=[];
+  const make=(current)=>new Function('configuration','latestFileSha','github','GitHubError',
+    fn+';return deleteCheckedRecord;')(
+      ()=>({branch:'main'}),
+      async()=>current,
+      async(_env,url,init)=>{submitted.push({url,method:init.method,payload:JSON.parse(init.body)});return {ok:true};},
+      class GitHubError extends Error{constructor(status,message){super(message);this.status=status;}}
+    );
+  const sha='a'.repeat(40);
+  for(const path of [
+    'src/content/notices/weekly/2026-11-23.md',
+    'src/content/notices/monthly/2026-11.md',
+    'src/content/notices/announcements/2026-11-23-meeting.md',
+  ])await make(sha)({},path,sha);
+  assert.equal(submitted.length,3);
+  for(const item of submitted){
+    assert.equal(item.method,'DELETE');
+    assert.equal(item.payload.sha,sha);
+    assert.equal(item.payload.branch,'main');
+    assert.match(item.url,/^\/contents\/src\/content\/notices\//);
+  }
+  await assert.rejects(make('b'.repeat(40))({},'src/content/notices/weekly/2026-11-23.md',sha),error=>error.status===409);
+  assert.equal(submitted.length,3,'SHA conflict must not invoke GitHub DELETE');
+});
