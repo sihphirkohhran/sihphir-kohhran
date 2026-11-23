@@ -2,6 +2,7 @@
 name: Year Book 2025
 year: 2025
 yearType: known
+owner: ktp
 category: Year Book
 published: true
 display_order: 1
