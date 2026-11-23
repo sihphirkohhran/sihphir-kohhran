@@ -122,7 +122,7 @@
         const section=button.dataset.addDuty??button.dataset.removeSection;
         if(button.dataset.addDuty!==undefined){collect();record.data[config.key][Number(section)].duties.push(area==='hun-ruatna'?{role:'',name:''}:{name:'',role:''});mark();draw();}
         if(button.dataset.removeSection!==undefined){collect();record.data[config.key].splice(Number(section),1);mark();draw();}
-        if(button.dataset.removeDuty!==undefined||button.dataset.duplicateDuty!==undefined){collect();const [i,j]=(button.dataset.removeDuty||button.dataset.duplicateDuty).split(':').map(Number);const duties=record.data[config.key][i].duties;if(button.dataset.removeDuty!==undefined)duties.splice(j,1);else duties.splice(j+1,0,clone(duties[j]));mark();draw();}
+        if(button.dataset.removeDuty!==undefined||button.dataset.duplicateDuty!==undefined){collect();const [i,j]=(button.dataset.removeDuty!==undefined?button.dataset.removeDuty:button.dataset.duplicateDuty).split(':').map(Number);const duties=record.data[config.key][i].duties;if(button.dataset.removeDuty!==undefined)duties.splice(j,1);else duties.splice(j+1,0,clone(duties[j]));mark();draw();}
       });
       host.querySelector('#schedule-add-section').onclick=()=>{collect();record.data[config.key].push(area==='hun-ruatna'?{day:'New section',duties:[]}:{title:'New category',duties:[]});mark();draw();};
       host.querySelector('#schedule-archive').onclick=()=>{collect();record.data.status=record.data.status==='archived'?'upcoming':'archived';mark();draw();};
@@ -139,8 +139,8 @@
           const result=await api('/api/admin/content',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({path,expectedSha:sha,content:serialize(record),message:'admin: save '+config.title})});
           const saved=await api('/api/admin/content?path='+encodeURIComponent(path));
           const parsed=parse(saved.content,config.key);await refresh();
-          record=parsed;selected=path;sha=saved.sha;savedIdentity=String(parsed.data[config.identity]||'');dirty=false;setSaveState('saved');draw();notification(config.title+' saved.');
-        }catch(error){dirty=true;setSaveState('error');notification('Save failed: '+error.message,'error');draw();}
+          record=parsed;selected=path;sha=saved.sha;savedIdentity=String(parsed.data[config.identity]||'');dirty=false;busy=false;setSaveState('saved');draw();notification(config.title+' saved.');
+        }catch(error){dirty=true;busy=false;setSaveState('error');notification('Save failed: '+error.message,'error');draw();}
         finally{busy=false;}
       };
     };
