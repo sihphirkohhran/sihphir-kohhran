@@ -129,3 +129,59 @@ test('checked DELETE submits the exact SHA for all three record types and reject
   await assert.rejects(make('b'.repeat(40))({},'src/content/notices/weekly/2026-11-23.md',sha),error=>error.status===409);
   assert.equal(submitted.length,3,'SHA conflict must not invoke GitHub DELETE');
 });
+
+
+test('actual DELETE endpoint returns 401, 400, 409, 200, and 500 with correct JSON messages',async()=>{
+  // Execute the real handler body, removing only TypeScript annotations so Node 20 can run it.
+  const source=backend.slice(backend.indexOf('export const onRequestDelete ='))
+    .replace('export const onRequestDelete = async ({ request, env }: Context) =>','return async ({ request, env }) =>')
+    .replace('as { path?: string; expectedSha?: string }','');
+  assert.ok(source.startsWith('return async ({ request, env }) =>'));
+  assert.ok(source.includes('error instanceof GitHubError ? error.status : 500'));
+  const validator=backend.match(/const deletableRecordPath = \(path: string\) =>\s*([\s\S]*?);\s*\n/);
+  assert.ok(validator);
+  const deletableRecordPath=new Function('path','return '+validator[1]);
+  const validPath='src/content/notices/weekly/2026-11-23.md';
+  const sha='a'.repeat(40);
+  class GitHubError extends Error{constructor(status,message){super(message);this.status=status;}}
+  let checkedDeletes=0,otherDeletes=0;
+  const getHandler=({authorized=true,conflict=false,unexpected=false}={})=>
+    new Function('getSession','json','allowedPath','deletableRecordPath','deleteCheckedRecord','removeFile','GitHubError',source)(
+      async()=>authorized,
+      (body,status=200)=>new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json'}}),
+      path=>typeof path==='string'&&!path.includes('..')&&path.startsWith('src/content/'),
+      deletableRecordPath,
+      async()=>{checkedDeletes++;if(conflict)throw new GitHubError(409,'This record has changed since it was opened. Reload before deleting.');if(unexpected)throw new Error('Unexpected repository failure.');},
+      async()=>{otherDeletes++;},
+      GitHubError
+    );
+  const request=(body)=>({request:{json:async()=>body},env:{}});
+  const unauthorized=await getHandler({authorized:false})(request({path:validPath,expectedSha:sha}));
+  assert.equal(unauthorized.status,401);
+  assert.match((await unauthorized.json()).error,/Authentication is required/);
+  const invalid=await getHandler()(request({path:'src/content/notices/weekly/../../settings/hero.json',expectedSha:sha}));
+  assert.equal(invalid.status,400);
+  const missingSha=await getHandler()(request({path:validPath}));
+  assert.equal(missingSha.status,400);
+  const conflict=await getHandler({conflict:true})(request({path:validPath,expectedSha:sha}));
+  assert.equal(conflict.status,409);
+  assert.match((await conflict.json()).error,/changed since it was opened/);
+  const unexpected=await getHandler({unexpected:true})(request({path:validPath,expectedSha:sha}));
+  assert.equal(unexpected.status,500);
+  const success=await getHandler()(request({path:validPath,expectedSha:sha}));
+  assert.equal(success.status,200);
+  assert.deepEqual(await success.json(),{ok:true,path:validPath});
+  const unrelated=await getHandler()(request({path:'src/content/gallery/example.md'}));
+  assert.equal(unrelated.status,200);
+  assert.equal(otherDeletes,1,'existing unrelated CMS deletion remains supported');
+  assert.equal(checkedDeletes,3,'invalid and unauthenticated requests must never call checked deletion');
+});
+
+test('unsaved changes require a separate warning before the irreversible confirmation',()=>{
+  assert.match(schedules,/if\(busy\|\|!selected\|\|!sha\|\|!record\)return;\s*\/\/[^\n]*\n\s*if\(!confirmDiscard\(\)\)return;/);
+  assert.match(notices,/if\(deleting\|\|uploads\|\|!selected\?\.path\|\|!selected\.sha\)return;\s*\/\/[^\n]*\n\s*if\(!confirmDiscard\(\)\)return;/);
+  assert.match(schedules,/catch\(error\)\{notification\('Delete failed: '\+error\.message,'error'\);\}/);
+  assert.match(notices,/catch\(error\)\{notification\('Delete failed: '\+error\.message,'error'\);\}/);
+  assert.match(schedules,/finally\{busy=false;if\(deleted\)draw\(\);else deleteButton\.disabled=false;\}/);
+  assert.match(notices,/finally\{deleting=false;if\(redraw\)draw\(\);else if\(button\)button\.disabled=false;\}/);
+});
