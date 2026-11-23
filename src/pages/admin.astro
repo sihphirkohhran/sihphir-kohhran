@@ -34,6 +34,7 @@ import { SITE_ORIGIN } from '../lib/site';
     <script is:inline src="/admin/ministry-manager.js?v=elder-cms-20261113-2"></script>
     <script is:inline src="/admin/fellowship-manager.js"></script>
     <script is:inline src="/admin/site-settings-manager.js"></script>
+    <script is:inline src="/admin/confirm-record-delete.js"></script>
     <script is:inline src="/admin/notice-manager.js"></script>
     <script is:inline src="/admin/schedule-manager.js"></script>
     <script is:inline src="/admin/page-manager.js"></script>
@@ -45,6 +46,19 @@ import { SITE_ORIGIN } from '../lib/site';
   </body>
 </html>
 
+<style is:global>
+  .cms-record-delete-dialog{width:min(92vw,460px);border:1px solid #d9dfe7;border-radius:10px;padding:24px;background:#fffdf8;color:#172941;box-shadow:0 20px 60px #10243f40}
+  .cms-record-delete-dialog::backdrop{background:#10243f9c}
+  .cms-record-delete-dialog h2{font-size:19px;margin:0 0 12px}
+  .cms-record-delete-dialog p{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+  .cms-record-delete-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:10px;margin-top:22px}
+  .cms-record-delete-actions button{min-height:40px;padding:9px 14px;border-radius:7px;border:1px solid #bdc7d4;background:white;color:#172941}
+  .cms-record-delete-actions .cms-record-delete-confirm{background:#a52b35;border-color:#a52b35;color:white;font-weight:700}
+  .cms-record-delete-dialog button:focus-visible{outline:3px solid #b8953f;outline-offset:2px}
+  #schedule-delete,.notice-editor-head #notice-permanent-delete{background:transparent;color:#a52b35;border:1px solid #d8a8ad;border-radius:7px;padding:8px 12px;font-size:12px;font-weight:600}
+  #schedule-delete:focus-visible,.notice-editor-head #notice-permanent-delete:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
+  #schedule-delete:disabled,.notice-editor-head #notice-permanent-delete:disabled{opacity:.5;cursor:not-allowed}
+</style>
 <style is:global>
   .media-detail{padding:24px;display:grid;grid-template-columns:minmax(180px,1fr) minmax(230px,1fr);gap:25px}.media-preview{display:grid;place-items:center;min-height:270px;border-radius:9px;background:#f5f7fa;overflow:hidden}.media-preview img{max-width:100%;max-height:390px;object-fit:contain}.media-preview i{font-size:55px;color:#b88934;font-style:normal}.media-info{display:grid;align-content:start;gap:10px}.media-info p{margin:0;color:#77849a;font-family:ui-monospace,monospace;font-size:11px;overflow-wrap:anywhere}.media-info label{display:grid;gap:6px;font-size:11px;color:#66758c;font-weight:700;text-transform:uppercase}.media-info input{border:1px solid #dbe1e9;border-radius:7px;padding:9px;color:#4a5a71;background:#fafbfd;font-size:12px}.media-info>div{display:flex;gap:9px}.copy-url{border:1px solid #cbd4df;border-radius:7px;background:#fff;padding:9px 12px;color:#43536c;font-size:12px}.media-info small{color:#8390a1;font-size:11px;line-height:1.5}
   :root { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172337; background: #f6f7f9; }
