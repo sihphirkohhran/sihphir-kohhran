@@ -35,14 +35,15 @@ test('schedule parser refuses unsafe legacy formats instead of wiping fields',as
   assert.match(manager,/duty\.name=target\.value/);
 });
 
-test('schedule selection, new/duplicate/archive and navigation warn before discarding changes',async()=>{
+test('schedule selection, new/duplicate and navigation warn before discarding changes',async()=>{
   const manager=await read('../public/admin/schedule-manager.js');
   const app=await read('../public/admin/app.js');
   assert.match(manager,/const confirmDiscard=\(\)=>!dirty\|\|confirm/);
   assert.match(manager,/window\.addEventListener\('beforeunload',beforeUnload\)/);
   assert.match(manager,/window\.__sihphirScheduleCleanup=/);
   assert.match(manager,/if\(!confirmDiscard\(\)\)return/);
-  assert.match(manager,/record\.data\.status=record\.data\.status==='archived'\?'upcoming':'archived'/);
+  assert.doesNotMatch(manager,/id="schedule-archive"/);
+  assert.match(manager,/status:'draft'/);
   assert.match(manager,/selected=null;sha=null;savedIdentity=null;dirty=true/);
   assert.match(manager,/selected=null;sha=null;savedIdentity=null;record=fresh\(\)/);
   assert.match(manager,/if\(!selected&&files\.some\(f=>f\.path===path\)\)/);
@@ -123,7 +124,7 @@ test('weekly and monthly published/draft/archived statuses survive name-only sav
   const context={window:{}};
   runInNewContext(await read('../public/admin/schedule-manager.js'),context);
   const {parse,serialize,validStatuses,applyStatus}=context.window.SihphirScheduleManager;
-  assert.deepEqual(Array.from(validStatuses),['current','upcoming','archived','published','draft']);
+  assert.deepEqual(Array.from(validStatuses),['draft','published']);
   for(const key of ['days','sections']){
     for(const status of ['published','draft','archived','current','upcoming']){
       const identity=key==='days'?'week_start: "2026-11-11"':'month: "May 2026"';
@@ -135,16 +136,18 @@ test('weekly and monthly published/draft/archived statuses survive name-only sav
       assert.equal(saved.data.status,status,key+' '+status);
       assert.equal(saved.data[key][0].duties[0].name,'Updated name');
       assert.equal(saved.body,'Historical body remains\n');
-      applyStatus(saved.data,status);
-      assert.equal(saved.data.status,status);
+      // Legacy status is preserved on content-only edits; explicit publication changes are canonical.
       const reloaded=parse(serialize(saved),key);
       assert.equal(reloaded.data.status,status);
-      applyStatus(reloaded.data,'archived');
-      assert.equal(reloaded.data.status,'archived');
+      applyStatus(reloaded.data,'draft');
+      assert.equal(reloaded.data.status,'draft');
+      assert.equal(reloaded.data.published,false);
+      applyStatus(reloaded.data,'published');
+      assert.equal(reloaded.data.status,'published');
+      assert.equal(reloaded.data.published,true);
     }
   }
   const legacy=parse('---\nmonth: "May 2026"\nsections: [{"title":"Duties","duties":[]}]\n---\n','sections');
-  applyStatus(legacy.data,'');
   assert.equal(Object.hasOwn(legacy.data,'status'),false);
   assert.equal(Object.hasOwn(parse(serialize(legacy),'sections').data,'status'),false);
   assert.throws(()=>applyStatus(legacy.data,'unexpected'),/Unsupported schedule status/);

@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getWeeklySchedules } from '../../lib/cms';
+import { scheduleIsPublic } from '../../lib/schedule-publication.js';
 
 export async function getStaticPaths() {
-  const schedules = (await getWeeklySchedules()).filter((schedule) => schedule.status === 'archived');
+  const schedules = (await getWeeklySchedules()).filter((schedule) => scheduleIsPublic(schedule));
   return schedules.map((schedule) => ({
     params: { slug: String(schedule.id) },
     props: { schedule },

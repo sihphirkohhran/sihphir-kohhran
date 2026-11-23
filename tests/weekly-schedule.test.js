@@ -10,7 +10,8 @@ const archive = read('../src/pages/hun-ruatna/index.astro');
 const detail = read('../src/pages/hun-ruatna/[slug].astro');
 
 test('homepage selects current eligible weekly record with a historical fallback',()=>{
-  assert.match(home,/weeklyRecords\.find\(record => record\.status === 'current'\) \?\? weeklyRecords\[0\]/);
+  assert.match(home,/selectWeekly\(records\.map/);
+  assert.match(home,/scheduleIsPublic\(record\)/);
   assert.match(home,/No publicly available weekly schedules/);
   assert.doesNotMatch(home,/Week of:/);
   assert.doesNotMatch(home,/href="\/hun-ruatna"/);
@@ -18,14 +19,14 @@ test('homepage selects current eligible weekly record with a historical fallback
 });
 
 test('weekly schedule ordering is deterministic for duplicate status/date records', () => {
-  assert.match(cms, /weeklyStatusPriority\(a\.status\) - weeklyStatusPriority\(b\.status\)/);
+  assert.doesNotMatch(cms, /weeklyStatusPriority/);
   assert.match(cms, /weeklyStartTimestamp\(b\.week_start, b\.id\) - weeklyStartTimestamp\(a\.week_start, a\.id\)/);
   assert.match(cms, /dateDifference \|\| a\.id\.localeCompare\(b\.id\)/);
   assert.ok(cms.includes("replace(/\\.md$/, '')"));
 });
 
-test('archive contains archived records only and supports search and year filters', () => {
-  assert.match(archive, /filter\(\(schedule\) => schedule\.status === 'archived'\)/);
+test('archive contains all public records and supports search and year filters', () => {
+  assert.match(archive, /filter\(\(schedule\) => scheduleIsPublic\(schedule\)\)/);
   assert.match(archive, /id="schedule-search"/);
   assert.match(archive, /id="schedule-year"/);
   assert.match(archive, /schedules\.sort\(\(a, b\) => scheduleTimestamp\(b\) - scheduleTimestamp\(a\)/);
@@ -33,7 +34,7 @@ test('archive contains archived records only and supports search and year filter
 });
 
 test('archived schedule detail exposes all structured duty fields', () => {
-  assert.match(detail, /schedule\.status === 'archived'/);
+  assert.match(detail, /scheduleIsPublic\(schedule\)/);
   for (const field of ['time', 'role', 'title', 'name', 'person_responsible', 'speaker', 'bible_text', 'notes']) {
     assert.ok(detail.includes(`duty.${field}`), `detail page missing ${field}`);
   }
