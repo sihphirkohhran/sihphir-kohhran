@@ -68,6 +68,7 @@
       ${assetEditor('photo','Profile Photo',false)}
       ${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||selected.data.notes||''))}
     </form>`;
+    const pastorLegacyFields=()=>['bible_verse','church_served','family_information','notes','short_description','family_photo','gallery','pastor_message','education','phone','email','address','documents'].filter(key=>{const value=selected.data[key];return Array.isArray(value)?value.length:Boolean(String(value??'').trim())});
     const pastorEditorMarkup=()=>`<form id="ministry-form"><header class="ministry-editor-head"><div><span id="ministry-save-state">${dirty?'Unsaved changes':'Profile editor'}</span><h2>${esc(selected.data.name)}</h2></div><div><button type="button" id="ministry-preview">Preview</button><button type="button" class="danger" id="ministry-delete">Delete</button><button class="gold" id="ministry-save">Save</button></div></header>
       <div class="ministry-fields pastor-cms-fields">
         ${field('name','Full Name')}
@@ -79,6 +80,7 @@
       </div>
       ${assetEditor('photo','Profile Photo',false)}
       ${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||''))}
+      ${pastorLegacyFields().length?'<p class="ministry-legacy-note" role="note">Legacy information retained but hidden from this editor and public profile: '+pastorLegacyFields().map(esc).join(', ')+'. Review before any future migration.</p>':''}
       ${selected.data.published===false?'<p class="ministry-publish-note">This profile is currently unpublished. Saving will preserve its unpublished status.</p>':''}
     </form>`;
     const editorMarkup=()=>area==='elders'?elderEditorMarkup():area==='pastors'?pastorEditorMarkup():existingEditorMarkup();
