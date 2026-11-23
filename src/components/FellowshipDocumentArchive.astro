@@ -1,0 +1,134 @@
+---
+import type { buildOwnerDocuments } from '../lib/owner-archives';
+type ArchiveDocument = ReturnType<typeof buildOwnerDocuments>[number];
+interface Props { documents: ArchiveDocument[]; fellowshipSlug: string }
+const { documents, fellowshipSlug } = Astro.props;
+const categories = [...new Set(documents.map(item => item.category))].sort();
+const years = [...new Set(documents.map(item=>item.year).filter((year):year is number => year != null))].sort((a,b)=>b-a);
+const hasUnknown=documents.some(item=>item.yearType==='unspecified');
+const documentLink = (id:string) => `/fellowship/${encodeURIComponent(fellowshipSlug)}?tab=documents&document=${encodeURIComponent(id)}`;
+const formatSize = (size:number|null) => size==null ? 'Size unavailable' : size>=1048576 ? `${(size/1048576).toFixed(1)} MB` : size>=1024 ? `${(size/1024).toFixed(1)} KB` : `${size} B`;
+const isPreviewable = (type:string) => ['pdf','jpg','jpeg','png','gif','webp','avif','svg'].includes(type.toLowerCase());
+const isImage = (type:string) => ['jpg','jpeg','png','gif','webp','avif','svg'].includes(type.toLowerCase());
+---
+<div class="owner-documents" data-owner-documents>
+  <div data-owner-document-listing>
+    <div class="owner-doc-toolbar" aria-label="Fellowship document filters">
+      <label>Search documents<input type="search" data-owner-document-search placeholder="Search titles, descriptions or categories" /></label>
+      <label>Category<select data-owner-document-category><option value="all">All categories</option>{categories.map(category=><option value={category}>{category}</option>)}</select></label>
+      <label>Year<select data-owner-document-year><option value="all">All years</option>{years.map(year=><option value={year}>{year}</option>)}{hasUnknown && <option value="unspecified">Year Unspecified</option>}</select></label>
+      <label>Sort<select data-owner-document-sort><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="title">Title A–Z</option></select></label>
+    </div>
+    <p class="owner-doc-count" aria-live="polite" data-owner-document-count>{documents.length} documents</p>
+    {documents.length > 0 ? <div class="owner-document-list" data-owner-document-list>
+      {documents.map(record=>(
+        <a href={documentLink(record.id)} class="owner-document-row" data-owner-document-row data-owner-document-open={record.id}
+          data-search={`${record.title} ${record.description} ${record.category} ${record.yearLabel}`.toLowerCase()}
+          data-category={record.category} data-year={record.yearFilterValue} data-sort-date={record.sortDate} data-sort-title={record.title.toLowerCase()}>
+          <span class="owner-file-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6zM15 2v5h5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>
+          <span class="owner-document-row-copy"><strong>{record.title}</strong><span class="owner-document-meta">{record.category} · {record.yearLabel} · {record.fileCount} {record.fileCount===1?'file':'files'}{record.featured?' · Featured':''}</span>{record.description && <span class="owner-document-desc">{record.description}</span>}</span>
+          <span class="owner-document-arrow" aria-hidden="true">↗</span>
+        </a>
+      ))}
+    </div> : <p class="owner-doc-empty">No documents are currently published for this Fellowship.</p>}
+    <p class="owner-doc-empty" data-owner-document-no-results hidden>No documents match those filters.</p>
+  </div>
+  <p class="owner-doc-empty" data-owner-document-invalid hidden>This document is not available in this Fellowship archive. <button type="button" data-owner-document-back>Back to Documents</button></p>
+  {documents.map(record=>(
+    <article class="owner-document-detail" data-owner-document-detail={record.id} hidden>
+      <button type="button" class="owner-document-back" data-owner-document-back>← Back to Documents</button>
+      <div class="owner-document-detail-heading"><p>{record.category} · {record.yearLabel}{record.date ? ` · ${record.date}`:''}</p><h2>{record.title}</h2>{record.description && <p>{record.description}</p>}<small>{record.fileCount} attached {record.fileCount===1?'file':'files'}</small></div>
+      <ul class="owner-file-list">
+        {record.files.map(file=>(
+          <li>
+            <span class="owner-file-badge">{file.type==='external'?'LINK':file.type.toUpperCase()}</span>
+            <span class="owner-file-name"><strong>{file.filename}</strong><small>{file.type==='external'?'External document source':formatSize(file.size)}</small></span>
+            <span class="owner-file-actions">
+              {isPreviewable(file.type) && <button type="button" data-owner-preview data-owner-preview-url={file.url} data-owner-preview-type={file.type} data-owner-preview-name={file.filename}>Preview</button>}
+              <a href={file.url} target="_blank" rel="noopener noreferrer" aria-label={`Open ${file.filename} in a new tab`}>Open ↗</a>
+              {file.type!=='external' && <a href={file.url} download={file.filename}>Download</a>}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div class="owner-preview" data-owner-preview-panel hidden>
+        <header><strong data-owner-preview-title></strong><button type="button" data-owner-preview-close>Close preview</button></header>
+        <iframe title="Document PDF preview" data-owner-preview-frame hidden></iframe>
+        <img alt="Document image preview" data-owner-preview-image hidden />
+      </div>
+    </article>
+  ))}
+</div>
+
+<script>
+  import { contentEntryIdMatches } from '../lib/content-deep-links';
+  const docRoot = document.querySelector<HTMLElement>('[data-owner-documents]');
+  if (docRoot) {
+    const listing=docRoot.querySelector<HTMLElement>('[data-owner-document-listing]')!;
+    const invalid=docRoot.querySelector<HTMLElement>('[data-owner-document-invalid]')!;
+    const details=[...docRoot.querySelectorAll<HTMLElement>('[data-owner-document-detail]')];
+    const rows=[...docRoot.querySelectorAll<HTMLElement>('[data-owner-document-row]')];
+    const search=docRoot.querySelector<HTMLInputElement>('[data-owner-document-search]')!;
+    const category=docRoot.querySelector<HTMLSelectElement>('[data-owner-document-category]')!;
+    const year=docRoot.querySelector<HTMLSelectElement>('[data-owner-document-year]')!;
+    const sort=docRoot.querySelector<HTMLSelectElement>('[data-owner-document-sort]')!;
+    const count=docRoot.querySelector<HTMLElement>('[data-owner-document-count]')!;
+    const noResults=docRoot.querySelector<HTMLElement>('[data-owner-document-no-results]')!;
+    let lastTrigger:HTMLAnchorElement|null=null;
+    const filters=()=>{
+      const term=search.value.trim().toLowerCase();
+      let visible=0;
+      rows.forEach(row=>{
+        const show=(!term||(row.dataset.search||'').includes(term))&&(category.value==='all'||row.dataset.category===category.value)&&(year.value==='all'||row.dataset.year===year.value);
+        row.hidden=!show;if(show)visible++;
+      });
+      const grid=docRoot.querySelector<HTMLElement>('[data-owner-document-list]');
+      if(grid)rows.sort((a,b)=>sort.value==='title'?(a.dataset.sortTitle||'').localeCompare(b.dataset.sortTitle||''):sort.value==='oldest'?(a.dataset.sortDate||'').localeCompare(b.dataset.sortDate||''):(b.dataset.sortDate||'').localeCompare(a.dataset.sortDate||'')).forEach(row=>grid.append(row));
+      count.textContent=`${visible} ${visible===1?'document':'documents'}`;
+      noResults.hidden=visible>0||rows.length===0;
+    };
+    [search,category,year,sort].forEach(el=>el.addEventListener(el===search?'input':'change',filters));
+    const closePreviews=()=>{
+      docRoot.querySelectorAll<HTMLElement>('[data-owner-preview-panel]').forEach(panel=>panel.hidden=true);
+      docRoot.querySelectorAll<HTMLIFrameElement>('[data-owner-preview-frame]').forEach(frame=>{frame.removeAttribute('src');frame.hidden=true;});
+      docRoot.querySelectorAll<HTMLImageElement>('[data-owner-preview-image]').forEach(img=>{img.removeAttribute('src');img.hidden=true;});
+    };
+    const syncFromUrl=()=>{
+      const id=new URL(location.href).searchParams.get('document');
+      const detail=id?details.find(item=>contentEntryIdMatches(item.dataset.ownerDocumentDetail||'',id)):undefined;
+      listing.hidden=Boolean(id);invalid.hidden=!id||Boolean(detail);
+      details.forEach(item=>item.hidden=item!==detail);
+      if(!id){closePreviews();filters();}
+    };
+    docRoot.querySelectorAll<HTMLAnchorElement>('[data-owner-document-open]').forEach(link=>link.addEventListener('click',event=>{
+      event.preventDefault();const id=link.dataset.ownerDocumentOpen;if(!id)return;
+      lastTrigger=link;const url=new URL(location.href);url.searchParams.set('tab','documents');url.searchParams.set('document',id);url.searchParams.delete('album');
+      if(url.href!==location.href)history.pushState({...(history.state||{}),fellowshipDocument:id},'',url);
+      syncFromUrl();docRoot.querySelector<HTMLElement>('[data-owner-document-detail]:not([hidden])')?.scrollIntoView({behavior:'smooth',block:'start'});
+    }));
+    docRoot.querySelectorAll<HTMLButtonElement>('[data-owner-document-back]').forEach(button=>button.addEventListener('click',()=>{
+      const current=new URL(location.href).searchParams.get('document');
+      if(current && history.state?.fellowshipDocument===current){history.back();return;}
+      const url=new URL(location.href);url.searchParams.delete('document');history.replaceState(history.state,'',url);syncFromUrl();lastTrigger?.focus();
+    }));
+    window.addEventListener('popstate',syncFromUrl);
+    window.addEventListener('fellowship:location',syncFromUrl);
+    syncFromUrl();
+    docRoot.querySelectorAll<HTMLButtonElement>('[data-owner-preview]').forEach(button=>button.addEventListener('click',()=>{
+      const article=button.closest<HTMLElement>('[data-owner-document-detail]');const panel=article?.querySelector<HTMLElement>('[data-owner-preview-panel]');
+      if(!article||!panel)return;
+      const frame=panel.querySelector<HTMLIFrameElement>('[data-owner-preview-frame]')!;
+      const image=panel.querySelector<HTMLImageElement>('[data-owner-preview-image]')!;
+      const type=button.dataset.ownerPreviewType||'';
+      closePreviews();
+      panel.querySelector<HTMLElement>('[data-owner-preview-title]')!.textContent=button.dataset.ownerPreviewName||'Document preview';
+      if(type==='pdf'){frame.src=button.dataset.ownerPreviewUrl||'';frame.hidden=false;}else{image.src=button.dataset.ownerPreviewUrl||'';image.alt=button.dataset.ownerPreviewName||'Document preview';image.hidden=false;}
+      panel.hidden=false;panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }));
+    docRoot.querySelectorAll<HTMLButtonElement>('[data-owner-preview-close]').forEach(button=>button.addEventListener('click',closePreviews));
+  }
+</script>
+
+<style>
+.owner-documents{color:#172941}.owner-doc-toolbar{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:.65rem;align-items:end;margin-bottom:.9rem}.owner-doc-toolbar label{font:600 .72rem Poppins,sans-serif;color:#34465c;display:grid;gap:.3rem}.owner-doc-toolbar select,.owner-doc-toolbar input{width:100%;min-width:0;background:#fffdf8;border:1px solid #d7d0bd;border-radius:5px;padding:.7rem;color:#172941;font:400 .83rem Poppins,sans-serif}.owner-documents :focus-visible{outline:3px solid #29B9F2;outline-offset:2px}.owner-doc-count{font:.75rem Poppins,sans-serif;color:#536275;margin-bottom:1rem}.owner-document-list{display:grid;gap:.3rem}.owner-document-row{display:flex;gap:1rem;align-items:center;padding:1rem;border:1px solid #e3dcc9;border-radius:5px;background:#fffdf8;color:#172941;text-decoration:none;min-width:0}.owner-document-row:hover{background:#f6f3e9;border-color:#b8953f}.owner-file-icon{width:2rem;height:2.3rem;flex-shrink:0;color:#8e691d}.owner-file-icon svg{width:100%;height:100%}.owner-document-row-copy{display:grid;gap:.3rem;min-width:0;flex:1}.owner-document-row-copy strong{font:600 .87rem Poppins,sans-serif;overflow-wrap:anywhere}.owner-document-meta{font:400 .7rem Poppins,sans-serif;color:#667085}.owner-document-desc{font:1rem/1.4 'EB Garamond',serif;color:#536275;overflow-wrap:anywhere}.owner-document-arrow{color:#8e691d}.owner-document-back{font:600 .8rem Poppins,sans-serif;text-decoration:underline;color:#172941}.owner-document-detail-heading{margin:1rem 0;border:1px solid #e0dccf;background:#fffdf8;border-radius:6px;padding:1.25rem}.owner-document-detail-heading h2{font:700 1.2rem Poppins,sans-serif;margin:.5rem 0}.owner-document-detail-heading p{font:1rem/1.5 'EB Garamond',serif}.owner-document-detail-heading small{display:block;color:#536275;margin-top:.5rem}.owner-file-list{list-style:none;display:grid;gap:.5rem;padding:0}.owner-file-list li{display:flex;align-items:center;gap:1rem;border:1px solid #e0dccf;border-radius:5px;padding:1rem;background:#fffdf8;min-width:0}.owner-file-badge{font:700 .7rem Poppins,sans-serif;color:#8e691d;min-width:2.5rem}.owner-file-name{display:grid;flex:1;min-width:0;overflow-wrap:anywhere}.owner-file-name strong{font:600 .8rem Poppins,sans-serif}.owner-file-name small{font:.75rem 'EB Garamond',serif;color:#6b7280}.owner-file-actions{display:flex;gap:.6rem;flex-wrap:wrap}.owner-file-actions a,.owner-file-actions button{font:600 .72rem Poppins,sans-serif;color:#172941;text-decoration:underline}.owner-file-actions a:hover,.owner-file-actions button:hover{color:#8e691d}.owner-preview{margin-top:1rem;padding:1rem;border:1px solid #d7d0bd;background:#fffdf8;border-radius:5px}.owner-preview header{display:flex;justify-content:space-between;align-items:center;gap:1rem;font:.8rem Poppins,sans-serif;margin-bottom:.8rem}.owner-preview button{color:#172941;text-decoration:underline}.owner-preview iframe{width:100%;height:min(64vh,580px);border:0}.owner-preview img{max-width:100%;max-height:65vh;margin:auto;object-fit:contain}.owner-doc-empty{text-align:center;padding:2rem;font:1rem 'EB Garamond',serif;border:1px dashed #d7d0bd;border-radius:6px}[hidden]{display:none!important}@media(max-width:700px){.owner-doc-toolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.owner-doc-toolbar label:first-child{grid-column:1/-1}.owner-document-row{padding:.75rem}.owner-file-list li{align-items:flex-start;flex-wrap:wrap}.owner-file-actions{width:100%;padding-left:3.5rem}}
+</style>
