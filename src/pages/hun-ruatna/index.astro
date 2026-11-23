@@ -1,8 +1,9 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getWeeklySchedules } from '../../lib/cms';
+import { scheduleIsPublic } from '../../lib/schedule-publication.js';
 
-const schedules = (await getWeeklySchedules()).filter((schedule) => schedule.status === 'archived');
+const schedules = (await getWeeklySchedules()).filter((schedule) => scheduleIsPublic(schedule));
 const scheduleTimestamp = (schedule: typeof schedules[number]) => {
   const value = String(schedule.week_start || '').trim();
   const legacy = value.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
