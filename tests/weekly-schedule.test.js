@@ -9,11 +9,12 @@ const schema = read('../src/content/config.ts');
 const archive = read('../src/pages/hun-ruatna/index.astro');
 const detail = read('../src/pages/hun-ruatna/[slug].astro');
 
-test('homepage selects only a current weekly schedule and has an empty state', () => {
-  assert.match(home, /getWeeklySchedules\(\)\)\.find\(\(schedule\) => schedule\.status === 'current'\)/);
-  assert.match(home, /No current weekly schedule is available/);
-  assert.match(home, /href="\/hun-ruatna"/);
-  assert.doesNotMatch(home, /<div class="pagination mt-4">/);
+test('homepage selects current eligible weekly record with a historical fallback',()=>{
+  assert.match(home,/weeklyRecords\.find\(record => record\.status === 'current'\) \?\? weeklyRecords\[0\]/);
+  assert.match(home,/No publicly available weekly schedules/);
+  assert.doesNotMatch(home,/Week of:/);
+  assert.doesNotMatch(home,/href="\/hun-ruatna"/);
+  assert.doesNotMatch(home,/<div class="pagination mt-4">/);
 });
 
 test('weekly schedule ordering is deterministic for duplicate status/date records', () => {
@@ -71,4 +72,30 @@ test('all three Notice Board tabs remain present and manually activatable', () =
     assert.match(home, new RegExp(`notice-${tab}`));
   }
   assert.match(home, /function activateNoticeTab\(target: string\)/);
+});
+
+test('all Notice Board tabs provide cascading, dynamically populated historical selectors',()=>{
+  for(const tab of ['weekly','monthly','notices']){
+    assert.match(home,new RegExp('data-notice-controls="'+tab+'"'));
+    assert.match(home,new RegExp('id="notice-'+tab+'"'));
+  }
+  assert.match(home,/data-period="year"/);
+  assert.match(home,/data-period="month"/);
+  assert.match(home,/data-period="record"/);
+  assert.match(home,/new Set\(records\.map/);
+  assert.match(home,/availableMonths/);
+  assert.match(home,/week\.value/);
+  assert.match(home,/record\.hidden/);
+  assert.match(home,/record\.dataset\.recordId/);
+  assert.match(home,/sort\(\(a,b\)=>\(b\.dataset\.weekStart/);
+  assert.match(home,/isoDate\(record\.week_start\)/);
+  assert.match(home,/indianDate\(record\.week_start\)/);
+  assert.match(home,/monthTitle\(record\.period\)/);
+  assert.match(home,/noticeIsActive\(notice\)/);
+  assert.match(home,/announcementEntries\.map\(notice=>/);
+  assert.match(home,/notice\.publishDate/);
+  assert.doesNotMatch(home,/View All Notices/);
+  assert.doesNotMatch(home,/View All →/);
+  assert.match(home,/\.notice-duty-label\{font-size:inherit;font-weight:600;color:#172941/);
+  assert.match(home,/@media\(max-width:480px\)/);
 });

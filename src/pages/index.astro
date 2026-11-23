@@ -69,29 +69,40 @@ const galleryPhotos = home.galleryOrder === 'oldest'
     ? pickHomeGalleryPhotos(gallerySource, galleryCount)
     : [];
 
-// Duplicate current records resolve to the newest week, then stable ID order, in getWeeklySchedules().
-const currentWeekly = (await getWeeklySchedules()).find((schedule) => schedule.status === 'current');
-const weeklySchedule = currentWeekly
-  ? {
-      date: [currentWeekly.week_start, currentWeekly.week_end].filter(Boolean).join(' — '),
-      days: (currentWeekly.days as {
-        day: string;
-        duties: { role?: string; name?: string; time?: string }[];
-      }[]) ?? [],
-    }
-  : null;
-
-const latestMonthly = (await getMonthlyDuties())[0];
-const monthlyDuties = latestMonthly
-  ? {
-      month: String(latestMonthly.month ?? ''),
-      sections: (latestMonthly.sections as {
-        title: string;
-        duties: { role: string; name: string }[];
-      }[]) ?? [],
-    }
-  : { month: '', sections: [] };
-
+// Historical records remain server-rendered; the homepage filters eligible records in place.
+const weeklyRecords = (await getWeeklySchedules()).filter(record => String(record.status||'')!=='draft');
+const monthlyRecords = (await getMonthlyDuties()).filter(record => String(record.status||'')!=='draft');
+const weeklyInitial = weeklyRecords.find(record => record.status === 'current') ?? weeklyRecords[0];
+const monthlyInitial = monthlyRecords.find(record => record.status === 'current') ?? monthlyRecords[0];
+const isoDate = (value: unknown): string => {
+  const raw=String(value??'').trim();
+  const iso=raw.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);
+  const legacy=raw.match(/^(\\d{1,2})[.\\/](\\d{1,2})[.\\/](\\d{4})$/);
+  const y=Number(iso?.[1]??legacy?.[3]),m=Number(iso?.[2]??legacy?.[2]),d=Number(iso?.[3]??legacy?.[1]);
+  if(!y||!m||!d||m>12)return '';
+  const check=new Date(Date.UTC(y,m-1,d));
+  return check.getUTCFullYear()===y&&check.getUTCMonth()===m-1&&check.getUTCDate()===d
+    ? String(y).padStart(4,'0')+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0'):'';
+};
+const indianDate=(value: unknown): string => {
+  const date=isoDate(value);
+  return date?date.slice(8,10)+'/'+date.slice(5,7)+'/'+date.slice(0,4):String(value??'');
+};
+const monthKey=(value: unknown): string => {
+  const raw=String(value??'').trim();
+  if(/^(\\d{4})-(0[1-9]|1[0-2])$/.test(raw))return raw;
+  const names=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const legacy=raw.match(/^([A-Za-z]+)\\s+(\\d{4})$/);
+  const index=legacy?names.findIndex(name=>name.toLowerCase()===legacy[1].toLowerCase()):-1;
+  return index>=0?legacy![2]+'-'+String(index+1).padStart(2,'0'):'';
+};
+const monthTitle=(value: string): string => {
+  const key=monthKey(value);
+  if(!key)return value;
+  return new Intl.DateTimeFormat('en-IN',{month:'long',timeZone:'UTC'}).format(new Date(key+'-01T00:00:00Z'))+', '+key.slice(0,4);
+};
+const weeklyBrowse=weeklyRecords.map(record=>({...record,period:isoDate(record.week_start),end:isoDate(record.week_end)})).filter(record=>record.period);
+const monthlyBrowse=monthlyRecords.map(record=>({...record,period:monthKey(record.month)})).filter(record=>record.period);
 const prayerSettings = prayerEntry?.data ?? {};
 const prayerHeading = prayerSettings.heading ?? 'Tawngtai Thupui';
 const prayerSubtitle = prayerSettings.subtitle ?? '';
@@ -133,20 +144,12 @@ const noticeCount = positiveCount(home.noticeCount, 3);
 const noticeVisible = home.noticeVisible !== false && visibility.notice_board !== false;
 const noticeHeading = homeUi.notice_title || String(home.noticeHeading ?? 'Notice Board');
 const noticeSubtitle = homeUi.notice_subtitle || String(home.noticeSubtitle ?? '');
-const noticeButtonText = String(home.noticeButtonText ?? 'View All Notices');
-const noticeButtonLink = String(home.noticeLink ?? '/notices');
-const announcements = await Promise.all(
-  announcementEntries.slice(0, noticeCount).map(async (notice) => {
-    const { Content } = await notice.entry.render();
-    return {
-      id: notice.slug,
-      title: notice.title,
-      date: notice.publishDate,
-      Content,
-    };
-  }),
-);
-
+const announcementPeriods = announcementEntries.map(notice=>({...notice,period:isoDate(notice.publishDate).slice(0,7)})).filter(notice=>notice.period);
+const announcements = await Promise.all(announcementPeriods.map(async notice=>{
+  const {Content}=await notice.entry.render();
+  return {id:notice.id,title:notice.title,date:notice.publishDate,period:notice.period,Content};
+}));
+const initialNoticePeriod=announcements[0]?.period??'';
 const historyFullHtml = renderMarkdown(history.full ?? '');
 const pastorMessageHtml = renderMarkdown(pastor.message ?? '');
 
@@ -459,70 +462,80 @@ const highlightItems = normalizeHighlights(
         <button class="notice-tab" data-target="notices">Notices</button>
       </div>
 
-      <!-- Weekly Schedule Panel -->
-      <div id="notice-weekly" class="notice-panel">
-        {weeklySchedule ? (
-          <>
-            <div class="font-body text-xs text-gray-500 tracking-wide mb-3">Week of: {weeklySchedule.date}</div>
+      <!-- Each record stays server-rendered; selectors reveal the selected eligible period. -->
+      <div id="notice-weekly" class="notice-panel" data-initial={weeklyInitial?.id??''}>
+        <div class="notice-period-controls" data-notice-controls="weekly">
+          <label>Year <select data-period="year" aria-label="Weekly year"></select></label>
+          <label>Month <select data-period="month" aria-label="Weekly month"></select></label>
+          <label>Week <select data-period="record" aria-label="Weekly date range"></select></label>
+        </div>
+        {weeklyBrowse.map(record=>(
+          <div class="notice-period-record" data-record-id={record.id} data-period={record.period.slice(0,7)} data-week-start={record.period} data-week-end={record.end} hidden>
+            <div class="font-body text-xs text-navy font-semibold tracking-wide mb-3">{indianDate(record.week_start)} — {indianDate(record.week_end)}</div>
             <div class="space-y-3">
-              {weeklySchedule.days.map((day, i) => (
-                <div class={`reveal reveal-delay-${i + 1} border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
-                  <div class="font-body text-sm font-semibold text-gray-600 tracking-wide uppercase mb-2">{day.day}</div>
+              {(record.days??[]).map((day,i)=>(
+                <div class={`border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
+                  <div class="font-body text-sm font-semibold text-navy tracking-wide uppercase mb-2">{day.day}</div>
                   <div class="space-y-1">
-                    {day.duties.map(duty => (
-                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm text-gray-700 border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
-                        <span class="min-w-0 text-gray-400 text-xs break-words">{duty.role}</span>
-                        <span class="min-w-0 font-medium text-navy text-left break-words">{duty.name}</span>
+                    {(day.duties??[]).map(duty=>(
+                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
+                        <span class="notice-duty-label min-w-0 break-words">{duty.role||duty.title}</span>
+                        <span class="min-w-0 font-medium text-navy text-left break-words">{duty.name||duty.person_responsible}</span>
                       </div>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-          </>
-        ) : (
-          <p class="rounded border border-gold/20 bg-white px-4 py-3 font-body text-sm text-gray-500">No current weekly schedule is available.</p>
-        )}
-        <div class="mt-3 text-right">
-          <a href="/hun-ruatna" class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/30 hover:border-navy transition-colors">View All →</a>
-        </div>
+          </div>
+        ))}
+        <p class="notice-period-empty" hidden>No publicly available weekly schedules.</p>
       </div>
 
-      <!-- Monthly Duties Panel -->
-      <div id="notice-monthly" class="notice-panel hidden" style="display:none">
-        <div class="font-body text-sm text-navy font-semibold tracking-wide mb-3">{monthlyDuties.month}</div>
-        <div class="space-y-3">
-          {monthlyDuties.sections.map((section, i) => (
-            <div class="bg-white border border-gold/20 border-l-2 border-l-gold rounded-r overflow-hidden">
-              <div class="bg-cream px-4 py-2 border-b border-navy/10">
-                <span class="font-display text-navy font-semibold text-sm">{section.title}</span>
-              </div>
-              <div class="px-4 py-2 space-y-1">
-                {section.duties.map(duty => (
-                  <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-xs text-navy border-b border-navy/10 pb-1.5 last:border-0 last:pb-0">
-                    <span class="min-w-0 text-gray-500 break-words">{duty.role}</span>
-                    <span class="min-w-0 text-navy text-left break-words">{duty.name}</span>
+      <div id="notice-monthly" class="notice-panel" data-initial={monthlyInitial?.id??''} style="display:none">
+        <div class="notice-period-controls" data-notice-controls="monthly">
+          <label>Year <select data-period="year" aria-label="Monthly year"></select></label>
+          <label>Month <select data-period="month" aria-label="Monthly month"></select></label>
+        </div>
+        {monthlyBrowse.map(record=>(
+          <div class="notice-period-record" data-record-id={record.id} data-period={record.period} hidden>
+            <div class="font-body text-sm text-navy font-semibold tracking-wide mb-3">{monthTitle(record.period)}</div>
+            <div class="space-y-3">
+              {(record.sections??[]).map(section=>(
+                <div class="bg-white border border-gold/20 border-l-2 border-l-gold rounded-r overflow-hidden">
+                  <div class="bg-cream px-4 py-2 border-b border-navy/10">
+                    <span class="font-display text-navy font-semibold text-sm">{section.title}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <!-- Notices Panel -->
-      <div id="notice-notices" class="notice-panel" style="display:none">
-        {announcements.map((notice, i) => (
-          <div class={`border-l-2 ${i === 0 ? 'border-gold' : 'border-gold/40'} bg-white rounded-r px-4 py-3 mb-3 ${i > 0 ? 'opacity-70' : ''}`}>
-            <div class="font-body text-[0.6rem] text-gray-400 tracking-widest uppercase mb-1">{notice.date}</div>
-            <div class="font-display text-navy font-semibold text-sm mb-1">{notice.title}</div>
-            <div class="content-page-body font-body text-xs text-gray-600">
-              <notice.Content />
+                  <div class="px-4 py-2 space-y-1">
+                    {(section.duties??[]).map(duty=>(
+                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm text-navy border-b border-navy/10 pb-1.5 last:border-0 last:pb-0">
+                        <span class="notice-duty-label min-w-0 break-words">{duty.role}</span>
+                        <span class="min-w-0 text-navy text-left break-words">{duty.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
+        <p class="notice-period-empty" hidden>No publicly available monthly rosters.</p>
       </div>
-      <div class="mt-4 text-right"><a href={noticeButtonLink} class="font-body text-[0.7rem] tracking-[0.1em] uppercase text-navy border-b border-navy/30 hover:border-navy transition-colors">{noticeButtonText} →</a></div>
+
+      <div id="notice-notices" class="notice-panel" data-initial={initialNoticePeriod} style="display:none">
+        <div class="notice-period-controls" data-notice-controls="notices">
+          <label>Year <select data-period="year" aria-label="Notice year"></select></label>
+          <label>Month <select data-period="month" aria-label="Notice month"></select></label>
+        </div>
+        {announcements.map((notice,i)=>(
+          <div class={`notice-period-record border-l-2 ${i===0?'border-gold':'border-gold/40'} bg-white rounded-r px-4 py-3 mb-3`} data-period={notice.period} hidden>
+            <div class="font-body text-xs text-navy/70 tracking-wide mb-1">{notice.date}</div>
+            <div class="font-display text-navy font-semibold text-sm mb-1">{notice.title}</div>
+            <div class="content-page-body font-body text-xs text-gray-700"><notice.Content /></div>
+          </div>
+        ))}
+        <p class="notice-period-empty" hidden>No publicly available notices for this period.</p>
+      </div>
     </div>
   </section>
 
@@ -586,6 +599,17 @@ const highlightItems = normalizeHighlights(
   </section>
 
 </BaseLayout>
+
+<style>
+  #notice-board .notice-period-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+  #notice-board .notice-period-controls label{display:grid;gap:5px;min-width:0;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;color:#172941}
+  #notice-board .notice-period-controls select{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:7px 9px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font:inherit;font-weight:500}
+  #notice-board .notice-period-controls select:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
+  #notice-board .notice-period-record[hidden],#notice-board .notice-period-empty[hidden]{display:none!important}
+  #notice-board .notice-duty-label{font-size:inherit;font-weight:600;color:#172941;overflow-wrap:anywhere}
+  #notice-board .notice-period-empty{border:1px solid rgba(184,149,63,.2);border-radius:5px;background:#fff;padding:14px;color:#52627a;font-size:13px}
+  @media(max-width:480px){#notice-board .notice-period-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#notice-board .notice-period-controls label:last-child:nth-child(3){grid-column:1/-1}#notice-board .notice-period-record{min-width:0}#notice-board .notice-period-record .grid{gap:8px}}
+</style>
 
 <script>
   // ── HERO SLIDESHOW ──
@@ -660,8 +684,59 @@ const highlightItems = normalizeHighlights(
     });
   });
 
-  // ── NOTICE TAB FIX (ensure first panel shows) ──
-  document.getElementById('notice-weekly')!.style.display = 'block';
+  // The first Notice Board panel is visible by default; the other panels retain their tab state.
+
+  // Native cascading selectors use the actual eligible, server-rendered records.
+  document.querySelectorAll<HTMLElement>('#notice-board .notice-panel').forEach(panel=>{
+    const records=Array.from(panel.querySelectorAll<HTMLElement>('.notice-period-record'));
+    const year=panel.querySelector<HTMLSelectElement>('[data-period="year"]');
+    const month=panel.querySelector<HTMLSelectElement>('[data-period="month"]');
+    const week=panel.querySelector<HTMLSelectElement>('[data-period="record"]');
+    const empty=panel.querySelector<HTMLElement>('.notice-period-empty');
+    if(!year||!month)return;
+    const key=(record:HTMLElement)=>record.dataset.period||'';
+    const options=(select:HTMLSelectElement,values:string[],label:(value:string)=>string)=>{
+      const previous=select.value;
+      select.replaceChildren(...values.map(value=>{const option=document.createElement('option');option.value=value;option.textContent=label(value);return option;}));
+      if(values.includes(previous))select.value=previous;
+      select.disabled=!values.length;
+    };
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const monthName=(value:string)=>months[Number(value)-1]||value;
+    const years=Array.from(new Set(records.map(record=>key(record).slice(0,4)))).sort().reverse();
+    options(year,years,value=>value);
+    const initial=records.find(record=>record.dataset.recordId===panel.dataset.initial||(!record.dataset.recordId&&key(record)===panel.dataset.initial));
+    if(initial)year.value=key(initial).slice(0,4);
+    const update=(level:'year'|'month'|'week',preferInitial=false)=>{
+      const availableMonths=Array.from(new Set(records.filter(record=>key(record).startsWith(year.value+'-')).map(record=>key(record).slice(5,7)))).sort().reverse();
+      const oldMonth=month.value;
+      options(month,availableMonths,monthName);
+      if(level==='year'||!availableMonths.includes(oldMonth))month.value=availableMonths[0]||'';
+      if(preferInitial&&initial&&key(initial).slice(0,4)===year.value)month.value=key(initial).slice(5,7);
+      const visible=records.filter(record=>key(record)===year.value+'-'+month.value);
+      if(week){
+        const sorted=[...visible].sort((a,b)=>(b.dataset.weekStart||'').localeCompare(a.dataset.weekStart||'')||(a.dataset.recordId||'').localeCompare(b.dataset.recordId||''));
+        options(week,sorted.map(record=>record.dataset.recordId||''),id=>{
+          const record=sorted.find(item=>item.dataset.recordId===id);
+          const indian=(value:string)=>/^\\d{4}-\\d{2}-\\d{2}$/.test(value)?value.slice(8)+'/'+value.slice(5,7)+'/'+value.slice(0,4):value;
+          return record?indian(record.dataset.weekStart||'')+' — '+indian(record.dataset.weekEnd||''):id;
+        });
+        if(preferInitial&&initial&&sorted.includes(initial))week.value=initial.dataset.recordId||'';
+        if(level==='year'||level==='month')if(!(preferInitial&&initial&&sorted.includes(initial)))week.value=sorted[0]?.dataset.recordId||'';
+        records.forEach(record=>{record.hidden=record.dataset.recordId!==week.value;});
+      }else if(panel.id==='notice-monthly'){
+        const chosen=preferInitial&&initial&&visible.includes(initial)?initial:visible[0];
+        records.forEach(record=>{record.hidden=record!==chosen;});
+      }else{
+        records.forEach(record=>{record.hidden=!visible.includes(record);});
+      }
+      if(empty)empty.hidden=records.some(record=>!record.hidden);
+    };
+    year.addEventListener('change',()=>update('year'));
+    month.addEventListener('change',()=>update('month'));
+    week?.addEventListener('change',()=>update('week'));
+    update('year',true);
+  });
 
   // ── QUICK LINKS (deep link to notice board tabs) ──
   function activateNoticeTab(target: string) {
