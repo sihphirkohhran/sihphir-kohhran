@@ -106,8 +106,10 @@ test('Document direct multi-file links open the existing accessible file dialog 
 test('invalid or deleted content identifiers are removed without breaking the listing', () => {
   assert.match(galleryPage, /if \(requestedId \|\| legacyId\)/);
   assert.ok(galleryPage.includes("url.searchParams.delete('album')"));
-  assert.ok(documentPage.includes("if (!row) { clearDocumentDeepLink(); return; }"));
-  assert.ok(documentPage.includes("if (!row) { clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }"));
+  assert.ok(documentPage.includes("if (!row) { reportUnavailableDocument(); clearDocumentDeepLink(); return; }"));
+  assert.ok(documentPage.includes("if (!row) { reportUnavailableDocument(); clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }"));
+  assert.ok(galleryPage.includes('id="gallery-unavailable"'));
+  assert.ok(documentPage.includes('id="document-unavailable"'));
   assert.equal(resolveContentDeepLink('?album=missing-id', 'album'), 'missing-id');
   assert.equal(resolveContentDeepLink('?document=deleted-id', 'document'), 'deleted-id');
 });
