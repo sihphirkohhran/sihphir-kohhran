@@ -58,3 +58,37 @@ test('CMS Preview and Copy Document Link remain available for external-only reco
   assert.match(manager,/new URL\('\/document',origin\)/);
   assert.match(manager,/const preview=\(\)=>/);
 });
+
+test('CMS sync preserves external-only records, legacy attachments and source switching',()=>{
+  const source=manager.split('const sync=form=>{')[1].split('const bindEditor=')[0];
+  assert.ok(source,'sync implementation found');
+  const FormData=class {
+    constructor(form){this.form=form}
+    get(key){return Object.hasOwn(this.form,key)?this.form[key]:null}
+  };
+  const run=(data,files,sourceValue,externalValue)=>{
+    const selected={data:{...data},files:files.map(file=>({...file}))};
+    const sync=new Function('selected','FormData','return form=>{'+source);
+    sync(selected,FormData)({
+      name:'External Archive',yearType:'unspecified',category:'Other',description:'',
+      display_order:'0',published:'on',document_source:sourceValue,pdf_external:externalValue
+    });
+    return selected.data;
+  };
+  const drive='https://drive.google.com/file/d/abc/view';
+  const only=run({pdf_url:'',pdf_external:drive},[],'external',drive);
+  assert.equal(only.pdf_external,drive);
+  assert.equal(only.document_source,'external');
+  assert.deepEqual(only.files,[]);
+  const legacyFile={url:'/documents/archive.pdf',filename:'archive.pdf',size:123};
+  const switched=run({pdf_url:legacyFile.url,pdf_external:drive},[legacyFile],'external',drive);
+  assert.equal(switched.pdf_url,legacyFile.url);
+  assert.deepEqual(switched.files,[{...legacyFile,uploaded_at:undefined,modified_at:undefined,type:undefined}]);
+  const back=run(switched,switched.files,'upload',drive);
+  assert.equal(back.pdf_external,drive);
+  assert.equal(back.pdf_url,legacyFile.url);
+  assert.equal(back.document_source,'upload');
+  const legacyRemote=run({pdf_url:drive},[],'external',drive);
+  assert.equal(legacyRemote.pdf_url,drive);
+  assert.equal(legacyRemote.pdf_external,drive);
+});
