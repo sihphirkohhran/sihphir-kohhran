@@ -64,7 +64,8 @@ export function buildOwnerDocuments(entries: DocumentEntry[], owner: string) {
     const stored = Array.isArray(data.files) ? data.files : [];
     const uploaded = stored.map(file => ({
       url: resolveDocumentUrl(file.url), filename: file.filename || filenameFromUrl(file.url),
-      size: file.size ?? null, type: file.type || extension(file.filename || file.url),
+      size: file.size ?? null,
+      type: /^[a-z0-9]{2,8}$/i.test(file.type || '') ? String(file.type).toLowerCase() : extension(file.filename || file.url),
       uploadedAt: file.uploaded_at || '', modifiedAt: file.modified_at || '',
     })).filter(file => file.url);
     const legacyUpload = data.pdf_url && !/^https?:\/\//i.test(data.pdf_url) ? resolveDocumentUrl(data.pdf_url) : '';
