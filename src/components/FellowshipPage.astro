@@ -84,47 +84,6 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
         )}
       </div>
     </div>}
-    <!-- Office Bearers -->
-    {officeBearers.length > 0 && <div class="reveal">
-      <div class="gold-divider mb-4"><h2>{ui.office_bearers_title}</h2></div>
-      <div class="bg-navy border border-gold/20 rounded overflow-hidden">
-        {officeBearers.map((ob, i) => (
-          <div class={`flex items-center justify-between gap-4 px-5 py-3 ${i < officeBearers.length - 1 ? 'border-b border-gold/[0.08]' : ''}`}>
-            <div class="flex items-center gap-3 min-w-0">
-              {ob.photo && <button class="fellowship-person-lightbox" data-lightbox-src={ob.photo} aria-label={`View ${ob.name} photo`}><img src={ob.photo} alt={ob.name} loading="lazy" /></button>}
-              <div><span class="font-body text-[0.65rem] tracking-widest uppercase text-gold/55 block">{ob.role}</span><span class="font-display text-gold-pale font-semibold text-sm">{ob.name}</span></div>
-            </div>
-            {(ob.phone || ob.email) && <span class="font-body text-[0.6rem] text-gold-pale/40 text-right">{ob.phone || ob.email}</span>}
-          </div>
-        ))}
-      </div>
-    </div>}
-    <!-- Committee Members -->
-    {committeeMembers.length > 0 && <div class="reveal">
-      <div class="gold-divider mb-4"><h2>{ui.members_title}</h2></div>
-      <div class="bg-navy border border-gold/20 rounded overflow-hidden">
-        <table class="w-full">
-          <thead>
-            <tr>
-              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10 w-8">#</th>
-              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10">Hming</th>
-              <th class="text-left px-4 py-2.5 font-body text-[0.6rem] tracking-widest uppercase text-gold-pale/40 bg-navy-light border-b border-gold/10">Role</th>
-            </tr>
-          </thead>
-          <tbody>
-            {committeeMembers.map((m, i) => (
-              <tr>
-                <td class="px-4 py-2.5 font-body text-xs text-gold-pale/25 border-b border-gold/[0.06]">{i + 1}</td>
-                <td class="px-4 py-2.5 font-body text-sm text-gold-pale/80 border-b border-gold/[0.06]"><div class="flex items-center gap-3">{m.photo && <button class="fellowship-person-lightbox" data-lightbox-src={m.photo} aria-label={`View ${m.name} photo`}><img src={m.photo} alt={m.name} loading="lazy" /></button>}<span>{m.name}</span></div></td>
-                <td class="px-4 py-2.5 border-b border-gold/[0.06]">
-                  <span class="font-body text-[0.6rem] tracking-wide text-gold-pale/40">{m.role || 'Member'}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>}
     {groupPhotos.length > 0 && (
       <section class="reveal fellowship-group-section" data-fellowship-name={name}>
         <div class="fellowship-group-panel">
