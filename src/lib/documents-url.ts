@@ -67,3 +67,17 @@ export function resolveDocumentUrl(
   if (/^https?:\/\//i.test(external)) return external;
   return normalizePdfUrl(external);
 }
+
+/** Resolve the active source without discarding legacy upload or external metadata. */
+export function resolvePreferredDocumentUrl(data: {
+  document_source?: 'upload' | 'external';
+  pdf_url?: string;
+  pdf_external?: string;
+  files?: { url: string }[];
+}): string {
+  const external = data.pdf_external || (/^https?:\/\//i.test(data.pdf_url || '') ? data.pdf_url : '');
+  const uploaded = data.files?.find(file => file?.url)?.url || (data.pdf_url && !/^https?:\/\//i.test(data.pdf_url) ? data.pdf_url : '');
+  if (data.document_source === 'external') return /^https?:\/\//i.test(external || '') ? external : '';
+  if (data.document_source === 'upload') return resolveDocumentUrl(uploaded);
+  return resolveDocumentUrl(uploaded, external);
+}
