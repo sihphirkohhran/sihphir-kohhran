@@ -43,7 +43,10 @@ const documents = entries
   .filter((entry) => entry.data.status !== 'archived' && entry.data.published !== false)
   .map((entry) => {
     const data = entry.data;
-    const legacyUrl = resolveDocumentUrl(data.pdf_url, data.pdf_external);
+    const externalUrl = data.pdf_external || (/^https?:\/\//i.test(data.pdf_url || '') ? data.pdf_url : '');
+    const uploadedLegacyUrl = data.pdf_url && !/^https?:\/\//i.test(data.pdf_url) ? resolveDocumentUrl(data.pdf_url) : '';
+    const externalLink = /^https?:\/\//i.test(externalUrl || '') ? externalUrl : '';
+    const source = data.document_source === 'external' || (data.document_source !== 'upload' && externalLink && !data.files?.length && !uploadedLegacyUrl) ? 'external' : 'upload';
     const storedFiles = Array.isArray(data.files) ? data.files : [];
     const normalizedFiles = storedFiles
       .map((file) => ({
@@ -55,17 +58,18 @@ const documents = entries
         type: file.type || '',
       }))
       .filter((file) => file.url);
-    if (legacyUrl && !normalizedFiles.some((file) => file.url === legacyUrl)) {
+    if (uploadedLegacyUrl && !normalizedFiles.some((file) => file.url === uploadedLegacyUrl)) {
       normalizedFiles.unshift({
-        url: legacyUrl,
-        filename: filenameFromUrl(legacyUrl),
+        url: uploadedLegacyUrl,
+        filename: filenameFromUrl(uploadedLegacyUrl),
         size: null,
         uploadedAt: '',
         modifiedAt: '',
         type: '',
       });
     }
-    const primary = normalizedFiles[0];
+    const displayedFiles = source === 'external' && externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : normalizedFiles.length ? normalizedFiles : externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : [];
+    const primary = displayedFiles[0];
     const fromId = parseYearMonthFromId(entry.id);
     const legacyYear = data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
     const yearType = resolveHistoricalYearType(legacyYear, (data as typeof data & { yearType?: 'known' | 'approximate' | 'unspecified' }).yearType);
@@ -96,11 +100,11 @@ const documents = entries
       url: primary?.url || '',
       filename: primary?.filename || '',
       size: primary?.size ?? null,
-      extension: ext,
+      extension: primary?.type === 'external' ? 'file' : ext,
       previewable: ext === 'pdf' || ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
       image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg'].includes(ext),
-      files: normalizedFiles.map((file) => ({ ...file, type: file.type || fileExtension(file.filename || file.url) })),
-      fileCount: normalizedFiles.length,
+      files: displayedFiles.map((file) => ({ ...file, type: file.type || fileExtension(file.filename || file.url) })),
+      fileCount: displayedFiles.length,
     };
   })
   .filter((document) => document.url)
