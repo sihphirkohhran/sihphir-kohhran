@@ -58,3 +58,12 @@ test('Multiple notices in one month preserve publication sorting and visibility 
   assert.equal(home.includes("filter((notice) => noticeIsActive(notice))"),true);
   assert.equal(home.includes(".sort((a, b) => sortNotices(a, b))"),true);
 });
+
+test('summary and attachment metadata remain separate from the rich-text body',()=>{
+  assert.match(home,/summary:notice\.summary/);
+  assert.match(home,/attachments:notice\.attachments\.filter/);
+  assert.match(home,/file\.title\|\|file\.name\|\|'View attachment'/);
+  assert.match(home,/class="content-page-body font-body text-xs text-gray-700"><notice\.Content \/><\/div>/);
+  assert.match(home,/notice-accordion-body\[hidden\]/);
+  assert.match(home,/notice-accordion-show-more\[hidden\]/);
+});
