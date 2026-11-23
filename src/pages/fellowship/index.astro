@@ -8,33 +8,27 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
 
 const fellowshipViewButton=ui.view_button||'View Details';
 const fellowshipEntries = await getCollection('fellowship');
-const knownFellowships = (Object.keys(fellowshipMeta) as FellowshipSlug[]).map((id) => {
-  const meta = fellowshipMeta[id];
-  const data = currentFellowshipRecord(fellowshipEntries, id)?.data;
+// CMS records determine which fellowships appear. Established metadata only preserves styling.
+const activeRecords = fellowshipEntries.filter(entry => entry.data.published !== false && entry.data.status !== 'archived');
+const bySlug = new Map<string, typeof activeRecords[number]>();
+for (const entry of activeRecords) {
+  const id = entry.data.slug ?? entry.id.replace(/-\\d{4}$/, '');
+  const current = currentFellowshipRecord(activeRecords, id);
+  if (current) bySlug.set(id, current);
+}
+const fellowships = [...bySlug].map(([id, entry]) => {
+  const data = entry.data;
+  const meta = fellowshipMeta[id as FellowshipSlug];
+  const name = meta?.name ?? data.fellowship_name ?? id.replace(/-/g, ' ');
   return {
-    id,
-    name: meta.name,
-    abbr: meta.abbr,
-    color: meta.accentColor,
-    description: data?.description ?? data?.history_short ?? '',
-    logo: data?.logo,
+    id, name,
+    abbr: meta?.abbr ?? name.split(/\\s+/).map(word => word[0]).join('').slice(0, 3).toUpperCase(),
+    color: meta?.accentColor ?? 'from-navy to-navy-light',
+    description: data.short_description ?? data.description ?? data.history_short ?? '',
+    logo: data.logo,
+    order: meta ? Object.keys(fellowshipMeta).indexOf(id) : (data.display_order ?? data.homepage_order ?? 999),
   };
-});
-const knownSlugs = new Set(knownFellowships.map((item) => item.id));
-const customFellowships = fellowshipEntries
-  .filter((entry) => entry.data.published !== false && entry.data.status !== 'archived')
-  .map((entry) => ({ entry, id: entry.data.slug ?? entry.id.replace(/-\d{4}$/, '') }))
-  .filter(({ id }) => !knownSlugs.has(id as FellowshipSlug))
-  .map(({ entry, id }) => ({
-    id,
-    name: entry.data.fellowship_name || id.replace(/-/g, ' '),
-    abbr: (entry.data.fellowship_name || id).split(/\s+/).map((word) => word[0]).join('').slice(0, 3).toUpperCase(),
-    color: 'from-navy to-navy-light',
-    description: entry.data.short_description ?? entry.data.description ?? entry.data.history_short ?? '',
-    logo: entry.data.logo,
-    order: entry.data.display_order ?? entry.data.homepage_order ?? 999,
-  }));
-const fellowships = [...knownFellowships.map((item, order) => ({ ...item, order })), ...customFellowships].sort((a, b) => a.order - b.order);
+}).sort((a,b) => a.order - b.order || a.name.localeCompare(b.name));
 ---
 
 <BaseLayout title="Fellowship — Sihphir Presbyterian Kohhran" activePage="fellowship">
