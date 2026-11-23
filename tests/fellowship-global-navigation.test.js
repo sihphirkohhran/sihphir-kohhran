@@ -14,7 +14,7 @@ function evaluatePublishedSelection(entries) {
   const last = recordsSource.indexOf('/** One published record per stable slug');
   const source = recordsSource.slice(first, last) + recordsSource.slice(last)
     .replace('entries: FellowshipEntry[]', 'entries')
-    .replace('item is { slug: string; entry: FellowshipEntry }', 'item');
+    .replace('(item): item is { slug: string; entry: FellowshipEntry }', '(item)');
   const js = source
     .replaceAll('entries: FellowshipEntry[]', 'entries')
     .replace('slug: string', 'slug')
