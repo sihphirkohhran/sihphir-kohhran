@@ -76,6 +76,7 @@ test('Notices editor keeps published records editable, saves drafts safely and p
   assert.match(manager,/notice-save-state/);
   assert.match(manager,/notice-search/);
   assert.match(manager,/notice-filter/);
+  assert.match(manager,/applyPublication\(data,values\.get\('published'\)==='on'\)/);
   for(const control of ['notice-save-draft','notice-publish','notice-delete'])assert.ok(manager.includes(control));
   assert.match(manager,/Update Published Notice/);
   assert.match(manager,/form\.requestSubmit\(\)/);
@@ -113,4 +114,59 @@ test('legacy monthly YAML and modern weekly JSON reopen without losing names, ro
   const savedWeekly=manager.parse(manager.serialize(parsedWeekly),'days');
   assert.equal(savedWeekly.data.days[0].duties[0].name,'Pu R. Lalthanmawia');
   assert.throws(()=>manager.parse('---\nmonth: "2026-11"\nsections:\n  - unexpected: "bad"\n---\n','sections'),/Unsupported legacy roster YAML/);
+});
+
+test('weekly and monthly published/draft/archived statuses survive name-only save and reload',async()=>{
+  const context={window:{}};
+  runInNewContext(await read('../public/admin/schedule-manager.js'),context);
+  const {parse,serialize,validStatuses,applyStatus}=context.window.SihphirScheduleManager;
+  assert.deepEqual(Array.from(validStatuses),['current','upcoming','archived','published','draft']);
+  for(const key of ['days','sections']){
+    for(const status of ['published','draft','archived','current','upcoming']){
+      const identity=key==='days'?'week_start: "2026-11-11"':'month: "May 2026"';
+      const section=key==='days'?{day:'Nilaini',duties:[{role:'Tantu',name:'Old name'}]}:{title:'Inkhawm Hruaitu',duties:[{role:'Thla chawhma',name:'Old name'}]};
+      const source='---\n'+identity+'\nstatus: "'+status+'"\n'+key+': '+JSON.stringify([section])+'\n---\nHistorical body remains\n';
+      const record=parse(source,key);
+      record.data[key][0].duties[0].name='Updated name';
+      const saved=parse(serialize(record),key);
+      assert.equal(saved.data.status,status,key+' '+status);
+      assert.equal(saved.data[key][0].duties[0].name,'Updated name');
+      assert.equal(saved.body,'Historical body remains\n');
+      applyStatus(saved.data,status);
+      assert.equal(saved.data.status,status);
+      const reloaded=parse(serialize(saved),key);
+      assert.equal(reloaded.data.status,status);
+      applyStatus(reloaded.data,'archived');
+      assert.equal(reloaded.data.status,'archived');
+    }
+  }
+  const legacy=parse('---\nmonth: "May 2026"\nsections: [{"title":"Duties","duties":[]}]\n---\n','sections');
+  applyStatus(legacy.data,'');
+  assert.equal(Object.hasOwn(legacy.data,'status'),false);
+  assert.equal(Object.hasOwn(parse(serialize(legacy),'sections').data,'status'),false);
+  assert.throws(()=>applyStatus(legacy.data,'unexpected'),/Unsupported schedule status/);
+});
+
+test('notices retain archived/draft/published states on edit; only explicit changes affect visibility',async()=>{
+  const context={window:{}};
+  runInNewContext(await read('../public/admin/notice-manager.js'),context);
+  const {applyPublication}=context.window.SihphirNoticeManager;
+  for(const status of ['published','draft','archived']){
+    const original={title:'Existing notice',status,published:status==='published',pinned:false};
+    const edited={...original,title:'Edited name'};
+    applyPublication(edited,original.published);
+    assert.equal(edited.status,status);
+    assert.equal(edited.published,original.published);
+    const reopened=JSON.parse(JSON.stringify(edited));
+    applyPublication(reopened,reopened.published);
+    assert.equal(reopened.status,status);
+  }
+  const archived={status:'archived',published:false};
+  applyPublication(archived,true);
+  assert.equal(archived.status,'published');
+  applyPublication(archived,false);
+  assert.equal(archived.status,'draft');
+  const unusualArchived={status:'archived',published:true};
+  applyPublication(unusualArchived,true);
+  assert.equal(unusualArchived.status,'archived');
 });
