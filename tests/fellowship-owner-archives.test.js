@@ -74,7 +74,7 @@ test('Fellowship albums preserve complete ordered photo sets, featured fallback,
 
 const documentRecords=[
   {id:'other/church-doc.md',body:'',data:{name:'Church Report',category:'Annual',pdf_url:'/documents/church.pdf'}},
-  {id:'other/uploaded.md',body:'',data:{owner:'ktp',name:'KTP Files',category:'Minutes',year:2026,files:[{url:'/documents/first.pdf',filename:'first.pdf'},{url:'/documents/second.docx',filename:'second.docx'}],document_source:'upload',pdf_external:'https://drive.google.com/old'}},
+  {id:'other/uploaded.md',body:'',data:{owner:'ktp',name:'KTP Files',category:'Minutes',year:2026,files:[{url:'/documents/first.pdf',filename:'first.pdf',type:'application/pdf'},{url:'/documents/second.docx',filename:'second.docx'}],document_source:'upload',pdf_external:'https://drive.google.com/old'}},
   {id:'other/external.md',body:'',data:{owner:'ktp',name:'Remote Report',category:'Minutes',year:1980,yearType:'approximate',document_source:'external',pdf_external:'https://drive.google.com/new',files:[{url:'/documents/unused.pdf'}]}},
   {id:'other/no-upload.md',body:'',data:{owner:'ktp',name:'No Upload',category:'Minutes',document_source:'upload',pdf_external:'https://drive.google.com/stale'}},
   {id:'other/legacy-external.md',body:'',data:{owner:'ktp',name:'Legacy Link',category:'Old',pdf_url:'https://example.org/legacy',yearType:'unspecified'}},
@@ -89,6 +89,7 @@ test('Fellowship documents retain uploaded attachments, respect external selecti
   const uploaded=docs.find(x=>x.id==='other/uploaded');
   assert.deepEqual(JSON.parse(JSON.stringify(uploaded.files.map(x=>x.url))),['/documents/first.pdf','/documents/second.docx']);
   assert.equal(uploaded.fileCount,2);
+  assert.equal(uploaded.files[0].type,'pdf','MIME type should normalize to PDF preview type');
   assert.equal(uploaded.url,'/documents/first.pdf');
   const external=docs.find(x=>x.id==='other/external');
   assert.equal(external.fileCount,1);
