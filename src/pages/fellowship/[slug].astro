@@ -3,26 +3,27 @@ import FellowshipPage from '../../components/FellowshipPage.astro';
 import { getCollection } from 'astro:content';
 import { fellowshipHistoryToHtml } from '../../lib/cms';
 import { fellowshipMeta } from '../../lib/fellowship-meta';
+import { publishedFellowships } from '../../lib/fellowship-records';
 import { resolveGroupPhotos, resolveRelatedGalleryPhotos, resolveRelatedDocuments } from '../../lib/fellowship';
 
 export async function getStaticPaths() {
   const entries = await getCollection('fellowship');
   const known = new Set(Object.keys(fellowshipMeta));
-  return entries
-    .filter((entry) => entry.data.published !== false && entry.data.status !== 'archived')
-    .map((entry) => ({ entry, slug: entry.data.slug ?? entry.id.replace(/-\d{4}$/, '') }))
+  return publishedFellowships(entries)
     .filter(({ slug }) => !known.has(slug))
     .map(({ entry, slug }) => ({ params: { slug }, props: { entry } }));
 }
 
 const { entry } = Astro.props;
 const data = entry.data;
+const ownerSlug = data.slug ?? entry.id.replace(/-\d{4}$/, '');
 const [galleryEntries, documentEntries] = await Promise.all([getCollection('gallery'), getCollection('documents')]);
 const name = data.fellowship_name || data.slug?.replace(/-/g, ' ') || 'Fellowship';
 const abbr = name.split(/\s+/).map((word: string) => word[0]).join('').slice(0, 3).toUpperCase();
 ---
 
 <FellowshipPage
+  ownerSlug={ownerSlug}
   name={name}
   abbr={abbr}
   subtitle={data.motto || data.bible_verse || data.category || 'Sihphir Presbyterian Kohhran'}

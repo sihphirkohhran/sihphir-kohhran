@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { ownedBy } from './content-ownership';
 import { normalizePdfUrl, resolvePreferredDocumentUrl } from './documents-url';
 import { renderMarkdown } from './markdown';
 
@@ -83,7 +84,7 @@ export type KtpInlengDoc = {
 };
 
 export async function getKtpInlengDocs(): Promise<KtpInlengDoc[]> {
-  const entries = await getCollection('documents');
+  const entries = ownedBy(await getCollection('documents'), 'kohhran');
   return entries
     .filter((e) => e.id.startsWith('ktp-inleng/'))
     .map((e) => {
@@ -108,7 +109,7 @@ export async function getKtpInlengDocs(): Promise<KtpInlengDoc[]> {
 }
 
 export async function getOtherDocuments() {
-  const entries = await getCollection('documents');
+  const entries = ownedBy(await getCollection('documents'), 'kohhran');
   return entries
     .filter((e) => e.id.startsWith('other/'))
     .map((e) => ({

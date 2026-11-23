@@ -1,4 +1,5 @@
 import { getCollection } from 'astro:content';
+import { ownedBy } from './content-ownership';
 import { formatHistoricalYear, resolveHistoricalYearType } from './historical-year';
 
 /** Normalize gallery photo field(s) from CMS (single or multiple). */
@@ -39,7 +40,7 @@ function entrySortKey(year: number | null, date?: string, id?: string): string {
 
 /** All gallery images from CMS, newest entries first. */
 export async function loadGalleryPhotos(): Promise<GalleryPhotoItem[]> {
-  const entries = await getCollection('gallery');
+  const entries = ownedBy(await getCollection('gallery'), 'kohhran');
   const photos: GalleryPhotoItem[] = [];
 
   for (const entry of entries) {

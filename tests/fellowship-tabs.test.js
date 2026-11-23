@@ -15,7 +15,7 @@ test('Four tab labels, panels and default History state', () => {
   for (const tab of ['committee','gallery','documents']) assert.ok(page.includes('data-fellowship-panel="' + tab + '" hidden'));
 });
 test('Deep links, back-forward, invalid fallback, keyboard and responsive focus', () => {
-  for (const text of ["searchParams.get('tab')","validTabs.has(value) ? value : 'history'","window.history.pushState","window.addEventListener('popstate'","selectTab(tabFromUrl())","focus-visible","max-width:390px"]) assert.ok(page.includes(text),text);
+  for (const text of ["params.get('tab')","validTabs.has(value) ? value : 'history'","window.history.pushState","window.addEventListener('popstate'","selectTab(tabFromUrl())","focus-visible","max-width:390px"]) assert.ok(page.includes(text),text);
   assert.ok(page.includes("updateHistory && tabFromUrl() !== selected"), "reselecting active tab must not push duplicate history");
   assert.ok(page.includes("button.tabIndex = active ? 0 : -1"), "roving tabindex remains synchronized");
   for (const key of ['ArrowRight','ArrowLeft','Home','End']) assert.ok(page.includes("event.key === '" + key + "'"));

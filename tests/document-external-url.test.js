@@ -50,7 +50,10 @@ test('Homepage resolves active external or upload source and retains legacy fall
   assert.equal((cms.match(/pdf_url: resolvePreferredDocumentUrl\(e\.data\)/g)||[]).length,2);
   const fellowshipPage = read('src/components/FellowshipPage.astro');
   assert.match(fellowshipPage,/id="fellowship-panel-documents"/);
-  assert.match(fellowshipPage,/Fellowship documents will be available here soon\./);
+  assert.match(fellowshipPage,/<FellowshipDocumentArchive documents=\{documents\} fellowshipSlug=\{ownerSlug\}/);
+  const fellowshipArchive = read('src/components/FellowshipDocumentArchive.astro');
+  assert.match(fellowshipArchive,/data-owner-document-detail/);
+  assert.match(fellowshipArchive,/data-owner-preview/);
   assert.doesNotMatch(fellowshipPage,/href=\{document\.url\}/);
   assert.doesNotMatch(fellowshipPage,/relatedDocuments\.map/);
 });

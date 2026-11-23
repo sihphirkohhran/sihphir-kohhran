@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
+import { ownedBy } from '../lib/content-ownership';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
@@ -13,7 +14,7 @@ const pageEntry=await getEntry('settings','document-page');
 const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const categoryRegistry = await getEntry('settings', 'document-categories');
 const registeredCategories = categoryRegistry?.data.categories ?? [];
-const entries = await getCollection('documents');
+const entries = ownedBy(await getCollection('documents'), 'kohhran');
 
 const fileExtension = (value: string) => {
   const clean = value.split(/[?#]/)[0];
@@ -139,6 +140,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 
   <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10" data-download-label={ui.download_button}>
     {page.intro_text && <p class="page-intro reveal">{page.intro_text}</p>}
+    <p id="document-unavailable" class="archive-unavailable" role="status" hidden>This document is not available in the Kohhran archive. Fellowship-owned documents are displayed on their respective <a href="/fellowship">Fellowship pages</a>.</p>
     <section class="document-toolbar reveal" aria-label="Document search and filters">
       <label class="document-search" for="document-search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
@@ -341,6 +343,8 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     closeDialog?.focus();
   }
 
+  function reportUnavailableDocument() { const status=document.querySelector<HTMLElement>('#document-unavailable');if(status)status.hidden=false; }
+
   function clearDocumentDeepLink() {
     const url = new URL(window.location.href);
     url.searchParams.delete('document');
@@ -351,7 +355,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) return;
     const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => contentEntryIdMatches(item.dataset.documentId || '', requestedId));
-    if (!row) { clearDocumentDeepLink(); return; }
+    if (!row) { reportUnavailableDocument(); clearDocumentDeepLink(); return; }
     row.hidden = false;
     openDocumentRow(row, { fromUrl: true });
   }
@@ -374,7 +378,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
     const requestedId = resolveContentDeepLink(window.location.search, 'document');
     if (!requestedId) { if (dialog?.open) dialog.close(); else lastFocusedRow?.focus(); return; }
     const row = [...document.querySelectorAll<HTMLButtonElement>('[data-document-open]')].find(item => contentEntryIdMatches(item.dataset.documentId || '', requestedId));
-    if (!row) { clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }
+    if (!row) { reportUnavailableDocument(); clearDocumentDeepLink(); if (dialog?.open) dialog.close(); return; }
     row.hidden = false;
     if (!dialog?.open) openDocumentRow(row, { fromUrl: true });
   });
@@ -392,7 +396,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
 </script>
 
 <style>
-  .documents-page{color:#13233a}
+  .archive-unavailable{margin:0 0 1rem;padding:1rem;background:#fff9ec;border:1px solid #b8953f;border-radius:6px;color:#172941;font:400 .8rem Poppins,sans-serif}.archive-unavailable[hidden]{display:none}.archive-unavailable a{text-decoration:underline}.documents-page{color:#13233a}
   .document-toolbar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px 16px;padding:14px 0 12px;border-bottom:1px solid rgba(18,35,59,.12)}
   .document-search{grid-column:1/-1;display:flex;align-items:center;gap:10px;border:1px solid rgba(18,35,59,.16);border-radius:5px;padding:0 12px;background:#fff}
   .document-search:focus-within{border-color:#b8953f;box-shadow:0 0 0 2px rgba(184,149,63,.1)}

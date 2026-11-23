@@ -1,9 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import { ownedBy } from '../lib/content-ownership';
+import { buildOwnerAlbums, buildOwnerDocuments } from '../lib/owner-archives';
+import FellowshipGalleryArchive from './FellowshipGalleryArchive.astro';
+import FellowshipDocumentArchive from './FellowshipDocumentArchive.astro';
 import type { FellowshipGroupPhoto } from '../lib/fellowship';
 import { getPageSettings } from '../lib/page-settings';
 
 interface Props {
+  ownerSlug: string;
   name: string;
   abbr: string;
   subtitle: string;
@@ -20,6 +26,7 @@ interface Props {
 }
 
 const {
+  ownerSlug,
   name,
   abbr,
   subtitle,
@@ -37,6 +44,9 @@ const {
 
 const defaultGroupYear = groupPhotos[0]?.year;
 const isKtp = variant === 'ktp';
+const [galleryEntries, documentEntries] = await Promise.all([getCollection('gallery'), getCollection('documents')]);
+const albums = buildOwnerAlbums(ownedBy(galleryEntries, ownerSlug), ownerSlug);
+const documents = buildOwnerDocuments(ownedBy(documentEntries, ownerSlug), ownerSlug);
 const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:name,hero_subtitle:subtitle,history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search fellowships…',empty_message:'No fellowships found',back_button:'All Fellowships'});
 ---
 
@@ -80,7 +90,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
     </div>
   </div>
 
-  <div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="max-w-2xl mx-auto px-4 py-8" style={isKtp ? '--owner-focus:#29B9F2' : undefined}>
     <section id="fellowship-panel-history" role="tabpanel" aria-labelledby="fellowship-tab-history" tabindex="0" class="space-y-8" data-fellowship-panel="history">
 
     <!-- History -->
@@ -139,10 +149,10 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
       <div class="fellowship-empty-state"><h2>Committee</h2><p>Committee information will be available through the centralized Committee system.</p></div>
     </section>
     <section id="fellowship-panel-gallery" role="tabpanel" aria-labelledby="fellowship-tab-gallery" tabindex="0" data-fellowship-panel="gallery" hidden>
-      <div class="fellowship-empty-state"><h2>Gallery</h2><p>Fellowship albums will be available here soon.</p></div>
+      <FellowshipGalleryArchive albums={albums} fellowshipSlug={ownerSlug} />
     </section>
     <section id="fellowship-panel-documents" role="tabpanel" aria-labelledby="fellowship-tab-documents" tabindex="0" data-fellowship-panel="documents" hidden>
-      <div class="fellowship-empty-state"><h2>Documents</h2><p>Fellowship documents will be available here soon.</p></div>
+      <FellowshipDocumentArchive documents={documents} fellowshipSlug={ownerSlug} />
     </section>
   </div>
 
@@ -154,7 +164,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
   const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[data-fellowship-tab]'));
   const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-fellowship-panel]'));
   const validTabs = new Set(['history', 'committee', 'gallery', 'documents']);
-  const tabFromUrl = () => { const value = new URL(window.location.href).searchParams.get('tab'); return value && validTabs.has(value) ? value : 'history'; };
+  const tabFromUrl = () => { const params = new URL(window.location.href).searchParams; const value = params.get('tab'); if (value !== null) return validTabs.has(value) ? value : 'history'; if (params.has('album')) return 'gallery'; if (params.has('document')) return 'documents'; return 'history'; };
   const selectTab = (tab: string, updateHistory = false, focus = false) => {
     const selected = validTabs.has(tab) ? tab : 'history';
     tabButtons.forEach(button => {
@@ -168,8 +178,11 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
       const url = new URL(window.location.href);
       if (selected === 'history') url.searchParams.delete('tab');
       else url.searchParams.set('tab', selected);
+      if (selected !== 'gallery') url.searchParams.delete('album');
+      if (selected !== 'documents') url.searchParams.delete('document');
       window.history.pushState({ fellowshipTab: selected }, '', url);
     }
+    if (updateHistory) window.dispatchEvent(new Event('fellowship:location'));
   };
   tabButtons.forEach((button, index) => {
     button.addEventListener('click', () => selectTab(button.dataset.fellowshipTab || 'history', true));
