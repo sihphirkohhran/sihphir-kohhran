@@ -251,5 +251,5 @@ export const onRequestDelete = async ({ request, env }: Context) => {
       await removeFile(env, path, `admin: remove ${path}`);
     }
     return json({ ok: true, path });
-  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to delete file.' }, 500); }
+  } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to delete file.' }, error instanceof GitHubError ? error.status : 500); }
 };
