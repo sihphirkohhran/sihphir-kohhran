@@ -62,7 +62,7 @@ async function readFile(env: Env, path: string) {
   const { branch } = configuration(env);
   const response = await github(env, `/contents/${path}?ref=${encodeURIComponent(branch)}&cache_bust=${Date.now()}`);
   const data = await response.json() as { content: string; sha: string };
-  return { sha: data.sha, content: atob(data.content.replace(/\n/g, '')) };
+  return { sha: data.sha, content: new TextDecoder().decode(Uint8Array.from(atob(data.content.replace(/\n/g, '')), char => char.charCodeAt(0))) };
 }
 
 async function latestFileSha(env: Env, path: string) {
@@ -94,6 +94,22 @@ async function writeGitHubFile(env: Env, path: string, content: string, message:
     }
   }
   throw new GitHubError(409, 'The gallery could not be saved. Your edits are still in the editor; please try again.');
+}
+
+// Opt-in optimistic concurrency for schedule/notice editors; legacy callers keep their existing flow.
+async function writeCheckedFile(env: Env, path: string, content: string, message: string, expectedSha: string | null) {
+  const { branch } = configuration(env);
+  const actualSha = await latestFileSha(env, path);
+  if ((actualSha || null) !== expectedSha) {
+    throw new GitHubError(409, 'This record changed since it was opened (or its filename is already in use). Reload it before saving; your unsaved edits remain in the editor.');
+  }
+  const response = await github(env, `/contents/${path}`, {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ message, content: btoa(unescape(encodeURIComponent(content))), branch, sha: actualSha }),
+  });
+  const result = await response.json() as { content?: { sha?: string } };
+  return { retried: false, sha: result.content?.sha };
 }
 
 async function writeFile(env: Env, path: string, content: string, message: string) {
@@ -143,7 +159,7 @@ export const onRequestGet = async ({ request, env }: Context) => {
 export const onRequestPut = async ({ request, env }: Context) => {
   try {
     if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
-    const { path, content, message, updates } = await request.json() as { path?: string; content?: string; message?: string; updates?: Array<{ path?: string; content?: string; message?: string }> };
+    const { path, content, message, updates, expectedSha } = await request.json() as { path?: string; content?: string; message?: string; expectedSha?: string | null; updates?: Array<{ path?: string; content?: string; message?: string }> };
     if (updates) {
       if (!Array.isArray(updates) || !updates.length || updates.some(update => !update.path || typeof update.content !== 'string' || update.content.length > 1_000_000 || !allowedPath(update.path))) return json({ error: 'Invalid content updates.' }, 400);
       let retried = false;
@@ -154,7 +170,7 @@ export const onRequestPut = async ({ request, env }: Context) => {
       return json({ ok: true, retried, message: retried ? 'The content changed while you were editing. The save was completed with the latest version.' : undefined });
     }
     if (!path || typeof content !== 'string' || content.length > 1_000_000 || !allowedPath(path)) return json({ error: 'Invalid content update.' }, 400);
-    const result = await writeFile(env, path, content, message || `admin: update ${path}`);
+    const result = expectedSha !== undefined ? await writeCheckedFile(env, path, content, message || `admin: update ${path}`, expectedSha) : await writeFile(env, path, content, message || `admin: update ${path}`);
     return json({ ok: true, ...result, message: result.retried ? 'The gallery changed while you were editing. The save was completed with the latest version.' : undefined });
   } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to save content.' }, error instanceof GitHubError ? error.status : 500); }
 };
