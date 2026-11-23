@@ -73,7 +73,9 @@ test('Notices editor keeps published records editable, saves drafts safely and p
   assert.match(manager,/selected\.path=path;selected\.sha=result\.sha/);
   assert.match(manager,/const path=selected\.path\|\|/);
   assert.match(manager,/selected\.data\.published=false/);
-  assert.doesNotMatch(manager,/method:'DELETE'/);
+  assert.match(manager,/method:'DELETE'/);
+  assert.match(manager,/expectedSha/);
+  assert.match(manager,/notice-permanent-delete/);
   assert.match(manager,/notice-save-state/);
   assert.match(manager,/notice-search/);
   assert.match(manager,/notice-filter/);
