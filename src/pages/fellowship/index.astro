@@ -2,21 +2,13 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { fellowshipMeta, type FellowshipSlug } from '../../lib/fellowship-meta';
-import { currentFellowshipRecord } from '../../lib/fellowship-records';
+import { publishedFellowships } from '../../lib/fellowship-records';
 import { getPageSettings } from '../../lib/page-settings';
 const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian Kohhran',hero_title:'Fellowship',hero_subtitle:'Thalai, hmeichhia, mipa leh member zawng zawng tan',history_title:'History',office_bearers_title:'Office Bearers',members_title:'Committee Members',gallery_title:'Gallery',documents_title:'Documents',search_placeholder:'Search fellowships…',empty_message:'No fellowships found',back_button:'All Fellowships'});
 
 const fellowshipViewButton=ui.view_button||'View Details';
 const fellowshipEntries = await getCollection('fellowship');
-// CMS records determine which fellowships appear. Established metadata only preserves styling.
-const activeRecords = fellowshipEntries.filter(entry => entry.data.published !== false && entry.data.status !== 'archived');
-const bySlug = new Map<string, typeof activeRecords[number]>();
-for (const entry of activeRecords) {
-  const id = entry.data.slug ?? entry.id.replace(/-\d{4}$/, '');
-  const current = currentFellowshipRecord(activeRecords, id);
-  if (current) bySlug.set(id, current);
-}
-const fellowships = [...bySlug].map(([id, entry]) => {
+const fellowships = publishedFellowships(fellowshipEntries).map(({ slug: id, entry }) => {
   const data = entry.data;
   const meta = fellowshipMeta[id as FellowshipSlug];
   const name = meta?.name ?? data.fellowship_name ?? id.replace(/-/g, ' ');
