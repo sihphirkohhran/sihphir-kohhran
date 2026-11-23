@@ -61,8 +61,8 @@ test('Legacy owner and categories remain independent; invalid fellowship IDs exc
 test('Fellowship listing and routes remain CMS-driven with established metadata styling', () => {
   const listing=read('src/pages/fellowship/index.astro');
   const route=read('src/pages/fellowship/[slug].astro');
-  assert.match(listing,/const activeRecords = fellowshipEntries\.filter/);
-  assert.match(listing,/const bySlug = new Map/);
+  assert.match(listing,/publishedFellowships\(fellowshipEntries\)/);
+  assert.match(read('src/lib/fellowship-nav.ts'),/publishedFellowships\(entries\)/);
   assert.match(listing,/meta\?\.accentColor/);
   assert.match(route,/getStaticPaths/);
   assert.match(route,/\.filter\(\(\{ slug \}\) => !known\.has\(slug\)\)/);
