@@ -77,11 +77,11 @@
         ${field('start_year','Start Year','number')}
         ${field('end_year','End Year','number')}
         <label><span>Current / Former</span><select name="record_status"><option value="Current" ${recordStatus(selected)==='Current'?'selected':''}>Current</option><option value="Former" ${recordStatus(selected)==='Former'?'selected':''}>Former</option></select></label>
+        <div class="wide ministry-checks">${checks()}<span>Uncheck to save as Draft (not visible publicly).</span></div>
       </div>
       ${assetEditor('photo','Profile Photo',false)}
       ${richEditor('biography','Biography',safeEditorHtml(selected.data.biography||selected.body||''))}
       ${pastorLegacyFields().length?'<p class="ministry-legacy-note" role="note">Legacy information retained but hidden from this editor and public profile: '+pastorLegacyFields().map(esc).join(', ')+'. Review before any future migration.</p>':''}
-      ${selected.data.published===false?'<p class="ministry-publish-note">This profile is currently unpublished. Saving will preserve its unpublished status.</p>':''}
     </form>`;
     const editorMarkup=()=>area==='elders'?elderEditorMarkup():area==='pastors'?pastorEditorMarkup():existingEditorMarkup();
     const assetEditor=(key,label,multiple,documents=false)=>{const values=!multiple?[selected.data[key]].filter(Boolean):Array.isArray(selected.data[key])?selected.data[key]:[];return`<section class="ministry-assets" data-assets="${key}"><header><div><h3>${label}</h3><p>${multiple?'Drag to reorder or remove uploaded files.':'Choose, preview, replace or delete this image.'}</p></div><button type="button" data-upload="${key}">${values.length?'Replace':'Choose File'}</button></header><input type="file" data-picker="${key}" ${multiple?'multiple':''} accept="${documents?'.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.zip':'image/*'}" hidden><div class="ministry-drop" data-drop="${key}">Drop ${documents?'documents':'images'} here or choose Upload</div><div class="ministry-asset-list">${values.map((url,index)=>`<article draggable="${multiple}" data-asset-index="${index}">${documents?'<i>FILE</i>':`<img src="${esc(url)}" alt="">`}<span>${esc(url.split('/').pop())}</span>${!documents&&multiple&&index===0?'<b>Featured image</b>':''}<button type="button" data-remove-asset="${key}:${index}">${multiple?'Remove':'Delete'}</button></article>`).join('')||'<p>No files attached.</p>'}</div></section>`};
