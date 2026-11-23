@@ -238,9 +238,18 @@ export const onRequestDelete = async ({ request, env }: Context) => {
   try {
     if (!(await getSession(request, env))) return json({ error: 'Authentication is required.' }, 401);
     const { path, expectedSha } = await request.json() as { path?: string; expectedSha?: string };
-    if (!path || !deletableRecordPath(path)) return json({ error: 'Only saved weekly, monthly and announcement records may be deleted here.' }, 400);
-    if (typeof expectedSha !== 'string' || !/^[a-f0-9]{40}$/.test(expectedSha)) return json({ error: 'A valid saved record SHA is required to delete.' }, 400);
-    await deleteCheckedRecord(env, path, expectedSha);
+    if (!path || !allowedPath(path)) return json({ error: 'Invalid delete request.' }, 400);
+    // Preserve existing authenticated deletion workflows in other CMS modules.
+    // These three record types must always supply the SHA from the opened record.
+    const scheduleOrNotice = ['src/content/notices/weekly/', 'src/content/notices/monthly/', 'src/content/notices/announcements/'].some(prefix => path.startsWith(prefix));
+    if (scheduleOrNotice) {
+      if (!deletableRecordPath(path)) return json({ error: 'Invalid schedule or notice record path.' }, 400);
+      if (typeof expectedSha !== 'string' || !/^[a-f0-9]{40}$/.test(expectedSha)) return json({ error: 'A valid saved record SHA is required to delete.' }, 400);
+      await deleteCheckedRecord(env, path, expectedSha);
+    } else {
+      if (expectedSha !== undefined) return json({ error: 'Checked record deletion is restricted to weekly, monthly and announcement records.' }, 400);
+      await removeFile(env, path, `admin: remove ${path}`);
+    }
     return json({ ok: true, path });
   } catch (error) { return json({ error: error instanceof Error ? error.message : 'Unable to delete file.' }, 500); }
 };
