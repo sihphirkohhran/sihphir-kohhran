@@ -164,7 +164,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
       if (active && focus) button.focus();
     });
     panels.forEach(panel => { panel.hidden = panel.dataset.fellowshipPanel !== selected; });
-    if (updateHistory) {
+    if (updateHistory && tabFromUrl() !== selected) {
       const url = new URL(window.location.href);
       if (selected === 'history') url.searchParams.delete('tab');
       else url.searchParams.set('tab', selected);
