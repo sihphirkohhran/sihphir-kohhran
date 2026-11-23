@@ -56,6 +56,7 @@ test('authenticated admin API prevents stale overwrites and duplicate creation f
   assert.match(backend,/expectedSha !== undefined \? await writeCheckedFile/);
   assert.match(backend,/if \(!\(await getSession\(request, env\)\)\)/);
   assert.match(backend,/notices: \['src\/content\/notices\/announcements\/'\]/);
+  assert.match(backend,/new TextDecoder\(\)\.decode\(Uint8Array\.from\(atob/);
 });
 
 test('Notices editor keeps published records editable, saves drafts safely and preserves notice URLs',async()=>{
