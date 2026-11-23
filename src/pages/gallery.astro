@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { getFallbackGalleryPhotos } from '../lib/gallery';
+import { ownedBy } from '../lib/content-ownership';
 import { uniqueGalleryPhotos, shouldOpenExternalAlbum } from '../lib/gallery-navigation';
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
 import { getPageSettings } from '../lib/page-settings';
@@ -13,7 +14,7 @@ const pageEntry=await getEntry('settings','gallery-page');
 const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const registry = await getEntry('settings', 'gallery-categories');
 const registeredCategories = registry?.data.categories?.map((item) => item.name) ?? [];
-const entries = (await getCollection('gallery')).filter((entry) => entry.data.status !== 'archived');
+const entries = ownedBy(await getCollection('gallery'), 'kohhran');
 const galleryPlaceholder = '/images/profile-placeholder.svg';
 
 const galleryPhotoSrc = (photo: string | { src?: string; photo?: string }) =>
