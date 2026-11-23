@@ -29,6 +29,8 @@
     const save=async event=>{event.preventDefault();if(deleting||uploads)return notification('Wait for the current operation to finish.','error');sync(event.currentTarget);if(!selected.data.title)return notification('Title is required.','error');const path=selected.path||`${ROOT}${selected.data.publish_date}-${selected.data.slug}.md`;if(!selected.path&&records.some(record=>record.path===path))return notification('This notice filename is already used. Choose another title or date.','error');try{const result=await api('/api/admin/content',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({path,expectedSha:selected.sha??null,content:serialize(selected),message:`admin: save notice ${selected.data.title}`})});selected.path=path;selected.sha=result.sha;dirty=false;notification('Notice saved.');await load();selected=records.find(record=>record.path===path)||selected;draw();}catch(error){dirty=true;notification(error.message,'error');}};
     const deleteNotice=async()=>{
       if(deleting||uploads||!selected?.path||!selected.sha)return;
+      // The permanent-delete dialog is separate from confirming loss of unsaved edits.
+      if(!confirmDiscard())return;
       const target=selected,path=target.path,expectedSha=target.sha,title=String(target.data.title||'Untitled Notice');
       deleting=true;
       const button=document.querySelector('#notice-permanent-delete');if(button)button.disabled=true;
