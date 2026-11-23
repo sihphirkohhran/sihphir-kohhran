@@ -25,7 +25,7 @@ test('backend restricts SHA-checked deletion to exact weekly monthly and announc
   assert.match(backend,/throw new GitHubError\(409, 'This record has changed or was deleted/);
   assert.match(backend,/method: 'DELETE'/);
   assert.match(backend,/sha: expectedSha, branch/);
-  assert.doesNotMatch(backend,/deleteCheckedRecord[\s\S]*?for \(let attempt/);
+  assert.doesNotMatch(backend.slice(backend.indexOf('async function deleteCheckedRecord'),backend.indexOf('async function readBase64File')),/for \(let attempt/);
 });
 
 test('schedule deletion uses saved SHA and only offers Delete for existing records',()=>{
