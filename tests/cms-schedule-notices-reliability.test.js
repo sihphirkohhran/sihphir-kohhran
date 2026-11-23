@@ -111,7 +111,7 @@ test('legacy monthly YAML and modern weekly JSON reopen without losing names, ro
   assert.equal(savedMonthly.data.sections[4].duties.length,1);
   assert.equal(savedMonthly.data.sections[4].duties[0].name,'Person 5');
 
-  const weekly=await read('../src/content/notices/weekly/2026-11-11.md');
+  const weekly='---\nweek_start: "2026-11-11"\nstatus: "archived"\ndays: '+JSON.stringify([{day:'Nilaini',duties:[{role:'Tantu',name:'Pu R. Lalthanmawia'}]}])+'\n---\n';
   const parsedWeekly=manager.parse(weekly,'days');
   assert.ok(['current','published','draft','upcoming','archived'].includes(parsedWeekly.data.status));
   assert.equal(parsedWeekly.data.days[0].duties[0].name,'Pu R. Lalthanmawia');
