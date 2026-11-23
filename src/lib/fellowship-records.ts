@@ -16,3 +16,10 @@ export function fellowshipRecords(entries: FellowshipEntry[], slug: string) {
 export function currentFellowshipRecord(entries: FellowshipEntry[], slug: string) {
   return fellowshipRecords(entries, slug)[0];
 }
+
+/** One published record per stable slug, shared by the listing and global navigation. */
+export function publishedFellowships(entries: FellowshipEntry[]) {
+  const slugs = new Set(entries.map(entry => entry.data.slug ?? entry.id.replace(/-\d{4}$/, '')));
+  return [...slugs].map(slug => ({ slug, entry: currentFellowshipRecord(entries, slug) }))
+    .filter((item): item is { slug: string; entry: FellowshipEntry } => Boolean(item.entry));
+}
