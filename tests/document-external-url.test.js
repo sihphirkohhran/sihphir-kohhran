@@ -92,3 +92,55 @@ test('CMS sync preserves external-only records, legacy attachments and source sw
   assert.equal(legacyRemote.pdf_url,drive);
   assert.equal(legacyRemote.pdf_external,drive);
 });
+
+test('functional preferred source and fellowship related document resolution',()=>{
+  const preferredSource=urls.slice(urls.indexOf('export function resolvePreferredDocumentUrl('));
+  const preferredBody=preferredSource.slice(preferredSource.indexOf('{',preferredSource.indexOf('): string'))+1,preferredSource.lastIndexOf('}'));
+  const normalizePdfUrl=url=>url||'';
+  const resolveDocumentUrl=(file,external)=>file||external||'';
+  const resolvePreferredDocumentUrl=new Function('normalizePdfUrl','resolveDocumentUrl','return data=>{'+preferredBody+'}')(normalizePdfUrl,resolveDocumentUrl);
+  const fellowship=read('src/lib/fellowship.ts');
+  const relatedSource=fellowship.slice(fellowship.indexOf('export function resolveRelatedDocuments('));
+  const relatedBody=relatedSource.slice(relatedSource.indexOf('{')+1,relatedSource.lastIndexOf('}'));
+  const contentId=path=>path.split('/').pop().replace(/\\.(md|json)$/i,'');
+  const resolveRelatedDocuments=new Function('resolvePreferredDocumentUrl','contentId','return (entries,paths=[])=>{'+relatedBody+'}')(resolvePreferredDocumentUrl,contentId);
+  const drive='https://drive.google.com/file/d/123/view';
+  const uploaded='/documents/annual-report.pdf';
+  const cases=[
+    [{document_source:'external',pdf_external:drive},drive],
+    [{document_source:'upload',pdf_url:uploaded},uploaded],
+    [{document_source:'external',pdf_external:drive,pdf_url:uploaded,files:[{url:uploaded}]},drive],
+    [{document_source:'upload',pdf_external:drive,pdf_url:uploaded,files:[{url:uploaded}]},uploaded],
+    [{document_source:'upload',pdf_external:drive},''],
+    [{document_source:'external',pdf_url:uploaded},''],
+    [{pdf_external:drive},drive],
+    [{pdf_url:uploaded},uploaded],
+    [{file_url:uploaded},''],
+  ];
+  for(const [data,expected] of cases){
+    assert.equal(resolvePreferredDocumentUrl(data),expected,JSON.stringify(data));
+    const result=resolveRelatedDocuments([{id:'other/report.md',data:{name:'Report',category:'Other',...data}}],['other/report.md']);
+    assert.equal(result[0]?.url||'',expected||(!data.document_source?data.file_url||'':''),JSON.stringify(data));
+  }
+  assert.equal(resolveRelatedDocuments([{id:'other/report.md',data:{document_source:'upload',pdf_external:drive}}],['other/report.md']).length,0);
+});
+
+test('functional public file selection respects explicit source through source switching',()=>{
+  const source=page.match(/const displayedFiles = ([^;]+);/);
+  assert.ok(source,'public displayedFiles expression exists');
+  const select=new Function('source','externalLink','normalizedFiles','data','return '+source[1]);
+  const external='https://example.org/document';
+  const uploaded={url:'/documents/report.pdf',filename:'report.pdf'};
+  const state={document_source:'external'};
+  const show=files=>select(state.document_source,external,files,state).map(file=>file.url);
+  assert.deepEqual(show([]),[external]);
+  state.document_source='upload';
+  assert.deepEqual(show([]),[],'upload without attachments must not fall back to external');
+  assert.deepEqual(show([uploaded]),[uploaded.url]);
+  state.document_source='external';
+  assert.deepEqual(show([uploaded]),[external],'switch back keeps external active');
+  state.document_source='upload';
+  assert.deepEqual(show([uploaded]),[uploaded.url],'switching back retains attachment');
+  delete state.document_source;
+  assert.deepEqual(show([]),[external],'legacy source-less record may fall back to external');
+});
