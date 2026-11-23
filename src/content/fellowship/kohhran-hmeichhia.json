@@ -8,11 +8,6 @@
       "display_order": 0
     },
     {
-      "role": "Vice Chairman",
-      "name": "Pi Vice President Hming",
-      "display_order": 1
-    },
-    {
       "role": "Secretary",
       "name": "Pi Chhingpuii",
       "display_order": 2
@@ -21,16 +16,6 @@
       "role": "Asst. Secretary",
       "name": "Pi Lalchhanhimi",
       "display_order": 3
-    },
-    {
-      "role": "Treasurer",
-      "name": "Pi Treasurer Hming",
-      "display_order": 4
-    },
-    {
-      "role": "Financial Secretary",
-      "name": "Pi Financial Secretary",
-      "display_order": 5
     }
   ],
   "members": [],
