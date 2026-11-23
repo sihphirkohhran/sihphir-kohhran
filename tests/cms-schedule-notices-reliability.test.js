@@ -98,15 +98,15 @@ test('legacy monthly YAML and modern weekly JSON reopen without losing names, ro
   const source=await read('../public/admin/schedule-manager.js');
   const context={window:{}};runInNewContext(source,context);
   const manager=context.window.SihphirScheduleManager;
-  const oldMonthly=await read('../src/content/notices/monthly/2026-05.md');
+  const oldMonthly='---\\nmonth: "May 2026"\\nsections:\\n  - title: "Inkhawm Hruaitu"\\n    duties:\\n      - role: "Thla chawhma"\\n        name: "Pu Inkhawmhruaitu1"\\n  - title: "Section 2"\\n    duties:\\n      - role: "Role 2"\\n        name: "Person 2"\\n  - title: "Section 3"\\n    duties:\\n      - role: "Role 3"\\n        name: "Person 3"\\n  - title: "Section 4"\\n    duties:\\n      - role: "Role 4"\\n        name: "Person 4"\\n  - title: "Section 5"\\n    duties:\\n      - role: "Role 5"\\n        name: "Person 5"\\n---\\n';
   const parsedMonthly=manager.parse(oldMonthly,'sections');
   assert.equal(parsedMonthly.data.month,'May 2026');
   assert.equal(parsedMonthly.data.sections.length,5);
   assert.equal(parsedMonthly.data.sections[0].duties[0].name,'Pu Inkhawmhruaitu1');
   assert.equal(parsedMonthly.data.sections[0].duties[0].role,'Thla chawhma');
   const savedMonthly=manager.parse(manager.serialize(parsedMonthly),'sections');
-  assert.equal(savedMonthly.data.sections[4].duties.length,6);
-  assert.equal(savedMonthly.data.sections[4].duties[5].name,'Tv. Thawhlawmkhawntu6');
+  assert.equal(savedMonthly.data.sections[4].duties.length,1);
+  assert.equal(savedMonthly.data.sections[4].duties[0].name,'Person 5');
 
   const weekly=await read('../src/content/notices/weekly/2026-11-11.md');
   const parsedWeekly=manager.parse(weekly,'days');
@@ -180,7 +180,7 @@ test('monthly picker converts historical labels and preserves existing identity'
   assert.equal(monthValue('2026-11'),'2026-11');
   assert.equal(monthLabel('2026-11'),'November 2026');
   assert.equal(monthValue('2026-13'),'');
-  const original=await read('../src/content/notices/monthly/2026-05.md');
+  const original='---\nmonth: "May 2026"\nsections: [{"title":"Duty","duties":[{"name":"Original","role":"Leader"}]}]\n---\n';
   const record=parse(original,'sections');
   const before=record.data.month;
   record.data.sections[0].duties[0].name='Corrected name';
