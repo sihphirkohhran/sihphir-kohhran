@@ -86,7 +86,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
     </div>
 
     <!-- Office Bearers -->
-    <div class="reveal">
+    {officeBearers.length > 0 && <div class="reveal">
       <div class="gold-divider mb-4"><h2>{ui.office_bearers_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         {officeBearers.map((ob, i) => (
@@ -99,10 +99,9 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
           </div>
         ))}
       </div>
-    </div>
-
+    </div>}
     <!-- Committee Members -->
-    <div class="reveal">
+    {committeeMembers.length > 0 && <div class="reveal">
       <div class="gold-divider mb-4"><h2>{ui.members_title}</h2></div>
       <div class="bg-navy border border-gold/20 rounded overflow-hidden">
         <table class="w-full">
@@ -125,7 +124,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
             ))}
           </tbody>
         </table>
-      </div>
+      </div>}
     {groupPhotos.length > 0 && (
       <section class="reveal fellowship-group-section" data-fellowship-name={name}>
         <div class="fellowship-group-panel">
