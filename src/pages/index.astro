@@ -18,6 +18,7 @@ import { normalizeContact } from '../lib/contact';
 import { getPageSettings } from '../lib/page-settings';
 import { normalizeNotice, noticeIsActive, sortNotices } from '../lib/notices';
 import { isoDate, indianDate, monthKey, monthTitle } from '../lib/notice-periods.js';
+import { scheduleIsPublic } from '../lib/schedule-publication.js';
 import { getHomepageStatistics } from '../lib/statistics.js';
 
 const heroEntry = await getEntry('settings', 'hero');
@@ -71,10 +72,10 @@ const galleryPhotos = home.galleryOrder === 'oldest'
     : [];
 
 // Historical records remain server-rendered; the homepage filters eligible records in place.
-const weeklyRecords = (await getWeeklySchedules()).filter(record => String(record.status||'')!=='draft');
+const weeklyRecords = (await getWeeklySchedules()).filter(record => scheduleIsPublic(record));
 const monthlyRecords = (await getMonthlyDuties()).filter(record => String(record.status||'')!=='draft');
-const weeklyInitial = weeklyRecords.find(record => record.status === 'current') ?? weeklyRecords[0];
-const monthlyInitial = monthlyRecords.find(record => record.status === 'current') ?? monthlyRecords[0];
+const weeklyInitial = weeklyRecords[0];
+const monthlyInitial = monthlyRecords[0];
 const weeklyBrowse=weeklyRecords.map(record=>({...record,period:isoDate(record.week_start),end:isoDate(record.week_end)})).filter(record=>record.period);
 const monthlyBrowse=monthlyRecords.map(record=>({...record,period:monthKey(record.month)})).filter(record=>record.period);
 const prayerSettings = prayerEntry?.data ?? {};
@@ -506,7 +507,6 @@ const highlightItems = normalizeHighlights(
             <h3 class="m-0">
               <button type="button" class="notice-accordion-toggle" aria-expanded="false" aria-controls={`notice-accordion-body-${i}`}>
                 <span class="notice-accordion-heading">
-                  <span class="font-body text-xs text-navy/70 tracking-wide">{notice.date}</span>
                   <span class="font-display text-navy font-semibold text-sm">{notice.title}</span>
                   {notice.summary && <span class="notice-accordion-summary font-body text-xs text-gray-700">{notice.summary}</span>}
                   <span class="notice-accordion-read-more font-body text-xs">Read More</span>
@@ -621,6 +621,7 @@ const highlightItems = normalizeHighlights(
 </style>
 
 <script>
+  import { selectWeekly, selectMonthly } from '../lib/schedule-publication.js';
   // ── HERO SLIDESHOW ──
   const slides = document.querySelectorAll('.hero-slide');
   const dots = document.querySelectorAll('[data-dot]');
@@ -745,7 +746,14 @@ const highlightItems = normalizeHighlights(
     const monthName=(value:string)=>months[Number(value)-1]||value;
     const years=Array.from(new Set(records.map(record=>key(record).slice(0,4)))).sort().reverse();
     options(year,years,value=>value);
-    const initial=records.find(record=>record.dataset.recordId===panel.dataset.initial||(!record.dataset.recordId&&key(record)===panel.dataset.initial));
+    const chosenPeriod=panel.id==='notice-weekly'
+      ? selectWeekly(records.map(record=>({id:record.dataset.recordId,week_start:record.dataset.weekStart,week_end:record.dataset.weekEnd})))
+      :panel.id==='notice-monthly'
+        ?selectMonthly(records.map(record=>({id:record.dataset.period,month:record.dataset.period})))
+        :null;
+    const initial=chosenPeriod
+      ?records.find(record=>panel.id==='notice-weekly'?record.dataset.recordId===chosenPeriod.id:record.dataset.period===chosenPeriod.id)
+      :records.find(record=>record.dataset.recordId===panel.dataset.initial||(!record.dataset.recordId&&key(record)===panel.dataset.initial));
     if(initial)year.value=key(initial).slice(0,4);
     const update=(level:'year'|'month'|'week',preferInitial=false)=>{
       const availableMonths=Array.from(new Set(records.filter(record=>key(record).startsWith(year.value+'-')).map(record=>key(record).slice(5,7)))).sort().reverse();
