@@ -17,7 +17,7 @@ function evaluatePublishedSelection(entries) {
     .replace('(item): item is { slug: string; entry: FellowshipEntry }', '(item)');
   const js = source
     .replaceAll('entries: FellowshipEntry[]', 'entries')
-    .replace('slug: string', 'slug')
+    .replaceAll('slug: string', 'slug')
     .replace(/: FellowshipEntry\b/g, '')
     .replaceAll('export function', 'function');
   return vm.runInNewContext(js + '; publishedFellowships(entries)', { entries });
