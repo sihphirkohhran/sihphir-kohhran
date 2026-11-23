@@ -10,7 +10,7 @@ const urls=read('src/lib/documents-url.ts');
 
 test('Document editor offers upload and external URL sources without removing upload controls',()=>{
   for(const value of ['Document Source','Upload Files','External Link','External Document URL','name="pdf_external"','id="document-source"','id="document-upload-section"','id="document-input"','data-file-replace','data-file-delete','document-preview','document-copy-link'])assert.ok(manager.includes(value),value);
-  assert.match(manager,/document_source: z\.enum\(\['upload', 'external'\]\)/.test(schema)?/documentSource=/:/documentSource=/);
+  assert.match(manager,/const documentSource = data/);
   assert.match(schema,/document_source: z\.enum\(\['upload', 'external'\]\)/);
 });
 
