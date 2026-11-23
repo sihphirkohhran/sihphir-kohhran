@@ -12,7 +12,7 @@ const fellowshipEntries = await getCollection('fellowship');
 const activeRecords = fellowshipEntries.filter(entry => entry.data.published !== false && entry.data.status !== 'archived');
 const bySlug = new Map<string, typeof activeRecords[number]>();
 for (const entry of activeRecords) {
-  const id = entry.data.slug ?? entry.id.replace(/-\\d{4}$/, '');
+  const id = entry.data.slug ?? entry.id.replace(/-\d{4}$/, '');
   const current = currentFellowshipRecord(activeRecords, id);
   if (current) bySlug.set(id, current);
 }
@@ -22,7 +22,7 @@ const fellowships = [...bySlug].map(([id, entry]) => {
   const name = meta?.name ?? data.fellowship_name ?? id.replace(/-/g, ' ');
   return {
     id, name,
-    abbr: meta?.abbr ?? name.split(/\\s+/).map(word => word[0]).join('').slice(0, 3).toUpperCase(),
+    abbr: meta?.abbr ?? name.split(/\s+/).map(word => word[0]).join('').slice(0, 3).toUpperCase(),
     color: meta?.accentColor ?? 'from-navy to-navy-light',
     description: data.short_description ?? data.description ?? data.history_short ?? '',
     logo: data.logo,
