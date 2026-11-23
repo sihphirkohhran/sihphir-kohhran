@@ -1,6 +1,8 @@
 ---
 caption: Good Friday
 year: 2025
+yearType: known
+owner: ktp
 category: Good Friday
 description: 18 April 2025
 status: current
