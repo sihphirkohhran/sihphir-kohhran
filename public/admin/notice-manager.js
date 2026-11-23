@@ -2,7 +2,7 @@
 (()=>{
   const ROOT='src/content/notices/announcements/';
   const scalar=value=>{const text=String(value??'').trim();if(text==='true'||text==='false')return text==='true';if(/^-?\d+$/.test(text))return Number(text);if(/^[\[{]/.test(text)){try{return JSON.parse(text)}catch{}}return text.replace(/^['"]|['"]$/g,'')};
-  const parse=content=>{const match=content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/),data={};if(!match)return{data,body:content};match[1].split(/\r?\n/).forEach(line=>{const found=line.match(/^([\w_]+):\s*(.*)$/);if(found)data[found[1]]=scalar(found[2]);});return{data,body:match[2]||''};};
+  const parse=content=>{const match=content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/),data={};if(!match)throw Error('Missing or malformed notice frontmatter. This record was not modified.');match[1].split(/\r?\n/).forEach(line=>{const found=line.match(/^([\w_]+):\s*(.*)$/);if(!found)throw Error('Unsupported notice frontmatter. This record was not modified.');if(/^[\[{]/.test(found[2].trim()))JSON.parse(found[2].trim());data[found[1]]=scalar(found[2]);});return{data,body:match[2]||''};};
   const yaml=value=>typeof value==='boolean'||typeof value==='number'?String(value):JSON.stringify(String(value??''));
   const serialize=record=>`---\n${Object.entries(record.data).filter(([,value])=>value!==''&&value!==undefined&&value!==null&&!(Array.isArray(value)&&!value.length)).map(([key,value])=>`${key}: ${Array.isArray(value)?JSON.stringify(value):yaml(value)}`).join('\n')}\n---\n${record.body||''}`;
   window.SihphirNoticeManager={async mount({api,esc,slug,notification,readUpload}){
