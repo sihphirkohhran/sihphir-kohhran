@@ -1,66 +1,24 @@
 {
-  "history_short": "Pavalai pawl chanchin ziahna",
-  "history_full": "KPP chanchin detail takin kan ziak ang",
-  "office_bearers": [
-    {
-      "role": "Chairman",
-      "name": "Pu Chairman",
-      "display_order": 0
-    },
-    {
-      "role": "Vice Chairman",
-      "name": "Pu Vice Chairman",
-      "display_order": 1
-    },
-    {
-      "role": "Secretary",
-      "name": "Pu Secretary Hming",
-      "display_order": 2
-    },
-    {
-      "role": "Treasurer",
-      "name": "Pu Treasurer Hming",
-      "display_order": 3
-    }
-  ],
-  "members": [
-    {
-      "name": "Pu Member 1",
-      "role": "Member",
-      "display_order": 0
-    },
-    {
-      "name": "Pu Member 2",
-      "role": "Member",
-      "display_order": 1
-    },
-    {
-      "name": "Pu Member 3",
-      "role": "Member",
-      "display_order": 2
-    },
-    {
-      "name": "Pu Member 4",
-      "role": "Member",
-      "display_order": 3
-    }
-  ],
+  "history_short": "",
+  "history_full": "",
+  "office_bearers": [],
+  "members": [],
   "logo": "/images/fellowship/kpp-logo.png",
   "fellowship_name": "kpp",
   "slug": "kpp",
   "category": "Fellowship",
-  "short_description": "Pavalai pawl chanchin ziahna",
-  "full_history": "KPP chanchin detail takin kan ziak ang",
+  "short_description": "",
+  "full_history": "",
   "cover_photo": "",
-  "published": true,
+  "published": false,
   "display_order": 0,
   "related_galleries": [],
   "related_documents": [],
   "motto": "",
-  "description": "Pavalai pawl chanchin ziahna",
+  "description": "",
   "banner_image": "",
   "group_photo": "",
   "homepage_order": 0,
-  "homepage_visible": true,
+  "homepage_visible": false,
   "status": "current"
 }
