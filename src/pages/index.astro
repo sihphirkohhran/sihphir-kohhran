@@ -121,7 +121,7 @@ const noticeSubtitle = homeUi.notice_subtitle || String(home.noticeSubtitle ?? '
 const announcementPeriods = announcementEntries.map(notice=>({...notice,period:isoDate(notice.publishDate).slice(0,7)})).filter(notice=>notice.period);
 const announcements = await Promise.all(announcementPeriods.map(async notice=>{
   const {Content}=await notice.entry.render();
-  return {id:notice.id,title:notice.title,date:notice.publishDate,period:notice.period,Content};
+  return {id:notice.id,title:notice.title,summary:notice.summary,date:notice.publishDate,period:notice.period,attachments:notice.attachments.filter((file: any)=>typeof file?.url==='string' && /^(https?:\/\/|\/[^\/])/.test(file.url)),Content};
 }));
 const initialNoticePeriod=announcements[0]?.period??'';
 const historyFullHtml = renderMarkdown(history.full ?? '');
@@ -502,12 +502,32 @@ const highlightItems = normalizeHighlights(
           <label>Month <select data-period="month" aria-label="Notice month"></select></label>
         </div>
         {announcements.map((notice,i)=>(
-          <div class={`notice-period-record border-l-2 ${i===0?'border-gold':'border-gold/40'} bg-white rounded-r px-4 py-3 mb-3`} data-period={notice.period} hidden>
-            <div class="font-body text-xs text-navy/70 tracking-wide mb-1">{notice.date}</div>
-            <div class="font-display text-navy font-semibold text-sm mb-1">{notice.title}</div>
-            <div class="content-page-body font-body text-xs text-gray-700"><notice.Content /></div>
-          </div>
+          <article class={`notice-period-record notice-accordion-card border-l-2 ${i===0?'border-gold':'border-gold/40'} bg-white rounded-r mb-3`} data-period={notice.period} hidden>
+            <h3 class="m-0">
+              <button type="button" class="notice-accordion-toggle" aria-expanded="false" aria-controls={`notice-accordion-body-${i}`}>
+                <span class="notice-accordion-heading">
+                  <span class="font-body text-xs text-navy/70 tracking-wide">{notice.date}</span>
+                  <span class="font-display text-navy font-semibold text-sm">{notice.title}</span>
+                  {notice.summary && <span class="notice-accordion-summary font-body text-xs text-gray-700">{notice.summary}</span>}
+                  <span class="notice-accordion-read-more font-body text-xs">Read More</span>
+                </span>
+                <svg class="notice-accordion-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+              </button>
+            </h3>
+            <div id={`notice-accordion-body-${i}`} class="notice-accordion-body" hidden>
+              <div class="content-page-body font-body text-xs text-gray-700"><notice.Content /></div>
+              {notice.attachments.length>0 && (
+                <div class="notice-accordion-attachments">
+                  <div class="font-body text-xs font-semibold text-navy">Attachments</div>
+                  {notice.attachments.map((file:any)=>(
+                    <a href={file.url} target="_blank" rel="noopener noreferrer" class="font-body text-sm text-navy underline underline-offset-2">{file.title||file.name||'View attachment'}</a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </article>
         ))}
+        <button type="button" class="notice-accordion-show-more" hidden aria-controls="notice-notices">Show More</button>
         <p class="notice-period-empty" hidden>No publicly available notices for this period.</p>
       </div>
     </div>
@@ -581,6 +601,21 @@ const highlightItems = normalizeHighlights(
   #notice-board .notice-period-controls select:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
   #notice-board .notice-period-record[hidden],#notice-board .notice-period-empty[hidden]{display:none!important}
   #notice-board .notice-duty-label{font-size:inherit;font-weight:600;color:#172941;overflow-wrap:anywhere}
+  #notice-board .notice-accordion-card{overflow:hidden}
+  #notice-board .notice-accordion-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:13px 15px;text-align:left;color:#172941;border:0;background:transparent;cursor:pointer}
+  #notice-board .notice-accordion-toggle:focus-visible,#notice-board .notice-accordion-show-more:focus-visible{outline:2px solid #b8953f;outline-offset:-3px}
+  #notice-board .notice-accordion-heading{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
+  #notice-board .notice-accordion-read-more{color:#98752e;font-weight:600}
+  #notice-board .notice-accordion-chevron{flex:none;color:#98752e;transition:transform .2s ease}
+  #notice-board .notice-accordion-toggle[aria-expanded="true"] .notice-accordion-chevron{transform:rotate(180deg)}
+  #notice-board .notice-accordion-toggle[aria-expanded="true"] .notice-accordion-read-more{font-size:0}
+  #notice-board .notice-accordion-toggle[aria-expanded="true"] .notice-accordion-read-more::after{content:'Show Less';font-size:12px}
+  #notice-board .notice-accordion-body{padding:0 15px 15px;border-top:1px solid rgba(23,41,65,.1);overflow-wrap:anywhere}
+  #notice-board .notice-accordion-body[hidden],#notice-board .notice-accordion-show-more[hidden]{display:none!important}
+  #notice-board .notice-accordion-body .content-page-body{padding-top:12px}
+  #notice-board .notice-accordion-attachments{display:flex;flex-direction:column;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(23,41,65,.12)}
+  #notice-board .notice-accordion-show-more{display:block;margin:10px auto 14px;padding:9px 18px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+  @media(prefers-reduced-motion:reduce){#notice-board .notice-accordion-chevron{transition:none}}
   #notice-board .notice-period-empty{border:1px solid rgba(184,149,63,.2);border-radius:5px;background:#fff;padding:14px;color:#52627a;font-size:13px}
   @media(max-width:480px){#notice-board .notice-period-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#notice-board .notice-period-controls label:last-child:nth-child(3){grid-column:1/-1}#notice-board .notice-period-record{min-width:0}#notice-board .notice-period-record .grid{gap:8px}}
 </style>
@@ -667,6 +702,37 @@ const highlightItems = normalizeHighlights(
     const month=panel.querySelector<HTMLSelectElement>('[data-period="month"]');
     const week=panel.querySelector<HTMLSelectElement>('[data-period="record"]');
     const empty=panel.querySelector<HTMLElement>('.notice-period-empty');
+    // The Notices accordion is scoped to this panel; other schedule tabs are untouched.
+    const isNotices=panel.id==='notice-notices';
+    const showMore=isNotices?panel.querySelector<HTMLButtonElement>('.notice-accordion-show-more'):null;
+    const pageSize=5;
+    let shownLimit=pageSize;
+    const closeNotices=()=>{
+      if(!isNotices)return;
+      panel.querySelectorAll<HTMLButtonElement>('.notice-accordion-toggle').forEach(button=>button.setAttribute('aria-expanded','false'));
+      panel.querySelectorAll<HTMLElement>('.notice-accordion-body').forEach(body=>{body.hidden=true;});
+    };
+    const limitNotices=()=>{
+      if(!isNotices)return;
+      const eligible=records.filter(record=>record.dataset.period===year?.value+'-'+month?.value);
+      eligible.forEach((record,index)=>{record.hidden=index>=shownLimit;});
+      if(showMore){showMore.hidden=eligible.length<=shownLimit;showMore.textContent='Show More';}
+    };
+    if(isNotices){
+      panel.addEventListener('click',event=>{
+        const button=(event.target as Element).closest<HTMLButtonElement>('.notice-accordion-toggle');
+        if(!button||!panel.contains(button))return;
+        const wasExpanded=button.getAttribute('aria-expanded')==='true';
+        closeNotices();
+        if(!wasExpanded){
+          button.setAttribute('aria-expanded','true');
+          const body=document.getElementById(button.getAttribute('aria-controls')||'');
+          if(body&&panel.contains(body))body.hidden=false;
+        }
+      });
+      showMore?.addEventListener('click',()=>{shownLimit+=pageSize;limitNotices();});
+    }
+
     if(!year||!month)return;
     const key=(record:HTMLElement)=>record.dataset.period||'';
     const options=(select:HTMLSelectElement,values:string[],label:(value:string)=>string)=>{
@@ -703,17 +769,22 @@ const highlightItems = normalizeHighlights(
         records.forEach(record=>{record.hidden=record!==chosen;});
       }else{
         records.forEach(record=>{record.hidden=!visible.includes(record);});
+        if(isNotices)limitNotices();
       }
       if(empty)empty.hidden=records.some(record=>!record.hidden);
     };
-    year.addEventListener('change',()=>update('year'));
-    month.addEventListener('change',()=>update('month'));
+    year.addEventListener('change',()=>{closeNotices();shownLimit=pageSize;update('year');});
+    month.addEventListener('change',()=>{closeNotices();shownLimit=pageSize;update('month');});
     week?.addEventListener('change',()=>update('week'));
     update('year',true);
   });
 
   // ── QUICK LINKS (deep link to notice board tabs) ──
   function activateNoticeTab(target: string) {
+    if(target!=='notices'){
+      document.querySelectorAll<HTMLButtonElement>('#notice-notices .notice-accordion-toggle').forEach(button=>button.setAttribute('aria-expanded','false'));
+      document.querySelectorAll<HTMLElement>('#notice-notices .notice-accordion-body').forEach(body=>{body.hidden=true;});
+    }
     document.querySelectorAll('.notice-tab').forEach((t) => {
       t.classList.toggle('active', (t as HTMLElement).dataset.target === target);
     });
