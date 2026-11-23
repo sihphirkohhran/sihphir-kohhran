@@ -14,9 +14,10 @@ test('weekly and monthly CMS mount dedicated selectable record editors',async()=
   assert.match(manager,/querySelectorAll\('\[data-schedule\]'\)/);
   assert.match(manager,/load\(button\.dataset\.schedule\)/);
   assert.match(manager,/await api\('\/api\/admin\/content\?path='\+encodeURIComponent\(path\)\)/);
-  assert.match(manager,/sha=response\.sha;selected=path;dirty=false/);
+  assert.match(manager,/sha=response\.sha;selected=path;savedIdentity=/);
   assert.match(manager,/await refresh\(\)/);
-  assert.match(manager,/record=parse\(saved\.content,config\.key\);sha=saved\.sha;draw\(\)/);
+  assert.match(manager,/const parsed=parse\(saved\.content,config\.key\)/);
+  assert.match(manager,/record=parsed;selected=path;sha=saved\.sha/);
 });
 
 test('schedule parser refuses unsafe legacy formats instead of wiping fields',async()=>{
@@ -42,8 +43,8 @@ test('schedule selection, new/duplicate/archive and navigation warn before disca
   assert.match(manager,/window\.__sihphirScheduleCleanup=/);
   assert.match(manager,/if\(!confirmDiscard\(\)\)return/);
   assert.match(manager,/record\.data\.status=record\.data\.status==='archived'\?'upcoming':'archived'/);
-  assert.match(manager,/selected=null;sha=null;dirty=true/);
-  assert.match(manager,/selected=null;sha=null;record=fresh\(\)/);
+  assert.match(manager,/selected=null;sha=null;savedIdentity=null;dirty=true/);
+  assert.match(manager,/selected=null;sha=null;savedIdentity=null;record=fresh\(\)/);
   assert.match(manager,/if\(!selected&&files\.some\(f=>f\.path===path\)\)/);
   assert.match(app,/__sihphirScheduleCleanup\?\.\(\)===false/);
 });
@@ -169,4 +170,45 @@ test('notices retain archived/draft/published states on edit; only explicit chan
   const unusualArchived={status:'archived',published:true};
   applyPublication(unusualArchived,true);
   assert.equal(unusualArchived.status,'archived');
+});
+
+test('monthly picker converts historical labels and preserves existing identity',async()=>{
+  const context={window:{}};
+  runInNewContext(await read('../public/admin/schedule-manager.js'),context);
+  const {monthValue,monthLabel,parse,serialize}=context.window.SihphirScheduleManager;
+  assert.equal(monthValue('May 2026'),'2026-05');
+  assert.equal(monthValue('2026-11'),'2026-11');
+  assert.equal(monthLabel('2026-11'),'November 2026');
+  assert.equal(monthValue('2026-13'),'');
+  const original=await read('../src/content/notices/monthly/2026-05.md');
+  const record=parse(original,'sections');
+  const before=record.data.month;
+  record.data.sections[0].duties[0].name='Corrected name';
+  assert.equal(parse(serialize(record),'sections').data.month,before);
+  const manager=await read('../public/admin/schedule-manager.js');
+  assert.match(manager,/type="month" required/);
+  assert.match(manager,/schedule-month-fallback/);
+  assert.match(manager,/data-month-part="month"/);
+  assert.match(manager,/data-month-part="year"/);
+  assert.match(manager,/String\(identity\)!==savedIdentity/);
+  assert.match(manager,/expectedSha:sha/);
+});
+
+test('schedule editor uses accessible compact rows and reliable persistence feedback',async()=>{
+  const manager=await read('../public/admin/schedule-manager.js');
+  const page=await read('../src/pages/admin.astro');
+  assert.match(manager,/schedule-monthly-row/);
+  assert.match(manager,/schedule-weekly-row/);
+  assert.match(manager,/aria-label="Duplicate duty row/);
+  assert.match(manager,/aria-label="Remove duty row/);
+  assert.match(manager,/schedule-remove-section/);
+  assert.match(manager,/role="status" aria-live="polite"/);
+  assert.match(manager,/setSaveState\('saving'\)/);
+  assert.match(manager,/setSaveState\('saved'\);draw\(\);notification/);
+  assert.match(manager,/setSaveState\('error'\)/);
+  assert.match(manager,/busy=false;setSaveState\('saved'\)/);
+  assert.match(page,/\.schedule-monthly-row\{grid-template-columns:minmax\(0,1\.65fr\) minmax\(0,1fr\) 86px\}/);
+  assert.match(page,/@media\(max-width:550px\)\{#schedule-form \.schedule-monthly-row/);
+  assert.match(page,/\.schedule-icon-button svg/);
+  assert.match(page,/\.schedule-field input/);
 });
