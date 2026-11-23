@@ -128,3 +128,14 @@ test('Owner-scoped deep links compare full content IDs and never open another ow
   assert.match(read('src/components/FellowshipPage.astro'),/window\.dispatchEvent\(new Event\('fellowship:location'\)\)/);
   assert.match(read('src/pages/fellowship/[slug].astro'),/publishedFellowships/);
 });
+
+test('KTP accent remains scoped and all Fellowship archive controls retain accessible focus',()=>{
+  const shared=read('src/components/FellowshipPage.astro');
+  const gallery=read('src/components/FellowshipGalleryArchive.astro');
+  const docs=read('src/components/FellowshipDocumentArchive.astro');
+  assert.match(shared,/style=\{isKtp \? '--owner-focus:#29B9F2'/);
+  assert.match(gallery,/outline:3px solid var\(--owner-focus,#b8953f\)/);
+  assert.match(docs,/outline:3px solid var\(--owner-focus,#b8953f\)/);
+  assert.match(read('src/pages/fellowship/ktp.astro'),/variant="ktp"/);
+  assert.doesNotMatch(read('src/pages/fellowship/kpp.astro'),/variant="ktp"/);
+});
