@@ -141,7 +141,8 @@
           if(selected!==path||sha!==expectedSha)throw Error('The selected record changed. Delete was cancelled.');
           await api('/api/admin/content',{method:'DELETE',headers:{'content-type':'application/json'},body:JSON.stringify({path,expectedSha})});
           selected=null;sha=null;savedIdentity=null;record=null;dirty=false;saveState='saved';loadError='';deleted=true;
-          await refresh();
+          files=files.filter(item=>item.path!==path);
+          try{await refresh();}catch(error){loadError='Could not refresh record list: '+error.message;}
           notification(config.title+' deleted permanently. The public website will update after deployment.');
         }catch(error){notification('Delete failed: '+error.message,'error');}
         finally{busy=false;if(deleted)draw();else deleteButton.disabled=false;}
