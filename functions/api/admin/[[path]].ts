@@ -62,7 +62,7 @@ async function readFile(env: Env, path: string) {
   const { branch } = configuration(env);
   const response = await github(env, `/contents/${path}?ref=${encodeURIComponent(branch)}&cache_bust=${Date.now()}`);
   const data = await response.json() as { content: string; sha: string };
-  return { sha: data.sha, content: atob(data.content.replace(/\n/g, '')) };
+  return { sha: data.sha, content: new TextDecoder().decode(Uint8Array.from(atob(data.content.replace(/\n/g, '')), char => char.charCodeAt(0))) };
 }
 
 async function latestFileSha(env: Env, path: string) {
