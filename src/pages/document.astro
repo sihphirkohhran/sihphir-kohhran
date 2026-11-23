@@ -68,7 +68,7 @@ const documents = entries
         type: '',
       });
     }
-    const displayedFiles = source === 'external' && externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : normalizedFiles.length ? normalizedFiles : externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : [];
+    const displayedFiles = source === 'external' && externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : normalizedFiles.length ? normalizedFiles : data.document_source !== 'upload' && externalLink ? [{ url: externalLink, filename: 'Open Document', size: null, uploadedAt: '', modifiedAt: '', type: 'external' }] : [];
     const primary = displayedFiles[0];
     const fromId = parseYearMonthFromId(entry.id);
     const legacyYear = data.year ?? fromId.year ?? parseYearFromDate(data.date) ?? null;
