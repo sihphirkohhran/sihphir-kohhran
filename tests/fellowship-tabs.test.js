@@ -49,7 +49,13 @@ test('About Us uses wide content without changing history tab identity or hero',
  assert.match(page,/relative z-10 max-w-2xl mx-auto/);
  assert.match(page,/tab === 'history' \? 'About Us'/);
  assert.match(page,/<h2>About Us<\/h2>/);
- assert.match(page,/\.fellowship-about-copy\{max-width:75ch\}/);
+ assert.match(page,/\.fellowship-about-copy\{width:100%;max-width:none;box-sizing:border-box;min-width:0;overflow-wrap:anywhere\}/);
+ assert.doesNotMatch(page,/max-width:75ch/);
+ assert.match(page,/class="fellowship-history-text font-body text-gray-700">\{history\}/);
+ assert.match(page,/id="history-full" class="content-page-body fellowship-history-text font-body text-gray-700 hidden"/);
+ assert.match(page,/\.fellowship-about-copy \.fellowship-history-text\{font-size:1rem;line-height:1\.75;margin-bottom:1rem\}/);
+ assert.match(page,/@media\(max-width:640px\)\{\.fellowship-about-copy\{padding-inline:1rem\}/);
+ assert.match(page,/fellowship-about-copy border-l-4 border-gold rounded-r bg-ivory/);
  assert.match(page,/\.fellowship-group-photo\{max-height:640px;width:100%;height:auto;object-fit:contain\}/);
  assert.match(page,/\.fellowship-group-photo\.hidden\{display:none\}/);
  assert.match(page,/data-fellowship-panel="history"/);
