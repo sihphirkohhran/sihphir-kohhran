@@ -18,7 +18,7 @@ function loadSource(file) {
   const code=transformSync(source,{loader:file.endsWith('.ts')?'ts':'js',format:'cjs',target:'es2020'}).code;
   const context={module,exports:module.exports,URL,Date,Set,Map,
     require(specifier) {
-      if (!specifier.startsWith('./')) throw Error('Unexpected import '+specifier);
+      if (!specifier.startsWith('.')) throw Error('Unexpected import '+specifier);
       const stem=path.posix.normalize(path.posix.join(path.posix.dirname(file),specifier));
       const found=[stem,stem+'.ts',stem+'.js'].find(candidate=>existsSync(new URL(candidate,base)));
       if(!found)throw Error('Unknown module '+specifier);
@@ -139,4 +139,16 @@ test('KTP accent remains scoped and all Fellowship archive controls retain acces
   assert.match(docs,/outline:3px solid var\(--owner-focus,#b8953f\)/);
   assert.match(read('src/pages/fellowship/ktp.astro'),/variant="ktp"/);
   assert.doesNotMatch(read('src/pages/fellowship/kpp.astro'),/variant="ktp"/);
+});
+
+test('one shared record appears once per selected destination in both archive builders',()=>{
+ const owners=['kohhran','ktp','new-fellowship','ktp'];
+ const album={id:'shared.md',data:{caption:'Shared',owners,owner:'kpp',photo:'/shared.jpg'}};
+ const doc={id:'shared.md',body:'',data:{name:'Shared',owners,owner:'kpp',pdf_url:'/shared.pdf'}};
+ for(const owner of ['kohhran','ktp','new-fellowship']){
+  assert.equal(buildOwnerAlbums([album],owner).length,1);
+  assert.equal(buildOwnerDocuments([doc],owner).length,1);
+ }
+ assert.equal(buildOwnerAlbums([album],'kpp').length,0);
+ assert.equal(buildOwnerDocuments([doc],'kpp').length,0);
 });
