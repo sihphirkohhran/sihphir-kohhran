@@ -34,7 +34,8 @@
     {
       "id": "kristian-chhungkaw",
       "name": "Kristian Chhungkaw Committee",
-      "display_order": 6
+      "display_order": 6,
+      "fellowship_slug": "ktp"
     },
     {
       "id": "sunday-school",
