@@ -94,3 +94,26 @@ test('historical archives default to latest eligible published, not the current 
   assert.deepEqual(fellowshipCommitteeArchives(masters,records,'ktp')[0].archives.map(x=>x.data.year),[2020,2015,2010]);
   assert.deepEqual(fellowshipCommitteeArchives(masters,[entry('masihi',1994)],'masihi-sangati')[0].archives.map(x=>x.data.year),[1994]);
 });
+
+test('Committee listing starts with latest cards and hidden details, with combined filters',()=>{
+ assert.ok(archiveComponent.includes('data-committee-details hidden'));
+ assert.ok(archiveComponent.includes('data-committee-filter-year'));
+ assert.ok(archiveComponent.includes('All Years'));
+ assert.ok(archiveComponent.includes('All Committees'));
+ assert.ok(archiveComponent.includes("year.value?card.dataset.year===year.value:card.dataset.latest==='true'"));
+ assert.ok(archiveComponent.includes('navigate(card.dataset.id,card.dataset.year)'));
+ assert.ok(archiveComponent.includes("window.addEventListener('popstate',()=>{"));
+ assert.ok(archiveComponent.includes("window.addEventListener('fellowship:location',sync)"));
+ assert.ok(read('src/components/FellowshipPage.astro').includes("url.searchParams.delete('committeeYear')"));
+});
+
+test('Committee detail close uses listing history or safe direct-entry replacement',()=>{
+ assert.ok(archiveComponent.includes('fellowshipCommitteeFromListing: Boolean(id)'));
+ assert.ok(archiveComponent.includes('history.back();'));
+ assert.ok(archiveComponent.includes('navigate(undefined,undefined,true)'));
+ assert.ok(archiveComponent.includes("if(replace)history.replaceState(state,'',url)"));
+ assert.ok(archiveComponent.includes('navigate(group.dataset.id,picker.value,true)'));
+ assert.ok(archiveComponent.includes('if(!listing.hidden)focusListing()'));
+ assert.ok(archiveComponent.includes('restoreCard && !restoreCard.hidden'));
+ assert.ok(archiveComponent.includes('committee.addEventListener(\'change\',filter);year.addEventListener(\'change\',filter)'));
+});

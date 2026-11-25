@@ -7,10 +7,29 @@ import { normalizeCommitteeArchiveId } from '../lib/committee-deep-links.js';
 const { fellowshipSlug } = Astro.props;
 const master = await getEntry('settings','committees');
 const groups = fellowshipCommitteeArchives(master?.data.committees ?? [], await getCollection('committee'), fellowshipSlug);
+const years = [...new Set(groups.flatMap(group=>group.archives.map(entry=>entry.data.year)))].sort((a,b)=>b-a);
 ---
 <div class="fellowship-committee-archives">
-  {groups.length === 0 && <p class="empty">No published Committee archives are available for this Fellowship.</p>}
-  {groups.map(group => <section class="committee-group" data-fellowship-committee-group>
+  <div data-committee-listing>
+    <div class="committee-filters">
+      <label>Choose Committee<select data-committee-filter><option value="">All Committees</option>{groups.map(group=><option value={group.id}>{group.name}</option>)}</select></label>
+      <label>Year<select data-committee-filter-year><option value="">All Years</option>{years.map(year=><option value={year}>{year}</option>)}</select></label>
+    </div>
+    <div class="committee-cards">
+      {groups.flatMap(group=>group.archives.map((entry,index)=>{
+        const directory=committeeDirectory(entry.data);
+        const photo=resolveCommitteePhoto(entry.data.group_photo);
+        return <button type="button" class="committee-card" data-committee-card data-id={group.id} data-year={entry.data.year} data-latest={index===0?'true':'false'} hidden={index!==0}>
+          {photo ? <img src={photo} alt={group.name+' group photo'} loading="lazy" data-card-photo /> : <span class="card-fallback" aria-hidden="true">Committee</span>}
+          <span class="card-body"><strong>{group.name}</strong><span class="period">{entry.data.year} · {directory.officeBearers.length+directory.members.length} members</span><span class="card-action">View Committee →</span></span>
+        </button>;
+      }))}
+    </div>
+    <p class="empty" data-committee-empty role="status" hidden={groups.length>0}>No published Committee archives match your selection.</p>
+  </div>
+  <div data-committee-details hidden>
+    <button type="button" class="back-committees" data-back-committees>← Back to Committees</button>
+  {groups.map(group => <section class="committee-group" data-fellowship-committee-group data-id={group.id} hidden>
     <header><h2>{group.name}</h2><label>Archive year <select data-fellowship-committee-year>{group.archives.map((entry,index)=><option value={entry.data.year} selected={index===0}>{entry.data.year}</option>)}</select></label></header>
     {group.archives.map((entry,index)=>{
       const data=entry.data;
@@ -25,14 +44,82 @@ const groups = fellowshipCommitteeArchives(master?.data.committees ?? [], await 
       </article>;
     })}
   </section>)}
+  </div>
 </div>
 <script>
-  document.querySelectorAll<HTMLElement>('[data-fellowship-committee-group]').forEach(group=>{
-    const picker=group.querySelector<HTMLSelectElement>('[data-fellowship-committee-year]');
-    picker?.addEventListener('change',()=>group.querySelectorAll<HTMLElement>('[data-fellowship-committee-archive]').forEach(archive=>archive.hidden=archive.dataset.fellowshipCommitteeArchive!==picker.value));
-    group.querySelectorAll<HTMLImageElement>('[data-member-photo]').forEach(img=>img.addEventListener('error',()=>{if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';}));
+  document.querySelectorAll<HTMLElement>('.fellowship-committee-archives').forEach(root=>{
+    const listing=root.querySelector<HTMLElement>('[data-committee-listing]')!;
+    const details=root.querySelector<HTMLElement>('[data-committee-details]')!;
+    const committee=root.querySelector<HTMLSelectElement>('[data-committee-filter]')!;
+    const year=root.querySelector<HTMLSelectElement>('[data-committee-filter-year]')!;
+    const empty=root.querySelector<HTMLElement>('[data-committee-empty]')!;
+    const back=root.querySelector<HTMLButtonElement>('[data-back-committees]')!;
+    const cards=Array.from(root.querySelectorAll<HTMLButtonElement>('[data-committee-card]'));
+    const groups=Array.from(root.querySelectorAll<HTMLElement>('[data-fellowship-committee-group]'));
+    const filter=()=>{
+      cards.forEach(card=>card.hidden=!( (!committee.value||card.dataset.id===committee.value) && (year.value?card.dataset.year===year.value:card.dataset.latest==='true')));
+      empty.hidden=cards.some(card=>!card.hidden);
+    };
+    const sync=()=>{
+      const params=new URL(location.href).searchParams;
+      const active=params.get('tab')==='committee';
+      const id=active?params.get('committeeId'):null;
+      const group=groups.find(g=>g.dataset.id===id);
+      listing.hidden=Boolean(group);details.hidden=!group;
+      groups.forEach(g=>g.hidden=g!==group);
+      if(group){
+        const picker=group.querySelector<HTMLSelectElement>('[data-fellowship-committee-year]')!;
+        const requested=params.get('committeeYear');
+        picker.value=Array.from(picker.options).some(o=>o.value===requested)?requested!:picker.options[0].value;
+        group.querySelectorAll<HTMLElement>('[data-fellowship-committee-archive]').forEach(archive=>archive.hidden=archive.dataset.fellowshipCommitteeArchive!==picker.value);
+      }
+      filter();
+    };
+    let restoreCard: HTMLButtonElement | undefined;
+    let returningToListing=false;
+    const navigate=(id?:string,archiveYear?:string,replace=false)=>{
+      const url=new URL(location.href);
+      url.searchParams.set('tab','committee');
+      if(id){url.searchParams.set('committeeId',id);url.searchParams.set('committeeYear',archiveYear||'');}
+      else{url.searchParams.delete('committeeId');url.searchParams.delete('committeeYear');}
+      if(url.href!==location.href){
+        const state={...history.state, fellowshipCommitteeFromListing: Boolean(id) && (!replace || history.state?.fellowshipCommitteeFromListing===true)};
+        if(replace)history.replaceState(state,'',url);
+        else history.pushState(state,'',url);
+      }
+      sync();
+    };
+    const focusListing=()=>{
+      (restoreCard && !restoreCard.hidden ? restoreCard : cards.find(card=>!card.hidden)||committee).focus();
+      restoreCard=undefined;
+    };
+    committee.addEventListener('change',filter);year.addEventListener('change',filter);
+    cards.forEach(card=>card.addEventListener('click',()=>{restoreCard=card;navigate(card.dataset.id,card.dataset.year);back.focus();}));
+    back.addEventListener('click',()=>{
+      if(returningToListing)return;
+      if(history.state?.fellowshipCommitteeFromListing===true){
+        returningToListing=true;
+        history.back();
+      }else{
+        navigate(undefined,undefined,true);
+        focusListing();
+      }
+    });
+    groups.forEach(group=>{
+      const picker=group.querySelector<HTMLSelectElement>('[data-fellowship-committee-year]')!;
+      picker.addEventListener('change',()=>navigate(group.dataset.id,picker.value,true));
+    });
+    root.querySelectorAll<HTMLImageElement>('[data-member-photo]').forEach(img=>img.addEventListener('error',()=>{if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';}));
+    root.querySelectorAll<HTMLImageElement>('[data-card-photo]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;const fallback=document.createElement('span');fallback.className='card-fallback';fallback.textContent='Committee';img.after(fallback);},{once:true}));
+    window.addEventListener('popstate',()=>{
+      sync();
+      if(returningToListing){returningToListing=false;if(!listing.hidden)focusListing();}
+    });
+    window.addEventListener('fellowship:location',sync);
+    sync();
   });
 </script>
 <style>
 .committee-group{border:1px solid #ded8c8;border-radius:8px;background:#fffdf8;padding:1rem;margin-bottom:1.2rem;color:#172941}.committee-group header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}.committee-group h2{font:700 1.1rem Poppins,sans-serif}.committee-group label{font:600 .75rem Poppins,sans-serif;display:flex;align-items:center;gap:.5rem}.committee-group select{border:1px solid #d7d0bd;padding:.5rem;border-radius:5px;background:white}.committee-group select:focus-visible,.archive-link:focus-visible{outline:3px solid var(--owner-focus,#b8953f)}.group-photo{width:100%;height:auto;border-radius:5px}.period{font:600 .75rem Poppins,sans-serif;color:#80601c;margin:.8rem 0}.description{margin:1rem 0}.directory{margin:1.2rem 0}.directory h3{font:600 .9rem Poppins,sans-serif;border-bottom:1px solid #d7d0bd;padding-bottom:.5rem;margin-bottom:.7rem}.member-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}.member{display:flex;align-items:flex-start;gap:.6rem;min-width:0}.member img{width:54px;height:64px;object-fit:cover;border-radius:4px;flex-shrink:0}.member h4{font:600 .8rem Poppins,sans-serif;overflow-wrap:anywhere}.member p{font:.85rem 'EB Garamond',serif;overflow-wrap:anywhere}.bio{color:#536275}.empty{padding:.8rem;color:#536275}.archive-link{font:600 .85rem 'EB Garamond',serif;color:#80601c;text-decoration:underline}[hidden]{display:none!important}@media(max-width:420px){.member-grid{grid-template-columns:1fr}.committee-group{padding:.75rem}}
+.committee-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem;margin-bottom:1rem}.committee-filters label{display:grid;gap:.3rem;font:600 .75rem Poppins,sans-serif;color:#172941}.committee-filters select{width:100%;min-width:0;border:1px solid #d7d0bd;border-radius:5px;background:white;padding:.6rem;font:400 .8rem Poppins,sans-serif}.committee-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem}.committee-card{display:flex;flex-direction:column;text-align:left;border:1px solid #ded8c8;border-radius:7px;overflow:hidden;background:#fffdf8;color:#172941;cursor:pointer;min-width:0}.committee-card img,.card-fallback{width:100%;aspect-ratio:4/3;object-fit:cover;background:#eee8dc}.card-fallback{display:grid;place-items:center;color:#80601c;font:600 .8rem Poppins,sans-serif}.card-body{display:grid;gap:.3rem;padding:.75rem;width:100%}.card-body strong{font:700 .95rem Poppins,sans-serif;overflow-wrap:anywhere}.card-body .period{margin:0}.card-action,.back-committees{font:600 .85rem 'EB Garamond',serif;color:#80601c}.back-committees{margin-bottom:1rem;padding:.5rem 0}.committee-card:focus-visible,.committee-filters select:focus-visible,.back-committees:focus-visible{outline:3px solid var(--owner-focus,#b8953f);outline-offset:2px}@media(max-width:480px){.committee-cards{grid-template-columns:1fr}.committee-filters{gap:.5rem}}
 </style>
