@@ -102,7 +102,7 @@
 
   window.SihphirDocumentManager = {
     async mount({api, esc, slug, notification, readUpload}) {
-      const { loadContentOwners, renderDisplayLocations, canSaveOwners, normalizeContentOwners, readDisplayLocations, loadLibraryRecords } = await import('/admin/content-owners.js');
+      const { loadContentOwners, renderDisplayLocations, canSaveOwners, normalizeContentOwners, readDisplayLocations, loadLibraryRecords } = await import('./content-owners.js');
       let contentOwners = [['kohhran','Kohhran']];
       const displayLocations = data => renderDisplayLocations(contentOwners, data, esc);
       const refreshOwners = async () => { try { contentOwners = await loadContentOwners(api); } catch (error) { notification('Fellowship owners could not load; saved owner values remain available.', 'error'); } };
