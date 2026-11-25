@@ -10,7 +10,7 @@ export async function versionAdminAssets(directory) {
   const names = (await readdir(source)).filter(name => name.endsWith('.js')).sort();
   const files = await Promise.all(names.map(async name => [name, await readFile(join(source, name))]));
   const hash = createHash('sha256');
-  for (const [name, bytes] of files) hash.update(name+'\\0').update(bytes).update('\\0');
+  for (const [name, bytes] of files) hash.update(name+'\0').update(bytes).update('\0');
   const version = hash.digest('hex').slice(0, 24);
   const target = join(source, 'assets', version);
   await mkdir(target, { recursive: true });
@@ -22,7 +22,7 @@ export async function versionAdminAssets(directory) {
   }
   if (!page) throw new Error('Admin HTML not found in build output');
   const html = await readFile(page, 'utf8');
-  const rewritten = html.replace(/(src=["'])\\/admin\\/([^/"'?]+\\.js)(?:\\?[^"']*)?(["'])/g,
+  const rewritten = html.replace(/(src=["'])\/admin\/([^/"'?]+\.js)(?:\?[^"']*)?(["'])/g,
     (_, start, name, end) => {
       if (!names.includes(name)) throw new Error('Missing admin script: '+name);
       return start+'/admin/assets/'+version+'/'+name+end;
