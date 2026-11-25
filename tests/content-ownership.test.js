@@ -9,8 +9,8 @@ test('Main archives and homepage gallery source use shared Kohhran ownership rul
 });
 test('Ownership helper defaults missing owners and rejects archived or unpublished records', () => {
   const source=read('src/lib/content-ownership.ts');
-  assert.match(source,/CHURCH_OWNER = 'kohhran'/);
+  assert.match(read('public/admin/content-owners.js'),/CHURCH_OWNER = 'kohhran'/);
   assert.match(source,/entry\.data\.status !== 'archived'/);
   assert.match(source,/entry\.data\.published !== false/);
-  assert.match(source,/contentOwner\(entry\.data\) === owner/);
+  assert.match(source,/normalizeContentOwners\(entry\.data\)\.includes\(owner\)/);
 });
