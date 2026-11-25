@@ -4,8 +4,8 @@ role: "pastor"
 start_year: 1961
 end_year: 1972
 record_status: "Former"
-designation: "."
+designation: "Pastor"
 published: true
 display_order: 10
-photo: "/images/1794551141254-5.jpg"
+photo: "/images/1795601997849-pastor-hranghnuna.jpg"
 ---
