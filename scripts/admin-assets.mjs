@@ -28,7 +28,20 @@ export async function versionAdminAssets(directory) {
       return start+'/admin/assets/'+version+'/'+name+end;
     });
   if (rewritten === html) throw new Error('No admin scripts versioned');
+  const references = [...rewritten.matchAll(/<script\b[^>]*\bsrc=["'](\/admin\/[^"']+)["']/g)].map(match => match[1]);
+  if (!references.length) throw new Error('No admin entry scripts found');
+  for (const reference of references) {
+    const prefix = '/admin/assets/'+version+'/';
+    if (!reference.startsWith(prefix)) throw new Error('Unversioned admin entry: '+reference);
+    await readFile(join(target, reference.slice(prefix.length)));
+  }
+  for (const [name, bytes] of files) {
+    const code = bytes.toString('utf8');
+    if (/\bimport\s*\(\s*['"]\/admin\//.test(code)) throw new Error('Unversioned admin import: '+name);
+    for (const match of code.matchAll(/\bimport\s*\(\s*['"]\.\/([^'"]+)['"]/g)) await readFile(join(target, match[1]));
+  }
   await writeFile(page, rewritten);
+  console.log('Verified admin asset version '+version+': '+references.length+' entry scripts, '+files.length+' JavaScript files');
   return version;
 }
 
