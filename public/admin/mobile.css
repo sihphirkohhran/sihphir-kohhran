@@ -56,3 +56,6 @@
  #admin-app #view .quick{grid-template-columns:minmax(0,1fr)}
  #admin-app #view :is(.gallery-library-actions,.document-library-actions,.committee-library-actions){grid-template-columns:minmax(0,1fr)}
 }
+
+.admin-drawer-close[hidden]{display:none}
+@media(max-width:900px){#admin-app .admin-drawer-close:not([hidden]){align-self:flex-end;min-width:44px;min-height:44px;border:1px solid #304967;border-radius:8px;background:#203b60;color:white;font-size:24px}}
