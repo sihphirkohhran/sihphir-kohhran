@@ -3,6 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { ownedBy } from '../lib/content-ownership';
 import { buildOwnerAlbums, buildOwnerDocuments } from '../lib/owner-archives';
+import FellowshipCommitteeArchive from './FellowshipCommitteeArchive.astro';
 import FellowshipGalleryArchive from './FellowshipGalleryArchive.astro';
 import FellowshipDocumentArchive from './FellowshipDocumentArchive.astro';
 import type { FellowshipGroupPhoto } from '../lib/fellowship';
@@ -146,7 +147,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
     )}
     </section>
     <section id="fellowship-panel-committee" role="tabpanel" aria-labelledby="fellowship-tab-committee" tabindex="0" data-fellowship-panel="committee" hidden>
-      <div class="fellowship-empty-state"><h2>Committee</h2><p>Committee information will be available through the centralized Committee system.</p></div>
+      <FellowshipCommitteeArchive fellowshipSlug={ownerSlug} />
     </section>
     <section id="fellowship-panel-gallery" role="tabpanel" aria-labelledby="fellowship-tab-gallery" tabindex="0" data-fellowship-panel="gallery" hidden>
       <FellowshipGalleryArchive albums={albums} fellowshipSlug={ownerSlug} />
