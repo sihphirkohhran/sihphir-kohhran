@@ -23,7 +23,7 @@ const owners = ['kohhran','ktp','kohhran-hmeichhia','kpp','masihi-sangati'];
 
 test('Gallery and Document owner selectors use the shared CMS-derived registry', () => {
   for (const source of [gallery, documents]) {
-    assert.match(source, /import\('\/admin\/content-owners\.js'\)/);
+    assert.match(source, /import\('\.\/content-owners\.js'\)/);
     assert.match(source, /loadContentOwners\(api\)/);
     assert.ok(source.includes('renderDisplayLocations(contentOwners, data, esc)'));
     assert.ok(source.includes('${displayLocations(data)}'));
