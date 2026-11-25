@@ -217,3 +217,51 @@ test('schedule editor uses accessible compact rows and reliable persistence feed
   assert.match(page,/\.schedule-icon-button svg/);
   assert.match(page,/\.schedule-field input/);
 });
+
+test('weekly duty editor renders three fields and preserves hidden legacy data through actual edit and save handlers',async()=>{
+ const source=await read('../public/admin/schedule-manager.js');
+ const original={role:'Prayer',name:'Original',time:'10:00',speaker:'Speaker',bible_text:'John 1',notes:'Old',custom:{keep:true}};
+ const path='src/content/notices/weekly/2026-11-23.md';
+ let saved='---\nweek_start: "2026-11-23"\nstatus: "published"\ndays: '+JSON.stringify([{day:'Sunday',duties:[original]}])+'\n---\nHistory\n';
+ let writes=0;
+ const elements=new Map();
+ const element=selector=>{if(!elements.has(selector))elements.set(selector,{dataset:{},events:{},addEventListener(n,fn){this.events[n]=fn;},querySelector:element});return elements.get(selector);};
+ const form=element('#schedule-form');
+ const host={innerHTML:'',querySelector:element,querySelectorAll:()=>[]};
+ const window={addEventListener(){},removeEventListener(){}};
+ const context={window,document:{querySelector:()=>host},confirm:()=>true,FormData:class{get(k){return {week_start:'2026-11-23',week_end:'',status:'published'}[k]??null;}}};
+ runInNewContext(source,context);
+ const manager=window.SihphirScheduleManager;
+ const api=async(url,options)=>{
+  if(options?.method==='PUT'){saved=JSON.parse(options.body).content;writes++;return {};}
+  if(url.includes('?area='))return {items:[{path,label:'2026-11-23.md'}]};
+  return {content:saved,sha:'sha'};
+ };
+ await manager.mount({area:'hun-ruatna',api,esc:v=>String(v??''),notification:(message,type)=>{assert.notEqual(type,'error',message);}});
+ const fields=()=>[...host.innerHTML.matchAll(/data-field="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(fields(),['title','person_responsible','notes']);
+ for(const label of ['Programme / Role','Name / Person Responsible','Notes (Optional)'])assert.ok(host.innerHTML.includes(label));
+ assert.match(host.innerHTML,/data-field="title" value="Prayer"/);
+ assert.match(host.innerHTML,/data-field="person_responsible" value="Original"/);
+ const edit=(field,value)=>form.events.input({target:{dataset:{duty:'0:0',field},value}});
+ edit('title','Updated programme');edit('person_responsible','Updated person');edit('notes','');
+ const click=dataset=>form.events.click({target:{closest:()=>({dataset})}});
+ click({duplicateDuty:'0:0'});assert.equal(fields().length,6);
+ click({addDuty:'0'});assert.equal(fields().length,9);
+ click({removeDuty:'0:1'});assert.equal(fields().length,6);
+ await form.onsubmit({preventDefault(){}});
+ assert.equal(writes,1);
+ const record=manager.parse(saved,'days');
+ const [edited,fresh]=record.data.days[0].duties;
+ assert.deepEqual(JSON.parse(JSON.stringify(edited)),{...original,title:'Updated programme',role:'Updated programme',person_responsible:'Updated person',name:'Updated person',notes:''});
+ assert.deepEqual(JSON.parse(JSON.stringify(fresh)),{role:'',name:''});
+ assert.equal(record.body,'History\n');
+ assert.deepEqual(fields(),['title','person_responsible','notes','title','person_responsible','notes']);
+ assert.match(source,/\['title','person_responsible','notes'\]:\['name','role'\]/);
+});
+test('weekly layout stacks independently of monthly layout',async()=>{
+ const page=await read('../src/pages/admin.astro');
+ assert.match(page,/\.schedule-weekly-row\{grid-template-columns:minmax\(0,1\.2fr\) minmax\(0,1\.2fr\) minmax\(0,1fr\) 86px\}/);
+ assert.match(page,/@media\(max-width:800px\)\{#schedule-form \.schedule-weekly-row\{grid-template-columns:minmax\(0,1fr\)/);
+ assert.match(page,/\.schedule-weekly-row \.schedule-field input\{height:44px;font-size:16px\}/);
+});
