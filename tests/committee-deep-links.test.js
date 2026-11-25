@@ -152,3 +152,69 @@ test('browser Back and Forward continue to restore previously visited Committee 
   assert.match(page, /function syncFromLocation\(\)/);
   assert.match(page, /resolveCommitteeDeepLink\(linkRecords,window\.location\.search,availableCommitteeIds\)/);
 });
+
+test('actual Committee client script restores listing and navigates archive history without missing imports', async () => {
+  const { transform } = await import('esbuild');
+  const { runInNewContext } = await import('node:vm');
+  const client = page.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const imports = [...client.matchAll(/import\s*\{([^}]+)\}\s*from\s*'([^']+)';/g)];
+  const bindings = {};
+  for (const [, names, path] of imports) {
+    const module = await import(new URL(path.replace('../lib/', '../src/lib/'), import.meta.url));
+    for (const name of names.split(',').map(s => s.trim())) bindings[name] = module[name];
+  }
+  assert.equal(bindings.getCommitteeListingUrl, getCommitteeListingUrl);
+  const { code } = await transform(client.replace(/import\s*\{[^}]+\}\s*from\s*'[^']+';/g, ''), { loader: 'ts' });
+  function element(dataset = {}, id = '') {
+    return { dataset, id, hidden: false, value: '', events: {},
+      addEventListener(name, fn) { this.events[name] = fn; },
+      scrollIntoView() {}, focus() {}, toggleAttribute(name, value) { if (name === 'hidden') this.hidden = value; } };
+  }
+  const detail2025 = element({archiveId:'pes-2025',committeeId:'pes',year:'2025'},'committee-detail-pes-2025');
+  const detail2026 = element({archiveId:'pes-2026',committeeId:'pes',year:'2026'},'committee-detail-pes-2026');
+  const details = [detail2025,detail2026];
+  const card = element({viewCommittee:'pes-2026',name:'PES',year:'2026',committee:'pes'});
+  const close = element(), listing = element(), filters = element(), search = element(), year = element({defaultYear:'2026'}), committee = element();
+  committee.options = [{value:'all'},{value:'pes'}];
+  const switchYear = element(); switchYear.value = '2025'; switchYear.closest = () => detail2026;
+  const document = {
+    querySelector(selector) { return ({'#committee-search':search,'#committee-year':year,'#committee-type':committee,'.committee-filters':filters})[selector] ?? null; },
+    querySelectorAll(selector) { return ({'[data-view-committee]':[card],'[data-committee-detail]':details,'.committee-section,.committee-filters,.committee-empty':[listing,filters],'[data-committee-card]':[card],'[data-close-committee]':[close],'[data-committee-year-switch]':[switchYear]})[selector] ?? []; },
+    getElementById(id) { return details.find(d=>d.id===id); }
+  };
+  const states = [new URL(origin+'/committee?archive=pes-2025&committee=pes&keep=1#committee-detail-pes-2025')];
+  let index = 0;
+  const window = {location:states[0],events:{},addEventListener(name,fn){this.events[name]=fn;}};
+  const history = {pushState(state,title,url){states.splice(index+1);states.push(new URL(url));window.location=states[++index];}};
+  const navigate = delta => {window.location=states[index+=delta];window.events.popstate();};
+  runInNewContext(code,{...bindings,document,window,history,URL,URLSearchParams});
+  assert.equal(detail2025.hidden,false);
+  assert.equal(listing.hidden,true);
+  close.events.click();
+  assert.equal(listing.hidden,false);
+  assert.equal(filters.hidden,false);
+  assert.ok(details.every(d=>d.hidden));
+  assert.equal(window.location.search,'?keep=1');
+  assert.equal(window.location.hash,'');
+  assert.equal(card.hidden,false);
+  navigate(-1);
+  assert.equal(detail2025.hidden,false);
+  navigate(1);
+  assert.equal(listing.hidden,false);
+  card.events.click({preventDefault(){}});
+  assert.equal(detail2026.hidden,false);
+  switchYear.events.change();
+  assert.equal(detail2025.hidden,false);
+  assert.equal(detail2026.hidden,true);
+  close.events.click();
+  assert.ok(details.every(d=>d.hidden));
+  assert.equal(listing.hidden,false);
+  navigate(-1);
+  assert.equal(detail2025.hidden,false);
+  navigate(-1);
+  assert.equal(detail2026.hidden,false);
+  navigate(1);
+  assert.equal(detail2025.hidden,false);
+  navigate(1);
+  assert.equal(listing.hidden,false);
+});
