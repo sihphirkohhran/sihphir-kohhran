@@ -75,24 +75,46 @@ const years = [...new Set(groups.flatMap(group=>group.archives.map(entry=>entry.
       }
       filter();
     };
-    const navigate=(id?:string,archiveYear?:string)=>{
+    let restoreCard: HTMLButtonElement | undefined;
+    let returningToListing=false;
+    const navigate=(id?:string,archiveYear?:string,replace=false)=>{
       const url=new URL(location.href);
       url.searchParams.set('tab','committee');
       if(id){url.searchParams.set('committeeId',id);url.searchParams.set('committeeYear',archiveYear||'');}
       else{url.searchParams.delete('committeeId');url.searchParams.delete('committeeYear');}
-      if(url.href!==location.href)history.pushState(history.state,'',url);
+      if(url.href!==location.href){
+        const state={...history.state, fellowshipCommitteeFromListing: Boolean(id) && (!replace || history.state?.fellowshipCommitteeFromListing===true)};
+        if(replace)history.replaceState(state,'',url);
+        else history.pushState(state,'',url);
+      }
       sync();
     };
+    const focusListing=()=>{
+      (restoreCard && !restoreCard.hidden ? restoreCard : cards.find(card=>!card.hidden)||committee).focus();
+      restoreCard=undefined;
+    };
     committee.addEventListener('change',filter);year.addEventListener('change',filter);
-    cards.forEach(card=>card.addEventListener('click',()=>{navigate(card.dataset.id,card.dataset.year);back.focus();}));
-    back.addEventListener('click',()=>{navigate();(cards.find(card=>!card.hidden)||committee).focus();});
+    cards.forEach(card=>card.addEventListener('click',()=>{restoreCard=card;navigate(card.dataset.id,card.dataset.year);back.focus();}));
+    back.addEventListener('click',()=>{
+      if(returningToListing)return;
+      if(history.state?.fellowshipCommitteeFromListing===true){
+        returningToListing=true;
+        history.back();
+      }else{
+        navigate(undefined,undefined,true);
+        focusListing();
+      }
+    });
     groups.forEach(group=>{
       const picker=group.querySelector<HTMLSelectElement>('[data-fellowship-committee-year]')!;
-      picker.addEventListener('change',()=>navigate(group.dataset.id,picker.value));
+      picker.addEventListener('change',()=>navigate(group.dataset.id,picker.value,true));
     });
     root.querySelectorAll<HTMLImageElement>('[data-member-photo]').forEach(img=>img.addEventListener('error',()=>{if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';}));
     root.querySelectorAll<HTMLImageElement>('[data-card-photo]').forEach(img=>img.addEventListener('error',()=>{img.hidden=true;const fallback=document.createElement('span');fallback.className='card-fallback';fallback.textContent='Committee';img.after(fallback);},{once:true}));
-    window.addEventListener('popstate',sync);
+    window.addEventListener('popstate',()=>{
+      sync();
+      if(returningToListing){returningToListing=false;if(!listing.hidden)focusListing();}
+    });
     window.addEventListener('fellowship:location',sync);
     sync();
   });
