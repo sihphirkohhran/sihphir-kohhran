@@ -4,7 +4,7 @@
   "office_bearers": [],
   "members": [],
   "logo": "/images/fellowship/sangati-logo.png",
-  "fellowship_name": "masihi sangati",
+  "fellowship_name": "Masihi Sangati",
   "slug": "masihi-sangati",
   "category": "Fellowship",
   "short_description": "",
@@ -19,6 +19,6 @@
   "banner_image": "",
   "group_photo": "",
   "homepage_order": 0,
-  "homepage_visible": false,
+  "homepage_visible": true,
   "status": "current"
 }
