@@ -114,7 +114,7 @@ const defaultMemberPhoto = '/images/profile-placeholder.svg';
 
 <script>
   import { matchesCommitteeFilters, resetCommitteeFilters } from '../lib/committee-filters.js';
-  import { resolveCommitteeDeepLink } from '../lib/committee-deep-links.js';
+  import { resolveCommitteeDeepLink, getCommitteeListingUrl } from '../lib/committee-deep-links.js';
 
   const search=document.querySelector<HTMLInputElement>('#committee-search'),year=document.querySelector<HTMLSelectElement>('#committee-year'),committee=document.querySelector<HTMLSelectElement>('#committee-type'),count=document.querySelector<HTMLElement>('#committee-count'),empty=document.querySelector<HTMLElement>('#committee-empty'),fallback=document.querySelector<HTMLElement>('#committee-link-fallback');
   const cards=[...document.querySelectorAll<HTMLAnchorElement>('[data-view-committee]')],details=[...document.querySelectorAll<HTMLElement>('[data-committee-detail]')],listing=[...document.querySelectorAll<HTMLElement>('.committee-section,.committee-filters,.committee-empty')];
