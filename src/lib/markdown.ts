@@ -1,11 +1,15 @@
 import { marked } from 'marked';
+import { parseFragment, serialize } from 'parse5';
 
 marked.setOptions({ gfm: true, breaks: true });
 
 /** Render CMS Markdown to HTML. Kept unchanged for existing non-elder modules. */
 export function renderMarkdown(text: string | undefined | null): string {
   if (!text?.trim()) return '';
-  return marked.parse(text.trim()) as string;
+  const html = marked.parse(text.trim()) as string;
+  // HTML5 parsing repairs legacy paragraph/list nesting without changing stored records.
+  // Only normalize content containing lists; existing sanitization remains downstream.
+  return /<(?:ol|ul)\b/i.test(html) ? serialize(parseFragment(html)) : html;
 }
 
 const allowedTags = new Set([
