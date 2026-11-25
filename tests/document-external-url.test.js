@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { readDisplayLocations, normalizeContentOwners } from '../public/admin/content-owners.js';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
@@ -72,11 +73,13 @@ test('CMS sync preserves external-only records, legacy attachments and source sw
   const FormData=class {
     constructor(form){this.form=form}
     get(key){return Object.hasOwn(this.form,key)?this.form[key]:null}
+    getAll(key){return this.form[key]??[]}
   };
   const run=(data,files,sourceValue,externalValue)=>{
     const selected={data:{...data},files:files.map(file=>({...file}))};
-    const sync=new Function('selected','FormData','return form=>{'+source);
-    sync(selected,FormData)({
+    const sync=new Function('selected','FormData','readDisplayLocations','return form=>{'+source);
+    sync(selected,FormData,readDisplayLocations)({
+      owners:normalizeContentOwners(data),
       name:'External Archive',yearType:'unspecified',category:'Other',description:'',
       display_order:'0',published:'on',document_source:sourceValue,pdf_external:externalValue
     });
