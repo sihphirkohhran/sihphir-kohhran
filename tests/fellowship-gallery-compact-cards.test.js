@@ -2,16 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../src/components/FellowshipGalleryArchive.astro',import.meta.url),'utf8');
-test('Fellowship listing has fixed cards and out-of-flow cropped covers regardless of intrinsic image dimensions',()=>{
+test('Fellowship listing matches Main Gallery proportions without intrinsic image expansion',()=>{
  const rule=selector=>source.split(selector+'{')[1].split('}')[0];
- const card=rule('.owner-album-card'),cover=rule('.owner-album-cover'),image=rule('.owner-album-cover img');
- assert.match(card,/box-sizing:border-box;width:100%;max-width:190px;min-width:0;height:210px/);
- assert.match(cover,/position:relative;width:100%;height:115px;min-height:115px;max-height:115px;overflow:hidden;flex-shrink:0/);
- assert.match(image,/position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center/);
- assert.doesNotMatch(cover,/aspect-ratio/);
- assert.match(rule('.owner-album-copy h3'),/-webkit-line-clamp:2;overflow:hidden/);
- assert.match(rule('.owner-album-grid'),/repeat\(auto-fill,minmax\(min\(100%,max\(150px,calc\(\(100% - 24px\)\/4\)\)\),1fr\)\)/);
- assert.match(rule('.owner-album-grid'),/gap:8px;.*max-width:784px/);
+ const main=readFileSync(new URL('../src/pages/gallery.astro',import.meta.url),'utf8');
+ assert.match(rule('.owner-album-card'),/width:100%;max-width:380px;min-width:0/);
+ assert.doesNotMatch(rule('.owner-album-card'),/height:210px|max-width:190px/);
+ assert.match(rule('.owner-album-cover'),/height:220px;min-height:220px;max-height:220px;overflow:hidden;flex-shrink:0/);
+ assert.match(rule('.owner-album-cover img'),/position:absolute;inset:0;width:100%;height:100%;object-fit:cover/);
+ assert.match(rule('.owner-album-grid'),/repeat\(3,minmax\(0,1fr\)\);gap:18px/);
+ assert.match(source,/@media\(max-width:850px\)\{\.owner-album-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(source,/@media\(max-width:560px\)\{\.owner-album-grid\{grid-template-columns:minmax\(0,1fr\)/);
+ assert.match(rule('.owner-album-copy'),/padding:12px 14px/);
+ assert.match(rule('.owner-album-copy h3'),/18px\/1.4 Poppins/);
+ assert.match(main,/\.album-cover\{[^}]*height:220px/);
+ assert.match(main,/\.album-body\{[^}]*padding:12px 14px/);
  assert.match(source,/\[hidden\]\{display:none!important\}/);
 });
 test('full album thumbnails and viewer retain their separate image rules',()=>{
