@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import vm from 'node:vm';
+import { normalizeContentOwners, renderDisplayLocations } from '../public/admin/content-owners.js';
 
 const read = path => readFileSync(new URL('../' + path, import.meta.url), 'utf8');
 const gallery = read('public/admin/gallery-manager.js');
@@ -24,11 +25,12 @@ test('Gallery and Document owner selectors use the shared CMS-derived registry',
   for (const source of [gallery, documents]) {
     assert.match(source, /import\('\/admin\/content-owners\.js'\)/);
     assert.match(source, /loadContentOwners\(api\)/);
-    assert.match(source, /renderOwnerOptions\(contentOwners, value, escape\)/);
-    assert.match(source, /<select name="owner" required>/);
-    assert.match(source, /selected\.data\.owner=String\(values\.get\('owner'\)\|\|'kohhran'\)/);
-    assert.match(source, /selected\.data\.category=String\(values\.get\('category'\)\|\|'Other'\)/);
-    assert.match(source, /canSaveOwner\(contentOwners,selected\.data\.owner,selected\.originalOwner\)/);
+    assert.ok(source.includes('renderDisplayLocations(contentOwners, data, esc)'));
+    assert.ok(source.includes('${displayLocations(data)}'));
+    assert.ok(source.includes('selected.data.owners=readDisplayLocations(values)'));
+    assert.ok(source.includes('selected.data.category=String(values.get(\'category\')||\'Other\')'));
+    assert.ok(source.includes('canSaveOwners(contentOwners,selected.data.owners,selected.originalOwners)'));
+    assert.ok(source.includes('originalOwners:') && source.includes('normalizeContentOwners(parsed.data)'));
   }
 });
 
@@ -67,8 +69,16 @@ test('Document serializes owner independently of category and keeps source metad
 
 test('Schema supplies legacy Kohhran default and validates dynamic slug IDs', () => {
   assert.equal((schema.match(/owner: z\.string\(\)\.regex\(\/\^\[a-z0-9\]/g)||[]).length,2);
-  assert.match(gallery,/owner:'kohhran'/);
-  assert.match(documents,/owner:'kohhran'/);
+  assert.ok(gallery.includes("owners:['kohhran']"));
+  assert.ok(documents.includes("owners:['kohhran']"));
+  assert.deepEqual(normalizeContentOwners({}),['kohhran']);
+  assert.deepEqual(normalizeContentOwners({owner:'ktp'}),['ktp']);
+  assert.deepEqual(normalizeContentOwners({owner:'kohhran',owners:['ktp']}),['ktp']);
+  const html=renderDisplayLocations([['kohhran','Kohhran'],['new-fellowship','New Fellowship']],{owner:'retired'},String);
+  assert.match(html,/type="checkbox" name="owners"/);
+  assert.match(html,/value="retired" checked/);
+  assert.match(html,/fellowship unavailable/);
+  assert.match(html,/value="new-fellowship"/);
 });
 
 test('Fellowship legacy people are not edited or changed during sync', () => {
