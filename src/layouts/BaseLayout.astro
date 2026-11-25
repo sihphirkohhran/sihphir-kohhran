@@ -269,7 +269,7 @@ const organizationJsonLd = JSON.stringify({
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     </button>
     <div class="lightbox-content">
-      <img id="lightbox-img" src="" alt="Gallery image" />
+      <img id="lightbox-img" alt="Gallery image" />
       <p id="lightbox-caption" class="lightbox-caption font-body text-gold-pale/70 text-sm text-center mt-3 tracking-wide"></p>
     </div>
     <button type="button" id="lightbox-next" class="lightbox-nav lightbox-nav-next" aria-label="Next image">
@@ -367,13 +367,18 @@ const organizationJsonLd = JSON.stringify({
       return [...document.querySelectorAll<HTMLElement>('[data-lightbox-src]')].filter((el) => {
         const hidden = el.closest('[style*="display: none"]') || el.closest('.hidden');
         if (hidden && hidden !== el) return false;
+        const src = el.getAttribute('data-lightbox-src')?.trim();
+        if (!src) return false;
+        try {
+          if (!['http:', 'https:'].includes(new URL(src, document.baseURI).protocol)) return false;
+        } catch { return false; }
         return el.offsetParent !== null || el.getBoundingClientRect().width > 0;
       });
     }
 
     function buildSlides(): LightboxSlide[] {
       return getLightboxTriggers().map((el) => ({
-        src: el.getAttribute('data-lightbox-src') || (el as HTMLImageElement).src || '',
+        src: el.getAttribute('data-lightbox-src')?.trim() || '',
         caption: el.getAttribute('data-lightbox-caption') || el.getAttribute('alt') || '',
         alt: el.getAttribute('data-lightbox-alt') || el.getAttribute('alt') || '',
       })).filter((s) => s.src);
@@ -436,7 +441,7 @@ const organizationJsonLd = JSON.stringify({
         const triggers = getLightboxTriggers();
         const target = el.closest('[data-lightbox-src]') as HTMLElement | null ?? el as HTMLElement;
         const index = triggers.indexOf(target);
-        openLightbox(index >= 0 ? index : 0);
+        if (index >= 0) openLightbox(index);
       });
     });
 
