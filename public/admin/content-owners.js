@@ -50,3 +50,30 @@ export function canSaveOwners(registry, values, previousValues = []) {
 export function readDisplayLocations(formData) {
   return [...new Set(formData.getAll('owners').map(String))];
 }
+
+/** Load libraries with bounded concurrency and safe, stage-specific diagnostics. */
+export async function loadLibraryRecords(api, area, parseRecord, buildRecord) {
+  let listing;
+  try { listing = await api('/api/admin/content?area='+area); }
+  catch { throw Error('Library listing request failed. Check your session and connection, then reload.'); }
+  if (!Array.isArray(listing?.items)) throw Error('Library listing returned an invalid response. Reload and try again.');
+  const records=[], failures=[];
+  const items=listing.items;
+  for(let offset=0;offset<items.length;offset+=4){
+    const batch=await Promise.all(items.slice(offset,offset+4).map(async item=>{
+      let stage='content fetch';
+      try {
+        if(typeof item?.path!=='string'||!item.path)throw Error();
+        const file=await api('/api/admin/content?path='+encodeURIComponent(item.path));
+        if(typeof file?.content!=='string')throw Error();
+        stage='record parsing';
+        const parsed=parseRecord(file.content);
+        stage='record normalization';
+        return {record:buildRecord(item,parsed)};
+      } catch { return {stage}; }
+    }));
+    for(const result of batch)if(result.record)records.push(result.record);else failures.push(result.stage);
+  }
+  const warning=failures.length ? 'Loaded '+records.length+' of '+items.length+' records. '+failures.length+' failed ('+[...new Set(failures)].join(', ')+'). Reload before creating new records.' : '';
+  return {records,warning,listed:items.length,failed:failures.length};
+}
