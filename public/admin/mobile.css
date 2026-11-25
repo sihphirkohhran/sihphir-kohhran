@@ -1,0 +1,58 @@
+/* Mobile-only enhancements. Existing desktop and module rules remain intact. */
+.admin-drawer-backdrop[hidden]{display:none}
+@media(max-width:900px){
+ #admin-app{padding:0;max-width:none}
+ #admin-app .app{grid-template-columns:minmax(0,1fr)}
+ #admin-app .side{inset:0 auto 0 0;width:min(300px,85vw);height:100vh;height:100dvh;z-index:60;padding:20px 12px max(16px,env(safe-area-inset-bottom));overflow:auto}
+ #admin-app .side nav{min-height:0;flex:1;overscroll-behavior:contain}
+ #admin-app .side nav button,#admin-app .profile button{min-height:44px}
+ #admin-app .side nav button.on{box-shadow:inset 3px 0 #e6bd64}
+ #admin-app .admin-drawer-backdrop:not([hidden]){position:fixed;inset:0;background:#10243f99;z-index:59}
+ #admin-app .app>main{min-width:0;padding:0 14px max(24px,env(safe-area-inset-bottom));margin:0 auto}
+ #admin-app .top{position:sticky;top:0;z-index:12;align-items:center;gap:10px;margin:0 -14px 18px;padding:12px 14px;background:#172941;color:#fff;box-shadow:0 2px 8px #10243f20}
+ #admin-app .top .crumb{color:#e6bd64;font-size:9px;letter-spacing:.07em}
+ #admin-app .top h1{font-size:20px;overflow-wrap:anywhere}
+ #admin-app .top .mobile-menu{flex:none;min-width:44px;min-height:44px;border-radius:8px;background:#203b60;color:white}
+ #admin-app .top-actions a{color:#fff}
+ #admin-app button:focus-visible,#admin-app a:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
+ #admin-app #view{min-width:0;overflow-wrap:anywhere}
+ #admin-app #view :where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select,textarea){min-width:0;max-width:100%;font-size:16px}
+ #admin-app #view :where(input:not([type=checkbox]):not([type=radio]):not([type=hidden]),select){min-height:44px}
+ #admin-app #view :where(button:not(.gallery-preview-button):not(.media-thumb)){min-height:44px;max-width:100%;white-space:normal}
+ #admin-app #view :where(label,article,section,form,fieldset){min-width:0}
+ #admin-app #view :where(img,video,iframe){max-width:100%}
+ #admin-app #view :where(.record,.gallery-record,.document-record,.committee-record,.fellowship-record,.notice-record,.ministry-record,.page-record) :is(b,small,em){white-space:normal;overflow-wrap:anywhere}
+ #admin-app #view :is(.dash-grid,.manager,.settings-grid,.worship-layout,.media-detail,.gallery-workspace,.document-workspace,.committee-workspace,.fellowship-workspace,.notice-workspace,.ministry-workspace,.page-workspace){grid-template-columns:minmax(0,1fr)}
+ #admin-app #view :is(.field-grid,.home-fields,.gallery-details,.document-details,.committee-details,.fellowship-general>div,.fellowship-branding>div,.fellowship-relations,.notice-general>div,.notice-dates>div,.ministry-fields,.elder-cms-fields,.site-fields,.page-block>div,.ui-text-grid,.statistics-cms .stats-fields,.statistics-cms .stats-source,.statistics-cms .stats-extra-row,.repeat-list article,.programme-row,.school-cms-row){grid-template-columns:minmax(0,1fr)}
+ #admin-app #view :is(.field-grid,.home-fields,.gallery-details,.document-details,.committee-details,.fellowship-general>div,.notice-general>div,.ministry-fields,.site-fields,.statistics-cms .stats-source)>*{grid-column:auto}
+ #admin-app #view :is(.gallery-library-list,.document-list,.committee-list,.fellowship-list,.notice-list,.ministry-records,.page-library){max-height: min(42vh,340px);overflow:auto;overscroll-behavior:contain}
+ #admin-app #view :is(.gallery-library,.document-library,.committee-library,.fellowship-library,.notice-library,.ministry-library,.page-library,.gallery-editor-panel,.document-editor-panel,.committee-editor-panel,.fellowship-editor,.notice-editor,.ministry-editor,.detail){min-width:0;min-height:0}
+ #admin-app #view :is(.edit-head,.gallery-editor-head,.document-editor-head,.committee-editor-head,.fellowship-editor-head,.notice-editor-head,.ministry-editor-head,.page-editor-head,.panel-head,.media-toolbar,.media-bulk,.gallery-photo-head,.document-files-head,.site-control-head){flex-wrap:wrap;gap:8px;padding:14px}
+ #admin-app #view :is(.edit-head>div:last-child,.gallery-editor-actions,.document-editor-actions,.committee-editor-actions,.fellowship-editor-head>div:last-child,.notice-editor-head>div:last-child,.ministry-editor-head>div:last-child,.page-editor-head>div:last-child,.media-tabs,.media-actions,.save-row,.school-cms-actions){flex-wrap:wrap;gap:8px}
+ #admin-app #view :is(.toolbar,.home-rich-toolbar,.committee-toolbar,.fellowship-rich-toolbar,.notice-toolbar,.ministry-rich-toolbar,.page-toolbar,.school-rich-toolbar){display:flex;flex-wrap:wrap;gap:4px;max-width:100%;padding:6px}
+ #admin-app #view :is(.toolbar,.home-rich-toolbar,.committee-toolbar,.fellowship-rich-toolbar,.notice-toolbar,.ministry-rich-toolbar,.page-toolbar,.school-rich-toolbar) button{min-width:44px;min-height:44px;font-size:12px}
+ #admin-app #view [contenteditable=true]{min-width:0;max-width:100%;font-size:16px;overflow-wrap:anywhere;scroll-margin-top:90px}
+ #admin-app #view :is(.home-rich-editor,.rich,.school-rich-editor){min-height:220px;max-height:none}
+ #admin-app #view :is(.gallery-upload-zone,.document-drop,.committee-member-drop,.media-drop){padding:12px;flex-wrap:wrap}
+ #admin-app #view :is(.gallery-assets,.document-assets,.media-grid,.gallery-preview-sheet>div){grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr))}
+ #admin-app #view :is(.gallery-category-dialog,.document-category-dialog,.committee-category-dialog,.gallery-preview-dialog,.document-preview-dialog,.committee-preview-dialog,.fellowship-preview-dialog,.notice-preview-dialog){padding:10px}
+ #admin-app #view :is(.gallery-category-sheet,.gallery-preview-sheet,.document-category-dialog>form,.document-preview-dialog>section,.committee-category-dialog>form,.committee-preview-dialog>section,.fellowship-preview-dialog>section,.notice-preview-dialog>article){max-width:100%;max-height:90vh;max-height:90dvh;overflow:auto}
+ #admin-app #view :is(.home-row,.home-prayer-row,#category-list>div,#document-category-list>div,.committee-master-rows article){grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #admin-app #view :is(.home-row,.home-prayer-row,#category-list>div,#document-category-list>div,.committee-master-rows article)>label{grid-column:1/-1}
+ #admin-app #view :is(.home-row,.home-prayer-row,#category-list>div,#document-category-list>div,.committee-master-rows article)>button{grid-column:auto}
+ #admin-app #view .home-save{position:sticky;bottom:0;padding:10px 0 max(10px,env(safe-area-inset-bottom));background:inherit;z-index:5}
+ #admin-app #view .home-save button{width:100%}
+ #admin-app #view .media-list .media-card{grid-template-columns:minmax(0,1fr)}
+ #admin-app #view .quick{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #admin-app #view .stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ #admin-app #view .stat{padding:12px;gap:8px;min-width:0}
+ #admin-app #view .stat i{flex-shrink:0}
+ #admin-app #view .stat b{font-size:22px}
+ #admin-app #view .recent{grid-template-columns:minmax(0,1fr)}
+ #admin-app #view .dashboard-details dd{white-space:normal;overflow-wrap:anywhere}
+}
+@media(max-width:375px){
+ #admin-app #view .stat{align-items:flex-start;flex-direction:column}
+ #admin-app #view .quick{grid-template-columns:minmax(0,1fr)}
+ #admin-app #view :is(.gallery-library-actions,.document-library-actions,.committee-library-actions){grid-template-columns:minmax(0,1fr)}
+}
