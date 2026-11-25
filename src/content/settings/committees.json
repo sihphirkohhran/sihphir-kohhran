@@ -39,7 +39,8 @@
     {
       "id": "sunday-school",
       "name": "Sunday School Committee",
-      "display_order": 7
+      "display_order": 7,
+      "fellowship_slug": "ktp"
     },
     {
       "id": "social-front",
