@@ -28,7 +28,7 @@
   const titleFor = file => (file.label || '').replace(/\.(md|json)$/,'').replace(/[-_]/g,' ').replace(/\b\w/g,x=>x.toUpperCase());
 
   function layout() {
-    root.innerHTML = `<div class="app"><aside class="side" id="admin-navigation" aria-label="Administration navigation"><a href="/" class="logo">SPK <span>ADMIN</span></a><nav><button class="${area==='dashboard'?'on':''}" data-go="dashboard"><i>▦</i>Dashboard</button>${menuGroups.map(([group,entries])=>`<div class="nav-group"><span>${group}</span>${entries.map(([id,name,icon])=>`<button class="${area===id?'on':''}" data-go="${id}"><i>${icon}</i>${name}</button>`).join('')}</div>`).join('')}</nav><div class="profile"><b>Administrator</b><small>Secure session active</small><button id="logout">Sign out</button></div></aside><div class="admin-drawer-backdrop" hidden></div><main><header class="top"><button class="mobile-menu" aria-label="Open navigation" aria-controls="admin-navigation" aria-expanded="false">☰</button><div><p class="crumb">SIHPHIR PRESBYTERIAN KOHHRAN</p><h1>${labels[area]}</h1></div><div class="top-actions"><a href="/" target="_blank">View website ↗</a></div></header><div id="toast" role="status"></div><section id="view"></section></main></div>`;
+    root.innerHTML = `<div class="app"><aside class="side" id="admin-navigation" aria-label="Administration navigation"><button type="button" class="admin-drawer-close" aria-label="Close navigation" hidden>×</button><a href="/" class="logo">SPK <span>ADMIN</span></a><nav><button class="${area==='dashboard'?'on':''}" data-go="dashboard"><i>▦</i>Dashboard</button>${menuGroups.map(([group,entries])=>`<div class="nav-group"><span>${group}</span>${entries.map(([id,name,icon])=>`<button class="${area===id?'on':''}" data-go="${id}"><i>${icon}</i>${name}</button>`).join('')}</div>`).join('')}</nav><div class="profile"><b>Administrator</b><small>Secure session active</small><button id="logout">Sign out</button></div></aside><div class="admin-drawer-backdrop" hidden></div><main><header class="top"><button class="mobile-menu" aria-label="Open navigation" aria-controls="admin-navigation" aria-expanded="false">☰</button><div><p class="crumb">SIHPHIR PRESBYTERIAN KOHHRAN</p><h1>${labels[area]}</h1></div><div class="top-actions"><a href="/" target="_blank">View website ↗</a></div></header><div id="toast" role="status"></div><section id="view"></section></main></div>`;
     root.querySelectorAll('[data-go]').forEach(b => b.onclick=()=>{ if(window.__sihphirScheduleCleanup?.()===false||window.__sihphirNoticeCleanup?.()===false)return; area=b.dataset.go; current=null; search=''; render(); });
     root.querySelector('#logout').onclick=async()=>{ await fetch('/api/auth/logout',{method:'POST'}); location.assign('/admin/login'); };
     const menu=root.querySelector('.mobile-menu'),side=root.querySelector('.side'),backdrop=root.querySelector('.admin-drawer-backdrop'),main=root.querySelector('.app > main');
@@ -39,12 +39,14 @@
       menu.setAttribute('aria-expanded',String(open));
       menu.setAttribute('aria-label',open?'Close navigation':'Open navigation');
       main.inert=open;
+      side.querySelector('.admin-drawer-close').hidden=!open;
       if(open){side.querySelector('[aria-current="page"]')?.focus();}
       else if(restore&&mobile())menu.focus();
     };
     side.querySelector('.on')?.setAttribute('aria-current','page');
     menu.onclick=()=>setDrawer(!side.classList.contains('open'));
     backdrop.onclick=()=>setDrawer(false);
+    side.querySelector('.admin-drawer-close').onclick=()=>setDrawer(false);
     side.addEventListener('keydown',event=>{
       if(event.key==='Escape'){event.preventDefault();setDrawer(false);return;}
       if(event.key!=='Tab'||!side.classList.contains('open'))return;
