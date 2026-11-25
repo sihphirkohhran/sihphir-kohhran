@@ -80,25 +80,25 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
   </div>
 
   <div class={`fellowship-tab-shell ${isKtp ? 'fellowship-tabs-ktp' : ''}`}>
-    <div class="max-w-2xl mx-auto px-4">
+    <div class="max-w-6xl mx-auto px-4">
       <div class="fellowship-tablist" role="tablist" aria-label={`${name} sections`}>
         {(['history','committee','gallery','documents'] as const).map((tab, index) => (
           <button type="button" role="tab" id={`fellowship-tab-${tab}`} aria-controls={`fellowship-panel-${tab}`} aria-selected={index === 0 ? 'true' : 'false'} tabindex={index === 0 ? 0 : -1} data-fellowship-tab={tab}>
-            {tab === 'history' ? 'History' : tab === 'committee' ? 'Committee' : tab === 'gallery' ? 'Gallery' : 'Documents'}
+            {tab === 'history' ? 'About Us' : tab === 'committee' ? 'Committee' : tab === 'gallery' ? 'Gallery' : 'Documents'}
           </button>
         ))}
       </div>
     </div>
   </div>
 
-  <div class="max-w-2xl mx-auto px-4 py-8" style={isKtp ? '--owner-focus:#29B9F2' : undefined}>
+  <div class="max-w-6xl mx-auto px-4 py-8" style={isKtp ? '--owner-focus:#29B9F2' : undefined}>
     <section id="fellowship-panel-history" role="tabpanel" aria-labelledby="fellowship-tab-history" tabindex="0" class="space-y-8" data-fellowship-panel="history">
 
     <!-- History -->
     {(history?.trim() || historyFull?.trim()) && <div class="reveal">
-      <div class="gold-divider mb-4"><h2>{ui.history_title}</h2></div>
-      <div class="border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
-        {history?.trim() && <p class="font-body text-sm text-gray-700 leading-relaxed mb-3">{history}</p>}
+      <div class="gold-divider mb-4"><h2>About Us</h2></div>
+      <div class="fellowship-about-copy border-l-4 border-gold rounded-r bg-ivory pl-5 pr-4 py-4">
+        {history?.trim() && <p class="font-body text-base text-gray-700 leading-relaxed mb-3">{history}</p>}
         {historyFull && (
           <>
             <div id="history-full" class="content-page-body font-body text-sm text-gray-700 leading-relaxed mb-3 hidden">
@@ -235,6 +235,8 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
 </script>
 
 <style>
+  .fellowship-about-copy{max-width:75ch}.fellowship-group-photo{max-height:640px;width:100%;height:auto;object-fit:contain}.fellowship-group-photo.hidden{display:none}
+
   .fellowship-hero-ktp{background:#29B9F2;border-bottom:2px solid #173B53}.fellowship-tab-shell{background:#fffdf8;border-bottom:1px solid rgba(23,41,65,.18)}.fellowship-tablist{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.25rem}.fellowship-tablist button{font-family:Poppins,sans-serif;font-size:.76rem;font-weight:600;color:#34465c;padding:1rem .4rem;border-bottom:3px solid transparent;transition:color .15s,border-color .15s}.fellowship-tablist button[aria-selected="true"]{color:#172941;border-bottom-color:#b8953f}.fellowship-tabs-ktp .fellowship-tablist button[aria-selected="true"]{color:#173B53;border-bottom-color:#29B9F2}.fellowship-tablist button:focus-visible{outline:3px solid #173B53;outline-offset:-3px}.fellowship-empty-state{border:1px solid rgba(23,41,65,.15);border-radius:.5rem;background:#fffdf8;text-align:center;padding:3rem 1.5rem}.fellowship-empty-state h2{font-family:Poppins,sans-serif;font-weight:600;color:#172941;font-size:1.2rem}.fellowship-empty-state p{font-family:EB Garamond,serif;color:#4b5563;margin-top:.75rem;font-size:1rem}[data-fellowship-panel][hidden]{display:none!important}@media(max-width:390px){.fellowship-tablist button{font-size:.68rem;padding:.9rem .15rem}}
   .fellowship-person-lightbox{width:42px;height:42px;flex:0 0 auto;overflow:hidden;border:1px solid rgba(184,149,63,.35);border-radius:50%;padding:0;background:#162844}.fellowship-person-lightbox img{width:100%;height:100%;object-fit:cover}.fellowship-related-gallery{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem}.fellowship-related-gallery button{aspect-ratio:1;border:0;border-radius:.35rem;overflow:hidden;padding:0;background:#162844}.fellowship-related-gallery img{width:100%;height:100%;object-fit:cover;transition:transform .25s}.fellowship-related-gallery button:hover img{transform:scale(1.04)}.fellowship-related-documents{display:grid;gap:.55rem}.fellowship-related-documents a{display:grid;grid-template-columns:90px minmax(0,1fr) auto;gap:.8rem;align-items:center;padding:.85rem 1rem;border:1px solid rgba(184,149,63,.2);border-radius:.35rem;background:#10243f;text-decoration:none}.fellowship-related-documents span,.fellowship-related-documents i{color:rgba(244,227,181,.48);font-size:.62rem;font-style:normal;text-transform:uppercase}.fellowship-related-documents b{color:#f4e3b5;font-size:.8rem}.fellowship-lightbox[hidden]{display:none}.fellowship-lightbox{position:fixed;z-index:100;inset:0;display:grid;place-items:center;padding:4rem 1.5rem 1.5rem;background:rgba(5,13,25,.94)}.fellowship-lightbox>button{position:absolute;top:1rem;right:1.25rem;border:0;background:transparent;color:#fff;font-size:2.2rem}.fellowship-lightbox>img{max-width:min(1100px,94vw);max-height:86vh;object-fit:contain}@media(max-width:640px){.fellowship-related-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.fellowship-related-documents a{grid-template-columns:1fr auto}.fellowship-related-documents span{grid-column:1/-1}}
 </style>

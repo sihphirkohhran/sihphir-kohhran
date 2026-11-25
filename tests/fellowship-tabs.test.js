@@ -42,3 +42,15 @@ test('Legacy references retained without related-gallery preview or people secti
   assert.ok(!panel.includes('centralized Committee system'));
   assert.ok(!page.includes('Committee information will be available through'));
 });
+
+test('About Us uses wide content without changing history tab identity or hero',()=>{
+ assert.match(page,/class="max-w-6xl mx-auto px-4 py-8"/);
+ assert.match(page,/class="max-w-6xl mx-auto px-4"/);
+ assert.match(page,/relative z-10 max-w-2xl mx-auto/);
+ assert.match(page,/tab === 'history' \? 'About Us'/);
+ assert.match(page,/<h2>About Us<\/h2>/);
+ assert.match(page,/\.fellowship-about-copy\{max-width:75ch\}/);
+ assert.match(page,/\.fellowship-group-photo\{max-height:640px;width:100%;height:auto;object-fit:contain\}/);
+ assert.match(page,/\.fellowship-group-photo\.hidden\{display:none\}/);
+ assert.match(page,/data-fellowship-panel="history"/);
+});
