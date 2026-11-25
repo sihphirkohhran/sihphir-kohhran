@@ -102,7 +102,18 @@ test('Committee listing starts with latest cards and hidden details, with combin
  assert.ok(archiveComponent.includes('All Committees'));
  assert.ok(archiveComponent.includes("year.value?card.dataset.year===year.value:card.dataset.latest==='true'"));
  assert.ok(archiveComponent.includes('navigate(card.dataset.id,card.dataset.year)'));
- assert.ok(archiveComponent.includes("window.addEventListener('popstate',sync)"));
+ assert.ok(archiveComponent.includes("window.addEventListener('popstate',()=>{"));
  assert.ok(archiveComponent.includes("window.addEventListener('fellowship:location',sync)"));
  assert.ok(read('src/components/FellowshipPage.astro').includes("url.searchParams.delete('committeeYear')"));
+});
+
+test('Committee detail close uses listing history or safe direct-entry replacement',()=>{
+ assert.ok(archiveComponent.includes('fellowshipCommitteeFromListing: Boolean(id)'));
+ assert.ok(archiveComponent.includes('history.back();'));
+ assert.ok(archiveComponent.includes('navigate(undefined,undefined,true)'));
+ assert.ok(archiveComponent.includes("if(replace)history.replaceState(state,'',url)"));
+ assert.ok(archiveComponent.includes('navigate(group.dataset.id,picker.value,true)'));
+ assert.ok(archiveComponent.includes('if(!listing.hidden)focusListing()'));
+ assert.ok(archiveComponent.includes('restoreCard && !restoreCard.hidden'));
+ assert.ok(archiveComponent.includes('committee.addEventListener(\'change\',filter);year.addEventListener(\'change\',filter)'));
 });
