@@ -4,8 +4,8 @@ role: "pastor"
 start_year: 2001
 end_year: 2007
 record_status: "Former"
-designation: "."
-photo: "/images/1794551641636-11.jpg"
+designation: "Pastor"
+photo: "/images/1795602158429-pastor-g-chhunthuama.jpg"
 published: true
 display_order: 15
 ---
