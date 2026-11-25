@@ -50,7 +50,18 @@ export function sanitizeRichText(html: string): string {
     if (!allowedTags.has(name)) return '';
     const closing = /^<\//.test(whole);
     if (closing) return voidTags.has(name) ? '' : `</${name}>`;
-    if (name !== 'a') return `<${name}>`;
+    if (name !== 'a') {
+      // Only a canonical alignment value may be emitted; never copy raw CSS.
+      if (/^(p|div|h[1-6]|blockquote|li|ul|ol|pre)$/.test(name)) {
+        const attrs = [...rawAttrs.matchAll(/(?:^|\s)([^\s=/"'<>]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g)];
+        const style = attrs.find(attr => attr[1].toLowerCase() === 'style');
+        const legacy = attrs.find(attr => attr[1].toLowerCase() === 'align');
+        const value = (style?.[2] ?? style?.[3] ?? style?.[4] ?? '').match(/^\s*text-align\s*:\s*(left|center|right|justify)\s*;?\s*$/i)?.[1]
+          ?? (legacy?.[2] ?? legacy?.[3] ?? legacy?.[4] ?? '').match(/^(left|center|right|justify)$/i)?.[1];
+        if (value) return `<${name} style="text-align: ${value.toLowerCase()};">`;
+      }
+      return `<${name}>`;
+    }
     const hrefMatch = rawAttrs.match(/\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i);
     const href = safeHref(hrefMatch?.[1] ?? hrefMatch?.[2] ?? hrefMatch?.[3] ?? '');
     return href ? `<a href="${escapeAttribute(href)}" rel="nofollow noopener noreferrer">` : '<a>';

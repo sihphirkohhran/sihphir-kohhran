@@ -72,7 +72,7 @@ test('shared rich-text editor exposes the PES field and mount API', () => {
   assert.match(helper, /const read=host=>Object\.fromEntries/);
   assert.match(helper, /data-rich-editor/);
   assert.match(helper, /data-rich-command/);
-  assert.match(helper, /window\.SihphirRichTextEditor=\{safeUrl,sanitizeHtml,bindPaste,field,mount,read\}/);
+  assert.match(helper, /window\.SihphirRichTextEditor=\{safeUrl,sanitizeHtml,bindPaste,field,mount,read,bindAlignment\}/);
   assert.match(schoolManager, /rich\.field\(/);
   assert.match(schoolManager, /rich\.mount\(/);
 });
@@ -141,4 +141,56 @@ test('PES save handler reads rich HTML and verifies the content after reloading'
   assert.match(schoolManager, /Object\.assign\(data,rich\.read\(host\)\)/);
   assert.match(schoolManager, /await save\(\);const verification=await api\('\/api\/admin\/content\?path='/);
   assert.match(schoolManager, /JSON\.stringify\(reloaded\)!==JSON\.stringify\(data\)/);
+});
+
+test('alignment controls preserve an editor range and dispatch all four native commands',()=>{
+ const window={},calls=[],listeners={},toolbarListeners={};
+ const node={},range={commonAncestorContainer:node,cloneRange(){return this;}};
+ const selection={rangeCount:1,anchorNode:node,focusNode:node,getRangeAt:()=>range,removeAllRanges(){calls.push('clear');},addRange(r){assert.equal(r,range);calls.push('restore');}};
+ const editor={ownerDocument:{getSelection:()=>selection,execCommand(cmd){calls.push(cmd);}},contains:n=>n===node,addEventListener:(name,fn)=>listeners[name]=fn,focus(){calls.push('focus');},dispatchEvent:e=>calls.push(e.type)};
+ const toolbar={querySelector:()=>null,insertAdjacentHTML:(_,html)=>{toolbar.html=html;},addEventListener:(name,fn)=>toolbarListeners[name]=fn};
+ runInNewContext(helper,{window,URL,Event:class{constructor(type){this.type=type;}}});
+ window.SihphirRichTextEditor.bindAlignment(editor,toolbar);
+ for(const [command,label] of [['justifyLeft','Align Left'],['justifyCenter','Align Center'],['justifyRight','Align Right'],['justifyFull','Justify']]){
+  assert.ok(toolbar.html.includes('data-rich-align="'+command+'"'));
+  assert.ok(toolbar.html.includes('aria-label="'+label+'"'));
+  const event={target:{closest:()=>({dataset:{richAlign:command}})},preventDefault(){calls.push('prevent');}};
+  toolbarListeners.mousedown(event);
+  selection.anchorNode=null;selection.focusNode=null;
+  toolbarListeners.click(event);
+  assert.deepEqual(calls.splice(0),['prevent','focus','clear','restore',command,'input']);
+  selection.anchorNode=node;selection.focusNode=node;
+ }
+});
+test('alignment sanitizer retains only canonical alignment and strips unrelated attributes',()=>{
+ const window={};
+ let nodes=[];
+ class Parser{parseFromString(){return {querySelectorAll:()=>[],body:{querySelectorAll:()=>nodes,get innerHTML(){return nodes.map(n=>'<'+n.tagName.toLowerCase()+[...n.attrs].map(([k,v])=>' '+k+'="'+v+'"').join('')+'>Text</'+n.tagName.toLowerCase()+'>').join('');}}};}}
+ const node=(tag,attrs)=>({tagName:tag,attrs:new Map(Object.entries(attrs)),get attributes(){return [...this.attrs].map(([name,value])=>({name,value}));},getAttribute(k){return this.attrs.get(k)||null;},setAttribute(k,v){this.attrs.set(k,v);},removeAttribute(k){this.attrs.delete(k);},hasAttribute(k){return this.attrs.has(k);}});
+ runInNewContext(helper,{window,URL,DOMParser:Parser});
+ const rich=window.SihphirRichTextEditor;
+ for(const value of ['left','center','right','justify']){
+  nodes=[node('P',{style:'color:red; text-align: '+value+'; background:url(javascript:evil)',onclick:'evil()'})];
+  const saved=rich.sanitizeHtml('<p>Text</p>');
+  assert.equal(saved,'<p style="text-align: '+value+';">Text</p>');
+  assert.equal(JSON.parse(JSON.stringify({full_history:saved})).full_history,saved);
+  assert.ok(rich.field({key:'history',label:'History',value:saved}).includes(saved));
+ }
+ nodes=[node('H2',{align:'CENTER'}),node('P',{style:'text-align:expression(evil);color:red'}),node('STRONG',{style:'text-align:right'})];
+ assert.equal(rich.sanitizeHtml(''),'<h2 style="text-align: center;">Text</h2><p>Text</p><strong>Text</strong>');
+ let paste,inserted;
+ nodes=[node('P',{style:'text-align:justify;color:red'})];
+ const editor={addEventListener:(name,fn)=>{if(name==='paste')paste=fn;}};
+ runInNewContext(helper,{window,URL,DOMParser:Parser,document:{execCommand:(cmd,_,html)=>{assert.equal(cmd,'insertHTML');inserted=html;}}});
+ window.SihphirRichTextEditor.bindPaste(editor);
+ paste({clipboardData:{getData:()=>'<p>Text</p>'},preventDefault(){}});
+ assert.equal(inserted,'<p style="text-align: justify;">Text</p>');
+});
+test('Fellowship alignment uses shared paste and save sanitizer and public HTML rendering',()=>{
+ assert.match(fellowship,/bindPaste\(form.querySelector\('#fellowship-history'\),\{media:true\}\)/);
+ assert.match(fellowship,/sanitizeHtml\(historyEditor\?\.innerHTML/);
+ assert.match(fellowship,/data\.full_history\|\|''/);
+ assert.match(read('../src/lib/cms.ts'),/function fellowshipHistoryToHtml[^]*?return renderMarkdown\(text\)/);
+ assert.match(read('../src/components/FellowshipPage.astro'),/set:html=\{historyFull\}/);
+ assert.match(sharedCss,/\[data-rich-align\]:focus-visible/);
 });
