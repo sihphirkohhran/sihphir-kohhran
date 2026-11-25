@@ -117,3 +117,12 @@ test('Committee detail close uses listing history or safe direct-entry replaceme
  assert.ok(archiveComponent.includes('restoreCard && !restoreCard.hidden'));
  assert.ok(archiveComponent.includes('committee.addEventListener(\'change\',filter);year.addEventListener(\'change\',filter)'));
 });
+
+test('Committee listing uses compact horizontal thumbnails without changing detail photos',()=>{
+ assert.match(archiveComponent,/\.committee-card\{[^}]*flex-direction:row[^}]*min-height:96px/);
+ assert.match(archiveComponent,/\.committee-card img,\.card-fallback\{[^}]*width:76px;height:76px;flex:0 0 76px[^}]*object-fit:cover/);
+ assert.match(archiveComponent,/\.card-body\{[^}]*flex:1;min-width:0/);
+ assert.match(archiveComponent,/\.committee-cards\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(archiveComponent,/@media\(max-width:600px\)\{\.committee-cards\{grid-template-columns:1fr/);
+ assert.match(archiveComponent,/\.group-photo\{width:100%;height:auto/);
+});
