@@ -179,6 +179,7 @@ const ui=await getPageSettings('fellowship',{hero_caption:'Sihphir Presbyterian 
       const url = new URL(window.location.href);
       if (selected === 'history') url.searchParams.delete('tab');
       else url.searchParams.set('tab', selected);
+      if (selected !== 'committee') { url.searchParams.delete('committeeId'); url.searchParams.delete('committeeYear'); }
       if (selected !== 'gallery') url.searchParams.delete('album');
       if (selected !== 'documents') url.searchParams.delete('document');
       window.history.pushState({ fellowshipTab: selected }, '', url);
