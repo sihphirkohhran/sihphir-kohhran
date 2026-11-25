@@ -4,8 +4,8 @@ role: "pastor"
 start_year: 1973
 end_year: 1976
 record_status: "Former"
-designation: "."
+designation: "Pastor"
 published: true
 display_order: 9
-photo: "/images/1794551182246-6.jpg"
+photo: "/images/1795602042518-pastor-lalbiakvela.jpg"
 ---
