@@ -3,9 +3,9 @@ name: "Pastor Lalbiaktluanga"
 role: "pastor"
 start_year: 1977
 record_status: "Former"
-designation: "."
+designation: "Pastor"
 published: true
 display_order: 8
 end_year: 1977
-photo: "/images/1794551216880-7.jpg"
+photo: "/images/1795602067730-pastor-lalbiaktluanga.jpg"
 ---
