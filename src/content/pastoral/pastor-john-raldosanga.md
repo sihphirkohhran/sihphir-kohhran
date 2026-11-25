@@ -4,8 +4,8 @@ role: "pastor"
 start_year: 2008
 end_year: 2012
 record_status: "Former"
-designation: "."
+designation: "Pastor"
 published: true
 display_order: 4
-photo: "/images/1794551683630-12.jpg"
+photo: "/images/1795602174597-pastor-john-raldosanga.jpg"
 ---
