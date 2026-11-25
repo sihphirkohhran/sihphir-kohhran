@@ -152,3 +152,22 @@ test('one shared record appears once per selected destination in both archive bu
  assert.equal(buildOwnerAlbums([album],'kpp').length,0);
  assert.equal(buildOwnerDocuments([doc],'kpp').length,0);
 });
+
+test('editing display destinations removes only the deselected location and retains the original record',()=>{
+ const album={id:'shared.md',data:{caption:'Shared',owner:'kohhran',owners:['kohhran','ktp','retired'],photo:'/shared.jpg'}};
+ const doc={id:'shared.md',body:'',data:{name:'Shared',owner:'kohhran',owners:['kohhran','ktp','retired'],document_source:'external',pdf_external:'https://example.org/report',files:[{url:'/original.pdf'}]}};
+ for(const [record,builder] of [[album,buildOwnerAlbums],[doc,buildOwnerDocuments]]){
+  const records=[record];
+  const original=builder(records,'ktp')[0];
+  assert.equal(builder(records,'kohhran').length,1);
+  record.data.owners=['ktp','retired'];
+  assert.equal(builder(records,'kohhran').length,0,'schema legacy default cannot override explicit array');
+  assert.equal(builder(records,'ktp').length,1);
+  assert.equal(builder(records,'retired').length,1);
+  assert.equal(builder(records,'ktp')[0].id,original.id);
+  assert.equal(records.length,1);
+ }
+ assert.equal(buildOwnerDocuments([doc],'ktp')[0].url,'https://example.org/report');
+ doc.data.document_source='upload';
+ assert.equal(buildOwnerDocuments([doc],'ktp')[0].url,'/original.pdf');
+});
