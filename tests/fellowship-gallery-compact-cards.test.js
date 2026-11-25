@@ -2,10 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const source=readFileSync(new URL('../src/components/FellowshipGalleryArchive.astro',import.meta.url),'utf8');
-test('Fellowship album listing uses capped three, two and one column tracks',()=>{
- assert.match(source,/\.owner-album-grid\{display:grid;grid-template-columns:repeat\(3,minmax\(0,260px\)\)/);
- assert.match(source,/@media\(max-width:900px\)\{\.owner-album-grid\{grid-template-columns:repeat\(2,minmax\(0,260px\)\)/);
- assert.match(source,/@media\(max-width:480px\)\{\.owner-album-grid\{grid-template-columns:minmax\(0,260px\)/);
+test('Fellowship album listing uses container-responsive tracks capped at three columns',()=>{
+ assert.match(source,/\.owner-album-grid\{display:grid;grid-template-columns:repeat\(auto-fill,minmax\(min\(100%,260px\),1fr\)\)/);
+ assert.match(source,/max-width:calc\(780px \+ 1\.7rem\)/);
+ assert.match(source,/@media\(max-width:480px\)\{\.owner-album-grid\{justify-items:center\}/);
+ assert.doesNotMatch(source,/\.owner-album-grid\{grid-template-columns:repeat\([23],/);
  assert.match(source,/\.owner-album-card\{[^}]*width:100%;max-width:260px;min-width:0/);
  assert.match(source,/\.owner-album-cover\{[^}]*aspect-ratio:4\/3/);
  assert.match(source,/\.owner-album-cover img\{[^}]*object-fit:cover/);
