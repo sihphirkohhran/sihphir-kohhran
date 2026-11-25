@@ -101,6 +101,7 @@ const settings = defineCollection({
             id: z.string(),
             name: z.string(),
             is_main: z.boolean().optional(),
+            fellowship_slug: z.string().optional(),
             display_order: z.number().optional(),
           }),
         )

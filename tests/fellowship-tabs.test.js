@@ -36,5 +36,9 @@ test('Legacy references retained without related-gallery preview or people secti
   assert.ok(!page.includes('relatedDocuments.map'));
   assert.ok(route.includes('data.related_galleries'));
   assert.ok(route.includes('data.related_documents'));
-  assert.ok(page.includes('centralized Committee system'));
+  assert.ok(page.includes("import FellowshipCommitteeArchive from './FellowshipCommitteeArchive.astro';"));
+  const panel = page.slice(page.indexOf('id="fellowship-panel-committee"'),page.indexOf('id="fellowship-panel-gallery"'));
+  assert.ok(panel.includes('<FellowshipCommitteeArchive fellowshipSlug={ownerSlug} />'));
+  assert.ok(!panel.includes('centralized Committee system'));
+  assert.ok(!page.includes('Committee information will be available through'));
 });

@@ -1,0 +1,38 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import { fellowshipCommitteeArchives, committeeDirectory } from '../lib/fellowship-committees.js';
+import { resolveCommitteePhoto } from '../lib/committee';
+import { renderSafeRichText } from '../lib/markdown';
+import { normalizeCommitteeArchiveId } from '../lib/committee-deep-links.js';
+const { fellowshipSlug } = Astro.props;
+const master = await getEntry('settings','committees');
+const groups = fellowshipCommitteeArchives(master?.data.committees ?? [], await getCollection('committee'), fellowshipSlug);
+---
+<div class="fellowship-committee-archives">
+  {groups.length === 0 && <p class="empty">No published Committee archives are available for this Fellowship.</p>}
+  {groups.map(group => <section class="committee-group" data-fellowship-committee-group>
+    <header><h2>{group.name}</h2><label>Archive year <select data-fellowship-committee-year>{group.archives.map((entry,index)=><option value={entry.data.year} selected={index===0}>{entry.data.year}</option>)}</select></label></header>
+    {group.archives.map((entry,index)=>{
+      const data=entry.data;
+      const directory=committeeDirectory(data);
+      const photo=resolveCommitteePhoto(data.group_photo);
+      return <article data-fellowship-committee-archive={data.year} hidden={index!==0}>
+        {photo && <img class="group-photo" src={photo} alt={group.name+' group photo'} loading="lazy" />}
+        <p class="period">{data.year} · {directory.officeBearers.length+directory.members.length} members</p>
+        {(entry.body?.trim() || data.description) && <div class="description prose" set:html={renderSafeRichText(entry.body?.trim() || data.description)} />}
+        {[{title:'Office Bearers',members:directory.officeBearers},{title:'Other Committee Members',members:directory.members}].map(section=><section class="directory"><h3>{section.title}</h3>{section.members.length ? <div class="member-grid">{section.members.map(member=><article class="member"><img src={resolveCommitteePhoto(member.photo)||'/images/profile-placeholder.svg'} alt="" loading="lazy" data-member-photo /><div><h4>{member.name}</h4><p>{member.designation}</p>{member.bio && <p class="bio">{member.bio}</p>}</div></article>)}</div>:<p class="empty">No members listed.</p>}</section>)}
+        <a class="archive-link" href={`/committee/?archive=${encodeURIComponent(normalizeCommitteeArchiveId(entry.id))}`}>View Central Committee archive →</a>
+      </article>;
+    })}
+  </section>)}
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-fellowship-committee-group]').forEach(group=>{
+    const picker=group.querySelector<HTMLSelectElement>('[data-fellowship-committee-year]');
+    picker?.addEventListener('change',()=>group.querySelectorAll<HTMLElement>('[data-fellowship-committee-archive]').forEach(archive=>archive.hidden=archive.dataset.fellowshipCommitteeArchive!==picker.value));
+    group.querySelectorAll<HTMLImageElement>('[data-member-photo]').forEach(img=>img.addEventListener('error',()=>{if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';}));
+  });
+</script>
+<style>
+.committee-group{border:1px solid #ded8c8;border-radius:8px;background:#fffdf8;padding:1rem;margin-bottom:1.2rem;color:#172941}.committee-group header{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}.committee-group h2{font:700 1.1rem Poppins,sans-serif}.committee-group label{font:600 .75rem Poppins,sans-serif;display:flex;align-items:center;gap:.5rem}.committee-group select{border:1px solid #d7d0bd;padding:.5rem;border-radius:5px;background:white}.committee-group select:focus-visible,.archive-link:focus-visible{outline:3px solid var(--owner-focus,#b8953f)}.group-photo{width:100%;height:auto;border-radius:5px}.period{font:600 .75rem Poppins,sans-serif;color:#80601c;margin:.8rem 0}.description{margin:1rem 0}.directory{margin:1.2rem 0}.directory h3{font:600 .9rem Poppins,sans-serif;border-bottom:1px solid #d7d0bd;padding-bottom:.5rem;margin-bottom:.7rem}.member-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem}.member{display:flex;align-items:flex-start;gap:.6rem;min-width:0}.member img{width:54px;height:64px;object-fit:cover;border-radius:4px;flex-shrink:0}.member h4{font:600 .8rem Poppins,sans-serif;overflow-wrap:anywhere}.member p{font:.85rem 'EB Garamond',serif;overflow-wrap:anywhere}.bio{color:#536275}.empty{padding:.8rem;color:#536275}.archive-link{font:600 .85rem 'EB Garamond',serif;color:#80601c;text-decoration:underline}[hidden]{display:none!important}@media(max-width:420px){.member-grid{grid-template-columns:1fr}.committee-group{padding:.75rem}}
+</style>
