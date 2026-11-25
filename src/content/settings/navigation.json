@@ -59,7 +59,7 @@
       "label": "Missionary",
       "href": "/missionary",
       "key": "missionary",
-      "visible": true,
+      "visible": false,
       "order": 7,
       "parent": "Rawngbawltu"
     },
@@ -84,7 +84,7 @@
       "href": "/document?category=Rawngbawltute",
       "key": "new-item",
       "visible": true,
-      "order": 11,
+      "order": 10,
       "parent": "Rawngbawltu"
     }
   ]
