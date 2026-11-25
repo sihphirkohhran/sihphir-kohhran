@@ -1058,52 +1058,53 @@ section[id] { scroll-margin-top: 56px; }
   line-height: 1.7;
   color: #3d3d52;
 }
-.content-page-body :global(h2) {
+.content-page-body h2 {
   font-family: 'EB Garamond', serif;
   font-size: 1.35rem;
   color: var(--navy);
   margin: 1.5rem 0 0.75rem;
 }
-.content-page-body :global(p) {
+.content-page-body p {
   margin-bottom: 1rem;
 }
-.content-page-body :global(a) {
+.content-page-body a {
   color: var(--navy);
   border-bottom: 1px solid rgba(15, 31, 61, 0.3);
 }
-.content-page-body :global(strong) {
+.content-page-body strong {
   font-weight: 600;
   color: var(--navy);
 }
-.content-page-body :global(em) {
+.content-page-body em {
   font-style: italic;
 }
-.content-page-body :global(ul),
-.content-page-body :global(ol) {
-  margin: 0 0 1rem 1.25rem;
-  padding: 0;
+.content-page-body ul,
+.content-page-body ol {
+  margin: .65em 0 1em;
+  padding-inline-start: 1.8em;
   list-style-position: outside;
 }
-.content-page-body :global(ul) { list-style-type: disc; }
-.content-page-body :global(ol) { list-style-type: decimal; }
-.content-page-body :global(ul ul) { list-style-type: circle; }
-.content-page-body :global(ol ol) { list-style-type: lower-alpha; }
-.content-page-body :global(li) {
+.content-page-body ul { list-style-type: disc; }
+.content-page-body ol { list-style-type: decimal; }
+.content-page-body ul ul { list-style-type: circle; }
+.content-page-body ol ol { list-style-type: lower-alpha; }
+.content-page-body li {
+  display: list-item;
   margin-bottom: 0.35rem;
 }
-.content-page-body :global(h1),
-.content-page-body :global(h3) {
+.content-page-body h1,
+.content-page-body h3 {
   font-family: 'EB Garamond', serif;
   color: var(--navy);
   margin: 1.25rem 0 0.5rem;
 }
-.content-page-body :global(h1) {
+.content-page-body h1 {
   font-size: 1.5rem;
 }
-.content-page-body :global(h3) {
+.content-page-body h3 {
   font-size: 1.15rem;
 }
-.content-page-body :global(img) {
+.content-page-body img {
   max-width: 100%;
   height: auto;
   border-radius: 3px;
