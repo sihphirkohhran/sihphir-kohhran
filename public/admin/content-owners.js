@@ -32,3 +32,21 @@ export function renderOwnerOptions(owners, value, esc) {
 
 export const canSaveOwner = (owners, value, previousValue) =>
   validOwnerId(value) && (owners.some(([id]) => id === value) || value === previousValue);
+
+/** Explicit arrays are authoritative, including an empty array (no visibility). */
+export function normalizeContentOwners(data = {}) {
+  const values = Array.isArray(data.owners) ? data.owners : [data.owner || CHURCH_OWNER];
+  return [...new Set(values.map(value=>typeof value==='string'?value.trim():value).filter(validOwnerId))];
+}
+export function renderDisplayLocations(registry, data, esc) {
+  const active = normalizeContentOwners(data);
+  const options = new Map([[CHURCH_OWNER,'Kohhran'],...registry]);
+  for (const id of active) if (!options.has(id)) options.set(id,id+' (fellowship unavailable)');
+  return '<fieldset class="display-locations" style="min-width:0;border:1px solid #ded8c8;border-radius:6px;padding:10px"><legend>Display In</legend><div style="display:flex;flex-wrap:wrap;gap:8px 16px">'+[...options].map(([id,label])=>`<label style="display:flex;align-items:center;gap:6px"><input style="width:auto" type="checkbox" name="owners" value="${esc(id)}" ${active.includes(id)?'checked':''}><span>${esc(label)}</span></label>`).join('')+'</div><small>Select at least one destination.</small></fieldset>';
+}
+export function canSaveOwners(registry, values, previousValues = []) {
+  return Array.isArray(values) && values.length>0 && values.every(id=>validOwnerId(id)&&(registry.some(([known])=>known===id)||previousValues.includes(id)));
+}
+export function readDisplayLocations(formData) {
+  return [...new Set(formData.getAll('owners').map(String))];
+}
