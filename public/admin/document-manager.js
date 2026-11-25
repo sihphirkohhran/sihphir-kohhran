@@ -102,7 +102,12 @@
 
   window.SihphirDocumentManager = {
     async mount({api, esc, slug, notification, readUpload}) {
-      const { loadContentOwners, renderDisplayLocations, canSaveOwners, normalizeContentOwners, readDisplayLocations, loadLibraryRecords } = await import('./content-owners.js');
+      const { loadContentOwners, renderDisplayLocations, canSaveOwners, normalizeContentOwners, readDisplayLocations, loadLibraryRecords } = await import('./content-owners.js').catch(() => null) || {};
+      if (typeof normalizeContentOwners !== 'function' || typeof loadLibraryRecords !== 'function') {
+        document.querySelector('#view').innerHTML = '<section class="panel" role="alert"><h2>Admin update required</h2><p>Admin scripts could not load. Reload this page before continuing.</p><button type="button" id="admin-reload">Reload admin</button></section>';
+        document.querySelector('#admin-reload').onclick = () => location.reload();
+        return;
+      }
       let contentOwners = [['kohhran','Kohhran']];
       const displayLocations = data => renderDisplayLocations(contentOwners, data, esc);
       const refreshOwners = async () => { try { contentOwners = await loadContentOwners(api); } catch (error) { notification('Fellowship owners could not load; saved owner values remain available.', 'error'); } };
