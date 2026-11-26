@@ -10,4 +10,5 @@ display_order: 40
 date_of_birth_precision: "unknown"
 nemnghettu_presbytery: "Aizawl Hmar Presbytery"
 date_of_death_precision: "unknown"
+photo: "/images/1795686645779-busb1511-copy-1-.jpg"
 ---
