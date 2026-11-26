@@ -10,4 +10,5 @@ display_order: 34
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1959
 date_of_death_precision: "unknown"
+photo: "/images/1795683185096-busb1535.jpg"
 ---
