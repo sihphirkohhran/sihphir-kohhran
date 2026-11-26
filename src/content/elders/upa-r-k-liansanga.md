@@ -9,6 +9,7 @@ published: true
 display_order: 25
 date_of_birth_precision: "year_only"
 date_of_birth_year: 1946
-date_of_death_precision: "unknown"
-photo: "/images/1795281574842-upa-r.k.-liansanga.jpg"
+date_of_death_precision: "year_only"
+photo: "/images/1795689177139-screenshot-2026-11-26-160128.png"
+date_of_death_year: 2023
 ---
