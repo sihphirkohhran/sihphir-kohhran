@@ -4,7 +4,7 @@ ordained_year: 1953
 record_status: "Former"
 designation: "Kohhran Upa"
 status: "Active"
-biography: ""
+biography: "<div>MSSU chawimawina kum 50 chawl lova thawk te hnena hlan thin a dawng.</div><div>\t1924-1975 (Kum 51) chhung a thawk a ni.</div>"
 published: true
 display_order: 8
 date_of_birth_precision: "year_only"
