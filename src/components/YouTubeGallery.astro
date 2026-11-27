@@ -91,17 +91,18 @@ const {channel,home=false}=Astro.props;
  .yt-home-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:11px}
  .yt-nav-label{font-family:'Poppins',sans-serif;font-size:.65rem;color:#697080;letter-spacing:.06em}
  .yt-nav-buttons{display:flex;gap:8px}
- .yt-nav-buttons button{display:grid;place-items:center;width:36px;height:36px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:var(--navy);background:#fffdf8;transition:background-color .18s,border-color .18s,opacity .18s}
+ .yt-nav-buttons button{display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:var(--navy);background:#fffdf8;transition:background-color .18s,border-color .18s,opacity .18s}
  .yt-nav-buttons svg{width:16px;height:16px}
  .yt-nav-buttons button:hover:not(:disabled){background:var(--navy);color:#fff;border-color:var(--navy)}
  .yt-nav-buttons button:disabled{opacity:.3;cursor:not-allowed}
- .yt-home .yt-carousel{gap:12px}
+ .yt-home .yt-carousel{gap:12px;padding:4px 4px 7px;margin:-4px -4px -7px}
  .yt-home .yt-carousel :global(article){flex-basis:calc((100% - 36px)/4)}
  .yt-home .yt-carousel :global(.yt-thumb){border-radius:5px;border:1px solid rgba(184,149,63,.22);box-shadow:0 1px 4px rgba(15,31,61,.08);transition:box-shadow .2s,transform .2s,border-color .2s}
  .yt-home .yt-carousel :global(.yt-thumb:hover){box-shadow:0 5px 15px rgba(15,31,61,.15);border-color:rgba(184,149,63,.6)}
  .yt-home .yt-carousel :global(.yt-thumb:focus-visible){outline:3px solid var(--gold);outline-offset:3px}
  .yt-home .yt-carousel :global(.yt-play){display:grid;place-items:center;width:36px;height:26px;padding:0;border-radius:6px;font-size:.8rem;box-shadow:0 2px 9px rgba(0,0,0,.23)}
- .yt-home .yt-carousel :global(h3){font-family:'Poppins',sans-serif;font-size:.72rem;line-height:1.5;font-weight:500;margin:7px 0 0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;min-height:2.16em}
+ .yt-home .yt-carousel :global(h3){font-family:'Poppins',sans-serif;font-size:.72rem;line-height:1.5;font-weight:500;margin:7px 0 0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;min-height:3em}
+ .yt-home [data-status]{min-height:1.1rem;line-height:1.1rem;font-size:.65rem;color:#596474;margin-bottom:.35rem}
  .yt-home-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;margin-top:16px}
  .yt-home-actions a{display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none}
  .yt-home-actions .yt-all{padding:10px 15px;border-radius:5px;background:var(--navy);color:#fff}
