@@ -45,7 +45,7 @@ test('published notices group by publication date, not draft date or filename', 
 });
 
 test('homepage uses executable parsers and client formatter matches ISO dates', () => {
-  assert.ok(home.includes("import { isoDate, indianDate, monthKey, monthTitle } from '../lib/notice-periods.js'"));
+  assert.ok(home.includes("import { isoDate, monthKey, monthTitle } from '../lib/notice-periods.js'"));
   for (const expression of ['isoDate(record.week_start)', 'monthKey(record.month)', 'isoDate(notice.publishDate)']) {
     assert.ok(home.includes(expression));
   }
