@@ -111,11 +111,21 @@ test('unified programme and roster preserve dynamic sections, duties and legacy 
   assert.match(home,/duty.role\|\|duty.title/);
   assert.match(home,/duty.name\|\|duty.person_responsible/);
   for(const field of ['time','speaker','bible_text','notes']) assert.ok(home.includes('duty.'+field+' &&'));
-  assert.match(home,/@media\(max-width:360px\)[^\n]*grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(home,/@media\(max-width:390px\)[^\n]*grid-template-columns:minmax\(0,1fr\)/);
   assert.match(home,/notice-board-tabs\{display:flex;overflow-x:auto/);
   assert.match(home,/notice-programme-section \+ .notice-programme-section\{margin-top:14px\}/);
   assert.match(home,/notice-programme-section\{background:white;border:1px solid rgba\(15,31,61,\.14\);border-radius:8px;overflow:hidden;min-width:0\}/);
   assert.match(home,/notice-programme-board\{min-width:0\}/);
   assert.match(home,/notice-programme-heading\{[^}]*background:var\(--cream\)[^}]*border-left:2px solid var\(--gold\)/);
   for(const target of ['weekly','monthly','notices']) assert.ok(home.includes("'tab-"+target+"': '"+target+"'"));
+});
+
+test('notice duty columns adapt and blank roles give details the full row',()=>{
+  assert.match(home,/notice-programme-row\{grid-template-columns:minmax\(0,35fr\) minmax\(0,65fr\);gap:12px/);
+  assert.match(home,/@media\(max-width:600px\)[^\n]*grid-template-columns:minmax\(0,40fr\) minmax\(0,60fr\)/);
+  assert.match(home,/notice-duty-label\[hidden\] \+ \*\{grid-column:1\/-1\}/);
+  assert.ok(home.includes("hidden={!String(duty.role||duty.title||'').trim()}"));
+  assert.ok(home.includes("hidden={!String(duty.role||'').trim()}"));
+  assert.match(home,/@media\(max-width:600px\)[^\n]*label:last-child:nth-child\(3\)\{grid-column:1\/-1\}/);
+  assert.match(home,/notice-period-controls\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(0,1.2fr\) minmax\(0,2fr\)/);
 });
