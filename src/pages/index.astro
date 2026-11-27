@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HomeKtpInleng from '../components/HomeKtpInleng.astro';
-import {buildIssues,selectHomeIssue} from '../lib/ktp-inleng';
+import {buildIssues,selectHomeIssue,isKtpInlengCategory} from '../lib/ktp-inleng';
 import QuickLinks from '../components/QuickLinks.astro';
 import Highlights from '../components/Highlights.astro';
 import ProfileImage from '../components/ProfileImage.astro';
@@ -106,7 +106,7 @@ const builtHomeDocuments = buildHomeDocumentSections(
   otherDocs,
   docCategoriesList,
   documentCount,
-);
+).filter(section=>section.id!=='ktp-inleng'&&!isKtpInlengCategory(section.category,docCategoriesList.find(c=>c.id==='ktp-inleng')?.name));
 const homeDocuments = documentCategory
   ? builtHomeDocuments.filter(
       (section) => section.id === documentCategory || section.category === documentCategory,
