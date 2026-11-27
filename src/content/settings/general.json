@@ -7,5 +7,74 @@
   "secretary_email": "sihphirkohhran@gmail.com",
   "facebook_url": "https://facebook.com",
   "founded_year": "1910",
-  "looker_url": "https://datastudio.google.com/reporting/0ba7652a-248a-4df6-93b2-3cf3c922b176"
+  "looker_url": "https://datastudio.google.com/reporting/0ba7652a-248a-4df6-93b2-3cf3c922b176",
+  "phone_number": "+91 8730098971",
+  "email": "sihphirkohhran@gmail.com",
+  "village_town": "Sihphir",
+  "district": "Aizawl",
+  "state": "Mizoram",
+  "country": "India",
+  "show_home_contact": true,
+  "footer": {
+    "name": "Sihphir Kohhran",
+    "affiliation1": "MIZORAM PRESBYTERIAN KOHHRAN",
+    "affiliation2": "PRESBYTERIAN CHURCH OF INDIA",
+    "location": "Sihphir, Mizoram",
+    "groups": [
+      {
+        "heading": "QUICK LINKS",
+        "links": [
+          {
+            "label": "Home",
+            "url": "/"
+          },
+          {
+            "label": "Gallery",
+            "url": "/gallery/"
+          },
+          {
+            "label": "Documents",
+            "url": "/document/"
+          },
+          {
+            "label": "Contact",
+            "url": "/#contact"
+          }
+        ]
+      },
+      {
+        "heading": "KOHHRAN",
+        "links": [
+          {
+            "label": "Pastor",
+            "url": "/bialtu-pastor/"
+          },
+          {
+            "label": "Committee",
+            "url": "/committee/"
+          },
+          {
+            "label": "Fellowship",
+            "url": "/fellowship/"
+          },
+          {
+            "label": "Kohhran Inchhiarna",
+            "url": "/statistics/"
+          }
+        ]
+      }
+    ],
+    "socials": {},
+    "emblem": "/images/1795811614405-pci-emblem.png"
+  },
+  "pin_code": "",
+  "mobile_number": "",
+  "whatsapp_number": "",
+  "website_url": "",
+  "office_hours": "",
+  "google_maps_embed_url": "",
+  "instagram_url": "",
+  "twitter_url": "",
+  "telegram_url": "",
+  "whatsapp_channel_url": ""
 }
