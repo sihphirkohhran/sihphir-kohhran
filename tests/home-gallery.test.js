@@ -46,6 +46,7 @@ test('homepage carousel retains CMS settings and responsive native navigation',(
  const update=new Function('prev','next','track',code);
  update(prev,next,track);assert.equal(prev.disabled,true);assert.equal(next.disabled,false);
  assert.equal(prev.tabIndex,-1);assert.equal(next.tabIndex,0);assert.equal(prev['aria-hidden'],'true');
+ track.scrollLeft=4;update(prev,next,track);assert.equal(prev.disabled,true);
  track.scrollLeft=300;update(prev,next,track);assert.equal(prev.disabled,false);assert.equal(next.disabled,false);
  track.scrollLeft=600;update(prev,next,track);assert.equal(prev.disabled,false);assert.equal(next.disabled,true);
  track.scrollLeft=0;track.scrollWidth=300;update(prev,next,track);assert.equal(next.disabled,true);
@@ -129,7 +130,7 @@ test('compact mobile cards retain a third-card preview and readable titles',()=>
 });
 
 test('hidden side controls retain their slots and are not keyboard targets',()=>{
- assert.match(component,/disabled\{visibility:hidden;pointer-events:none\}/);
+ assert.match(component,/disabled\{visibility:hidden!important;opacity:0!important;pointer-events:none\}/);
  assert.match(component,/aria-hidden="true" tabindex="-1"/);
  assert.match(component,/MutationObserver/);
  assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px/);
