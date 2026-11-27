@@ -7,7 +7,7 @@ date: "2026-11-22"
 owners: ["kohhran","ktp"]
 category: KTP Inleng
 description: 22 November 2026
-published: false
+published: true
 display_order: 0
 document_source: upload
 pdf_url: /documents/1795767255849-2025-rawngbawltute.pdf
