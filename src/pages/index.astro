@@ -58,7 +58,7 @@ const positiveCount = (value: unknown, fallback: number) => {
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : fallback;
 };
 
-const galleryAlbums = selectHomeAlbums(await getCollection('gallery'), Math.min(6, positiveCount(home.galleryCount, 6)), String(home.galleryCategory ?? '').trim(), String(home.galleryOrder ?? ''));
+const galleryAlbums = selectHomeAlbums(await getCollection('gallery'));
 
 // Historical records remain server-rendered; the homepage filters eligible records in place.
 const weeklyRecords = (await getWeeklySchedules()).filter(record => scheduleIsPublic(record));
