@@ -29,3 +29,10 @@ export function buildIssues(entries: any[], categoryName='KTP Inleng') {
 export function matchesIssue(issue:{search:string;year:number|null;month:number|null},query:string,year:string,month:string){
  return issue.search.includes(query.trim().toLowerCase())&&(year==='all'||String(issue.year)===year)&&(month==='all'||String(issue.month)===month);
 }
+
+export function selectLatestIssue(issues: ReturnType<typeof buildIssues>) {
+ return issues.find(i=>i.url&&i.key);
+}
+export function selectHomeIssue(issues: ReturnType<typeof buildIssues>, visibility?: Record<string, boolean>) {
+ return visibility?.ktp_inleng === true ? selectLatestIssue(issues) ?? issues[0] : undefined;
+}
