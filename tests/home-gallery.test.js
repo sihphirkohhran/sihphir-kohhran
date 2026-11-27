@@ -37,7 +37,7 @@ test('homepage carousel retains CMS settings and responsive native navigation',(
  assert.match(component,/max-w-5xl mx-auto/);
  assert.match(component,/flex:0 0 calc\(\(100% - 36px\)\/4\)/);
  assert.match(component,/@media\(max-width:720px\)\{.home-album\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
- assert.match(component,/@media\(max-width:600px\)\{\.home-album\{flex-basis:78%;aspect-ratio:5\/6\}\.album-nav\{display:block\}\.album-nav button\{display:none\}/);
+ assert.match(component,/@media\(max-width:600px\)\{\.home-album\{flex-basis:43.5%;aspect-ratio:3\/4\}\.album-nav\{display:block\}\.album-nav button\{display:none\}/);
  assert.match(component,/scroll-snap-type:x mandatory/);assert.match(component,/scrollbar-width:none/);
  assert.match(component,/aspect-ratio:4\/5/);assert.match(component,/View Full Gallery/);
  assert.match(component,/href=\{album.href\}/);assert.match(component,/target=\{album.external\?'_blank'/);
@@ -109,9 +109,19 @@ test('side navigation reserves space only when needed and keeps mobile track vis
  assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px;align-items:center;gap:8px/);
  assert.match(component,/@media\(min-width:1140px\)[^\n]*grid-template-columns:minmax\(0,1fr\)[^\n]*right:calc\(100% \+ 8px\)[^\n]*left:calc\(100% \+ 8px\)/);
  assert.match(component,/top:50%;transform:translateY\(-50%\)/);
- assert.match(component,/@media\(max-width:600px\)[^\n]*aspect-ratio:5\/6[^\n]*\.album-nav button\{display:none\}/);
+ assert.match(component,/@media\(max-width:600px\)[^\n]*aspect-ratio:3\/4[^\n]*\.album-nav button\{display:none\}/);
  const actions=component.split('<div class="album-actions">')[1].split('</div>')[0];
  assert.doesNotMatch(actions,/data-album-(prev|next)/);
  assert.match(actions,/View Full Gallery/);
  assert.match(component,/\.album-nav button:focus-visible/);
+});
+
+test('compact mobile cards retain a third-card preview and readable titles',()=>{
+ assert.match(component,/@media\(max-width:600px\)[^\n]*flex-basis:43\.5%;aspect-ratio:3\/4[^\n]*font-size:\.78rem;font-weight:600/);
+ assert.match(component,/@media\(max-width:340px\)[^\n]*flex-basis:44%[^\n]*font-size:\.75rem/);
+ for(const viewport of [320,360,390,430]){
+  const width=viewport-32,card=width*(viewport<=340?.44:.435),peek=width-2*card-24;
+  assert.ok(peek>0&&peek<card);
+  assert.ok(card*4/3<width*.78*6/5);
+ }
 });
