@@ -18,7 +18,7 @@ test('homepage carousel preserves six-video limit, dedicated grid and lazy playb
  assert.match(component,/home\?'yt-carousel':'yt-grid'/);
  assert.match(component,/createElement\('iframe'\)/);
  assert.match(component,/https:\/\/i\.ytimg\.com\/vi\//);
- assert.match(component,/aria-label='Play '/);
+ assert.match(component,/setAttribute\('aria-label','Play '\+video\.title\)/);
  assert.match(component,/loading='lazy'/);
  assert.match(component,/href="\/videos\/"/);
  assert.match(component,/Visit YouTube Channel/);
