@@ -18,15 +18,14 @@ const {channel,home=false}=Astro.props;
  <div class="yt-controls"><a href={channel} target="_blank" rel="noopener noreferrer">Visit YouTube Channel ↗</a></div>
  )}
  <p data-status role="status">Loading videos…</p>
+ {home ? <div class="yt-home-nav" role="group" aria-label="Video carousel navigation">
+ <button type="button" data-prev aria-label="Previous videos" disabled aria-hidden="true" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
  <div class:list={['yt-list',home?'yt-carousel':'yt-grid']} data-list aria-label={home ? "Latest YouTube videos" : undefined}></div>
+ <button type="button" data-next aria-label="Next videos" disabled aria-hidden="true" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+ </div> : <div class:list={['yt-list',home?'yt-carousel':'yt-grid']} data-list aria-label={home ? "Latest YouTube videos" : undefined}></div>}
+
  {home && (
  <div class="yt-home-actions">
-  <div class="yt-home-nav" aria-label="Video carousel navigation">
-   <div class="yt-nav-buttons">
-    <button type="button" data-prev aria-label="Previous videos" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
-    <button type="button" data-next aria-label="Next videos" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
-   </div>
-  </div>
   <a class="yt-channel" href={channel} target="_blank" rel="noopener noreferrer">Visit YouTube Channel <span aria-hidden="true">↗</span></a>
  </div>
  )}
@@ -39,8 +38,9 @@ const {channel,home=false}=Astro.props;
  document.querySelectorAll<HTMLElement>('[data-youtube-gallery]').forEach(root=>{
  const list=root.querySelector<HTMLElement>('[data-list]')!, status=root.querySelector<HTMLElement>('[data-status]')!, more=root.querySelector<HTMLButtonElement>('[data-more]'), dialog=root.querySelector<HTMLDialogElement>('[data-player]')!, frame=root.querySelector<HTMLElement>('[data-frame]')!, watch=root.querySelector<HTMLAnchorElement>('[data-watch]')!;
  const home=root.dataset.home==='true';const previous=root.querySelector<HTMLButtonElement>('[data-prev]');const next=root.querySelector<HTMLButtonElement>('[data-next]');
- const updateNavigation=()=>{if(!home)return;const max=Math.max(0,list.scrollWidth-list.clientWidth);const atStart=list.scrollLeft<=2;const atEnd=list.scrollLeft>=max-2; if(previous)previous.disabled=atStart;if(next)next.disabled=atEnd;};
+ const updateNavigation=()=>{if(!home)return;const max=Math.max(0,list.scrollWidth-list.clientWidth);const atStart=list.scrollLeft<=2;const atEnd=list.scrollLeft>=max-2; if(previous)previous.disabled=atStart;if(next)next.disabled=atEnd;for(const button of [previous,next]){if(button){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}}};
  list.addEventListener('scroll',updateNavigation,{passive:true});if(home&&typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(updateNavigation);observer.observe(list);root.addEventListener('astro:before-swap',()=>observer.disconnect(),{once:true});}else if(home)window.addEventListener('resize',updateNavigation);
+ if(home){new MutationObserver(updateNavigation).observe(list,{childList:true});window.addEventListener('resize',updateNavigation);updateNavigation();}
  let page='',busy=false;let opener:HTMLButtonElement|null=null;const close=root.querySelector<HTMLButtonElement>('[data-close]')!;const cursors=new Set<string>();const seen=new Set<string>();
  async function load(){
  if(busy)return;busy=true;status.textContent='Loading videos…';if(more)more.disabled=true;
@@ -87,12 +87,12 @@ const {channel,home=false}=Astro.props;
  .yt-home-head{text-align:center}
  .yt-home .gold-divider{margin-bottom:12px}
  .yt-home .gold-divider h2{font-family:'EB Garamond',serif;font-weight:600}
- .yt-home-nav{display:flex;align-items:center;justify-content:flex-start}
- .yt-nav-buttons{display:flex;gap:8px}
- .yt-nav-buttons button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:var(--navy);background:#fffdf8;transition:background-color .18s,border-color .18s,opacity .18s}
- .yt-nav-buttons svg{width:16px;height:16px}
- .yt-nav-buttons button:hover:not(:disabled){background:var(--navy);color:#fff;border-color:var(--navy)}
- .yt-nav-buttons button:disabled{opacity:.3;cursor:not-allowed}
+ .yt-home-nav{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px}
+ @media(min-width:1140px){.yt-home-nav{grid-template-columns:minmax(0,1fr);gap:0}.yt-home-nav button[data-prev],.yt-home-nav button[data-next]{position:absolute;top:50%;transform:translateY(-50%)}.yt-home-nav [data-prev]{right:calc(100% + 8px)}.yt-home-nav [data-next]{left:calc(100% + 8px)}}
+ .yt-home-nav > button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8;transition:background-color .18s,border-color .18s}
+ .yt-home-nav > button svg{width:16px;height:16px}
+ .yt-home-nav > button:hover:not(:disabled){background:#172941;color:white;border-color:#172941}
+ .yt-home-nav > button:disabled{visibility:hidden;pointer-events:none}
  .yt-home .yt-carousel{gap:12px;padding:4px 4px 7px;margin:-4px -4px -7px}
  .yt-home .yt-carousel :global(article){flex-basis:calc((100% - 24px)/3)}
  .yt-home .yt-carousel :global(.yt-home-card){display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:8px;background:white;box-shadow:0 2px 8px rgba(23,38,59,.05);transition:border-color .18s ease,box-shadow .18s ease}
@@ -105,17 +105,18 @@ const {channel,home=false}=Astro.props;
  .yt-home .yt-carousel :global(h3){font-family:'Poppins',sans-serif;font-size:.75rem;line-height:1.4;font-weight:700;margin:0;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;min-height:2.8em}
  .yt-home [data-status]{line-height:1.1rem;font-size:.65rem;color:#596474;margin-bottom:.35rem}
  .yt-home [data-status]:empty{margin:0}
- .yt-home-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;margin-top:12px}
+ .yt-home-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px 16px;margin-top:12px}
  .yt-home-actions a{display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none}
  .yt-home-actions .yt-channel{color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35)}
  .yt-home-actions .yt-channel:hover{border-bottom-color:var(--navy)}
- .yt-home-actions a:focus-visible,.yt-nav-buttons button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+ .yt-home-actions a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+ .yt-home-nav > button:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
  dialog{width:min(92vw,850px);padding:16px;background:#fffdf8;border-radius:8px;margin:auto}
  dialog::backdrop{background:#000b}
  [data-frame]{aspect-ratio:16/9;margin:10px 0}
  [data-frame] :global(iframe){width:100%;height:100%;border:0}
  @media(max-width:900px){.yt-carousel :global(article){flex-basis:calc((100% - 28px)/3)}.yt-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:calc((100% - 12px)/2)}}
- @media(max-width:600px){.yt-home .yt-home-nav{display:none}.yt-home-actions{justify-content:flex-end}.yt-carousel :global(article){flex-basis:75%}.yt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:78%}}
+ @media(max-width:600px){.yt-home .yt-home-nav{display:block}.yt-home-nav > button{display:none}.yt-home-actions{justify-content:flex-end}.yt-carousel :global(article){flex-basis:75%}.yt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:78%}}
  @media(max-width:360px){.yt-grid{grid-template-columns:1fr}.yt-home .yt-carousel :global(article){flex-basis:82%}}
- @media(prefers-reduced-motion:reduce){.yt-home .yt-carousel :global(.yt-home-card),.yt-nav-buttons button{transition:none}}
+ @media(prefers-reduced-motion:reduce){.yt-home .yt-carousel :global(.yt-home-card),.yt-home-nav > button{transition:none}}
 </style>
