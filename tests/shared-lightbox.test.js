@@ -35,8 +35,9 @@ test('actual shared lightbox handlers reject empty sources and navigate valid sl
  click(next);assert.equal(img.src,'/images/a.jpg');assert.equal(caption.textContent,'A');
  document.events.keydown({key:'ArrowLeft'});assert.equal(img.src,'/images/b.jpg');
  box.events.touchstart({changedTouches:[{clientX:100}]});box.events.touchend({changedTouches:[{clientX:20}]});assert.equal(img.src,'/images/a.jpg');
- document.events.keydown({key:'Escape'});assert.equal(box.open,false);assert.equal(document.body.style.overflow,'');
+ document.events.keydown({key:'Escape'});assert.equal(box.open,false);assert.equal(box.hidden,true);assert.equal(document.body.style.overflow,'');
+ click(next);assert.equal(img.src,'/images/a.jpg');
  triggers=[a];click(a);assert.ok('disabled' in prev.attrs);assert.ok('disabled' in next.attrs);
  click(prev);assert.equal(img.src,'/images/a.jpg');
- close.events.click();assert.equal(box.open,false);
+ close.events.click();assert.equal(box.open,false);assert.equal(box.hidden,true);
 });
