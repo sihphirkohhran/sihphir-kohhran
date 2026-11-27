@@ -64,6 +64,7 @@ const {albums}=Astro.props;
  .album-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  @media(max-width:900px){.home-album{flex-basis:calc((100% - 24px)/3)}}
  @media(max-width:720px){.home-album{flex-basis:calc((100% - 12px)/2)}}
- @media(max-width:600px){.home-album{flex-basis:78%;aspect-ratio:5/6}.album-nav{display:block}.album-nav button{display:none}.album-actions{justify-content:flex-end}}
+ @media(max-width:600px){.home-album{flex-basis:43.5%;aspect-ratio:3/4}.album-nav{display:block}.album-nav button{display:none}.album-actions{justify-content:flex-end}.album-body{padding:10px 9px 12px}.album-body h3{font-size:.78rem;font-weight:600}}
+ @media(max-width:340px){.home-album{flex-basis:44%}.album-body{padding:8px 7px 10px}.album-body h3{font-size:.75rem}}
  @media(prefers-reduced-motion:reduce){.home-album,.album-cover img,.album-body::before{transition:none}.home-album:hover,.home-album:hover .album-cover img{transform:none}}
 </style>
