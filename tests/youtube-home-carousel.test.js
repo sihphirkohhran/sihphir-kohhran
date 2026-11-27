@@ -54,6 +54,7 @@ test('carousel buttons follow scroll boundaries and remain disabled without over
  update(true,list,previous,next);
  assert.equal(previous.disabled,true);
  assert.equal(next.disabled,false);
+ list.scrollLeft=4;update(true,list,previous,next);assert.equal(previous.disabled,true);
  list.scrollLeft=200;
  update(true,list,previous,next);
  assert.equal(previous.disabled,false);
@@ -104,7 +105,7 @@ test('homepage navigation follows cards and retains only the channel link',()=>{
 });
 
 test('hidden side controls retain their slots and are not keyboard targets',()=>{
- assert.match(component,/disabled\{visibility:hidden;pointer-events:none\}/);
+ assert.match(component,/disabled\{visibility:hidden!important;opacity:0!important;pointer-events:none\}/);
  assert.match(component,/aria-hidden="true" tabindex="-1"/);
  assert.match(component,/MutationObserver/);
  assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px/);
