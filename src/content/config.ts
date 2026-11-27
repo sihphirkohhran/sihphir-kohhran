@@ -407,7 +407,7 @@ export const collections = {
   fellowship,
   committee,
   pastoral,
-  proPastoral,
+  'pro-pastoral': proPastoral,
   missionaries,
   elders,
   gallery,
