@@ -2,10 +2,10 @@
 import {getCollection,getEntry} from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PageHero from '../components/PageHero.astro';
-import {buildIssues,months} from '../lib/ktp-inleng';
+import {buildIssues,months,selectLatestIssue} from '../lib/ktp-inleng';
 const registry=await getEntry('settings','document-categories');
 const issues=buildIssues(await getCollection('documents'),registry?.data.categories.find(c=>c.id==='ktp-inleng')?.name);
-const latest=issues.find(i=>i.url&&i.key);
+const latest=selectLatestIssue(issues);
 const years=[...new Set(issues.flatMap(i=>i.year?[i.year]:[]))].sort((a,b)=>b-a);
 const availableMonths=[...new Set(issues.flatMap(i=>i.month?[i.month]:[]))].sort((a,b)=>a-b);
 ---
