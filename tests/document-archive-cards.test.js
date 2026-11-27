@@ -114,3 +114,36 @@ test('historical-year labels and published/archive visibility rules remain intac
   assert.match(page, /entry\.data\.status !== 'archived' && entry\.data\.published !== false/);
   assert.match(page, /historicalYearFilterValue\(year, yearType\)/);
 });
+
+test('featured publication card retains archive route and exact Mizo subtitle',()=>{
+ assert.match(page,/<a class="publication-card" href="\/ktp-inleng\/">/);
+ assert.match(page,/<span class="publication-title">KTP Inleng<\/span>/);
+ assert.match(page,/<span class="publication-subtitle">Kar tin chhuak chanchinbu<\/span>/);
+ assert.doesNotMatch(page,/weekly publication archive/i);
+ assert.match(page,/\.publication-card:focus-visible/);
+});
+test('premium cards preserve optional descriptions, external links and compact responsive layout',()=>{
+ assert.equal((page.match(/document\.description && <span class="document-row-description">/g)||[]).length,2);
+ assert.equal((page.match(/document\.files\[0\]\?\.type === 'external'/g)||[]).length,2);
+ assert.match(page,/\.document-list\{display:flex;flex-direction:column;gap:10px\}/);
+ assert.match(page,/\.document-row\{[^}]*border-radius:10px/);
+ assert.match(page,/\.document-row-title\{[^}]*overflow-wrap:anywhere/);
+ assert.match(page,/\.document-row-description\{[^}]*-webkit-line-clamp:2/);
+ assert.match(page,/\.document-filter-row select\{[^}]*min-height:44px/);
+ assert.match(page,/grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+ assert.match(page,/id="document-count" class="document-count" role="status" aria-live="polite"/);
+ assert.match(page,/@media\(prefers-reduced-motion:reduce\)/);
+});
+test('actual archive filtering and sorting work with hundreds of records',()=>{
+ const source=page.slice(page.indexOf('  function applyFilters()'),page.indexOf('  const fileTypeDetails'));
+ const rows=Array.from({length:300},(_,i)=>({dataset:{searchTitle:'record '+String(i).padStart(3,'0'),description:i===12?'special description':'',category:i%2?'Year Book':'Rawngbawltute',year:i%2?'2025':'2026',date:String(i).padStart(3,'0')},hidden:false}));
+ const list={querySelectorAll:()=>rows.slice(),append(row){rows.splice(rows.indexOf(row),1);rows.push(row)}};
+ const search={value:''},category={value:'all'},year={value:'all'},sort={value:'newest'},empty={},count={};
+ const document={querySelectorAll:s=>s==='.document-list'?[list]:rows,querySelector:()=>null};
+ const apply=new Function('search','category','year','sort','empty','count','document',source.replaceAll('<HTMLElement>','')+'return applyFilters;')(search,category,year,sort,empty,count,document);
+ apply();assert.equal(count.textContent,'300 documents');assert.equal(rows[0].dataset.date,'299');
+ search.value='special description';apply();assert.equal(count.textContent,'1 document');
+ search.value='rawngbawltute';year.value='2026';category.value='Rawngbawltute';sort.value='oldest';apply();assert.equal(count.textContent,'150 documents');assert.equal(rows[0].dataset.date,'000');
+ search.value='2025';category.value='all';year.value='all';sort.value='title';apply();assert.equal(count.textContent,'150 documents');assert.equal(rows[0].dataset.searchTitle,'record 000');
+ search.value='no match';apply();assert.equal(count.textContent,'0 documents');assert.equal(empty.hidden,false);
+});
