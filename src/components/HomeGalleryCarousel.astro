@@ -6,20 +6,18 @@ const {albums}=Astro.props;
 <div class="max-w-5xl mx-auto" data-home-albums>
  <div class="gold-divider reveal"><h2>Gallery</h2></div>
  {albums.length ? (
- <>
+ <div class="album-nav" role="group" aria-label="Gallery carousel navigation">
+ <button type="button" data-album-prev aria-label="Previous albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
  <div class="album-track" data-album-track aria-label="Gallery albums">
  {albums.map(album=><a class="home-album" href={album.href} target={album.external?'_blank':undefined} rel={album.external?'noopener noreferrer':undefined}>
  <div class="album-cover"><img src={album.cover} alt="" loading="lazy" decoding="async" data-fallback={album.coverFallback} /></div>
  <div class="album-body"><h3>{album.title}</h3></div>
  </a>)}
  </div>
- </>
+ <button type="button" data-album-next aria-label="Next albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+ </div>
  ) : <p class="text-center text-navy/65 py-6">No gallery albums are available yet.</p>}
  <div class="album-actions">
- {albums.length > 0 && <div class="album-nav" aria-label="Gallery carousel navigation">
- <button type="button" data-album-prev aria-label="Previous albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
- <button type="button" data-album-next aria-label="Next albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
- </div>}
  <a class="album-link" href="/gallery">View Full Gallery <span aria-hidden="true">→</span></a>
  </div>
 </div>
@@ -53,11 +51,12 @@ const {albums}=Astro.props;
  .album-body{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px 14px;background:linear-gradient(to top,rgba(15,31,61,.96) 0%,rgba(15,31,61,.85) 18%,rgba(15,31,61,.32) 40%,transparent 65%)}
  .album-body::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(15,31,61,.25),transparent 55%);opacity:0;transition:opacity .28s;pointer-events:none}
  .album-body h3{position:relative;color:white;font:700 1rem/1.4 Poppins,sans-serif;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:2.8em;margin:0}
- .album-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;margin-top:12px}
+ .album-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px 16px;margin-top:12px}
  .album-actions .album-link{display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none;color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35);margin-left:auto}
  .album-actions .album-link:hover{border-bottom-color:var(--navy)}
  .album-actions .album-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
- .album-nav{display:flex;gap:8px}
+ .album-nav{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px}
+ @media(min-width:1140px){.album-nav{grid-template-columns:minmax(0,1fr);gap:0}.album-nav button{position:absolute;top:50%;transform:translateY(-50%)}.album-nav [data-album-prev]{right:calc(100% + 8px)}.album-nav [data-album-next]{left:calc(100% + 8px)}}
  .album-nav button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8}
  .album-nav button:disabled{opacity:.3;cursor:not-allowed}
  .album-nav button:hover:not(:disabled){background:#172941;color:white}
@@ -65,6 +64,6 @@ const {albums}=Astro.props;
  .album-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  @media(max-width:900px){.home-album{flex-basis:calc((100% - 24px)/3)}}
  @media(max-width:720px){.home-album{flex-basis:calc((100% - 12px)/2)}}
- @media(max-width:600px){.home-album{flex-basis:78%}.album-nav{display:none}.album-actions{justify-content:flex-end}}
+ @media(max-width:600px){.home-album{flex-basis:78%;aspect-ratio:5/6}.album-nav{display:block}.album-nav button{display:none}.album-actions{justify-content:flex-end}}
  @media(prefers-reduced-motion:reduce){.home-album,.album-cover img,.album-body::before{transition:none}.home-album:hover,.home-album:hover .album-cover img{transform:none}}
 </style>
