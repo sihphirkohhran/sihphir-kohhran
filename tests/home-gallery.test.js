@@ -42,7 +42,7 @@ test('homepage carousel retains CMS settings and responsive native navigation',(
  assert.match(component,/@media\(max-width:900px\)\{.home-album\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
  assert.match(component,/@media\(max-width:600px\)\{.home-album\{flex-basis:78%\}.album-nav\{display:none\}/);
  assert.match(component,/scroll-snap-type:x mandatory/);assert.match(component,/scrollbar-width:none/);
- assert.match(component,/aspect-ratio:3\/2/);assert.match(component,/View Full Gallery/);
+ assert.match(component,/aspect-ratio:4\/5/);assert.match(component,/View Full Gallery/);
  assert.match(component,/href=\{album.href\}/);assert.match(component,/target=\{album.external\?'_blank'/);
  const code=component.match(/const update=\(\)=>\{([^}]+)\}/)[1];
  const prev={},next={},track={scrollLeft:0,scrollWidth:900,clientWidth:300};
@@ -58,17 +58,25 @@ test('dedicated gallery direct links, browser history and existing lightbox rema
  assert.match(layout,/data-lightbox-alt/);assert.match(layout,/stepLightbox\(-1\)/);
 });
 
-test('compact title-only cards and matching homepage action links',()=>{
+test('portrait editorial title-only cards and matching homepage action links',()=>{
  const video=read('src/components/YouTubeGallery.astro');
  assert.match(component,/<div class="album-body"><h3>\{album.title\}<\/h3><\/div>/);
  assert.doesNotMatch(component,/\{album.category\}/);
  assert.match(component,/object-fit:cover/);
- assert.match(component,/padding:8px 12px;flex:1/);
- assert.match(component,/-webkit-line-clamp:2;overflow:hidden;min-height:2.8em/);
+ assert.match(component,/\.album-body\{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px 14px;background:linear-gradient/);
+ assert.match(component,/-webkit-line-clamp:2;overflow:hidden;max-height:2.8em/);
  assert.match(component,/<div class="album-actions">[\s\S]*data-album-prev[\s\S]*data-album-next[\s\S]*class="album-link" href="\/gallery"/);
  assert.match(component,/\.album-nav\{display:none\}\.album-actions\{justify-content:flex-end\}/);
  assert.match(video,/\.yt-home \.yt-home-nav\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
  for(const rule of ["font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none","color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35)","border-bottom-color:var(--navy)"]){
   assert.ok(component.includes(rule));assert.ok(video.includes(rule));
  }
+});
+
+test('portrait covers fill the card without distortion and titles overlay the photograph',()=>{
+ assert.match(component,/\.album-cover\{position:absolute;inset:0/);
+ assert.match(component,/object-fit:cover;object-position:50% 40%/);
+ assert.match(component,/rgba\(15,31,61,.96\) 0%/);
+ assert.match(component,/transparent 65%/);
+ assert.match(component,/\.album-body h3\{color:white;font:700 1rem\/1.4 Poppins/);
 });
