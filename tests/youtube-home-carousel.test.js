@@ -23,7 +23,7 @@ test('homepage carousel preserves six-video limit, dedicated grid and lazy playb
  assert.match(component,/https:\/\/i\.ytimg\.com\/vi\//);
  assert.match(component,/setAttribute\('aria-label','Play '\+video\.title\)/);
  assert.match(component,/loading='lazy'/);
- assert.match(component,/href="\/videos\/"/);
+ assert.doesNotMatch(component,/href="\/videos\/"|View All Videos/);
  assert.match(component,/Visit YouTube Channel/);
 });
 
@@ -85,4 +85,20 @@ test('homepage cards use unified Gallery and Committee conventions without chang
  assert.match(component,/\.yt-home \.yt-carousel :global\(\.yt-card-body\)\{flex:1;padding:9px 10px 10px/);
  assert.match(component,/\.yt-home-card:focus-within/);
  assert.match(component,/font-weight:700;margin:0;display:-webkit-box/);
+});
+
+test('homepage navigation follows cards and retains only the channel link',()=>{
+ const markup=component.split('<script>')[0];
+ const row=markup.match(/<div class="yt-home-actions">([\s\S]*?)\n <\/div>/)[1];
+ assert.ok(markup.indexOf('data-list')<markup.indexOf('class="yt-home-actions"'));
+ assert.equal((markup.match(/data-prev/g)||[]).length,1);
+ assert.equal((markup.match(/data-next/g)||[]).length,1);
+ assert.match(row,/data-prev[\s\S]*data-next[\s\S]*class="yt-channel" href=\{channel\}/);
+ assert.match(component,/\.yt-home-actions\{display:flex;align-items:center;justify-content:space-between/);
+ assert.match(component,/\.yt-home \.yt-home-nav\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
+ assert.match(component,/\.yt-home \[data-status\]:empty\{margin:0\}/);
+ assert.match(component,/previous\?\.addEventListener\('click',\(\)=>list.scrollBy\(\{left:-list.clientWidth/);
+ assert.match(component,/next\?\.addEventListener\('click',\(\)=>list.scrollBy\(\{left:list.clientWidth/);
+ assert.match(component,/!home&&<button type="button" data-more hidden>Load More/);
+ assert.match(readFileSync('src/pages/videos.astro','utf8'),/<YouTubeGallery channel=/);
 });
