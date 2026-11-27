@@ -16,7 +16,7 @@
     "quick_access": true,
     "prayer_topics": false,
     "featured_gallery": true,
-    "featured_documents": false,
+    "featured_documents": true,
     "ktp_inleng": true,
     "featured_committee": true,
     "featured_fellowship": true,
