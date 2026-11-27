@@ -384,9 +384,9 @@ const highlightItems = normalizeHighlights(
       {noticeSubtitle && <p class="font-body text-xs text-gray-500 text-center -mt-3 mb-5">{noticeSubtitle}</p>}
 
       <!-- Tabs -->
-      <div class="flex border-b-2 border-navy mb-5 overflow-x-auto md:overflow-visible reveal">
-        <button class="notice-tab active" data-target="weekly">Hun ruatna</button>
-        <button class="notice-tab" data-target="monthly">Thlabi mawhphurtu</button>
+      <div class="notice-board-tabs reveal">
+        <button class="notice-tab active" data-target="weekly">Hun Ruatna</button>
+        <button class="notice-tab" data-target="monthly">Thlabi Mawhphurtu</button>
         <button class="notice-tab" data-target="notices">Notices</button>
       </div>
 
@@ -399,20 +399,20 @@ const highlightItems = normalizeHighlights(
         </div>
         {weeklyBrowse.map(record=>(
           <div class="notice-period-record" data-record-id={record.id} data-period={record.period.slice(0,7)} data-week-start={record.period} data-week-end={record.end} hidden>
-            <div class="font-body text-xs text-navy font-semibold tracking-wide mb-3">{indianDate(record.week_start)} — {indianDate(record.week_end)}</div>
-            <div class="space-y-3">
+            <div class="notice-programme-period">{indianDate(record.week_start)} — {indianDate(record.week_end)}</div>
+            <div class="notice-programme-board">
               {(record.days??[]).map((day,i)=>(
-                <div class={`border-l-2 border-gold bg-white rounded-r px-4 py-3`}>
-                  <div class="font-body text-sm font-semibold text-navy tracking-wide uppercase mb-2">{day.day}</div>
-                  <div class="space-y-1">
+                <section class="notice-programme-section">
+                  <h3 class="notice-programme-heading">{day.day}</h3>
+                  <div class="notice-programme-duties">
                     {(day.duties??[]).map(duty=>(
-                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm border-b border-ivory-dark pb-1 last:border-0 last:pb-0">
+                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] notice-programme-row items-start font-body text-sm">
                         <span class="notice-duty-label min-w-0 break-words">{duty.role||duty.title}</span>
-                        <span class="min-w-0 font-medium text-navy text-left break-words">{duty.name||duty.person_responsible}</span>
+                        <div class="min-w-0 font-medium text-navy text-left break-words">{duty.name||duty.person_responsible}{duty.time && <div class="notice-duty-note">{duty.time}</div>}{duty.speaker && <div class="notice-duty-note">{duty.speaker}</div>}{duty.bible_text && <div class="notice-duty-note">{duty.bible_text}</div>}{duty.notes && <div class="notice-duty-note">{duty.notes}</div>}</div>
                       </div>
                     ))}
                   </div>
-                </div>
+                </section>
               ))}
             </div>
           </div>
@@ -427,16 +427,14 @@ const highlightItems = normalizeHighlights(
         </div>
         {monthlyBrowse.map(record=>(
           <div class="notice-period-record" data-record-id={record.id} data-period={record.period} hidden>
-            <div class="font-body text-sm text-navy font-semibold tracking-wide mb-3">{monthTitle(record.period)}</div>
-            <div class="space-y-3">
+            <div class="notice-programme-period">{monthTitle(record.period)}</div>
+            <div class="notice-programme-board">
               {(record.sections??[]).map(section=>(
-                <div class="bg-white border border-gold/20 border-l-2 border-l-gold rounded-r overflow-hidden">
-                  <div class="bg-cream px-4 py-2 border-b border-navy/10">
-                    <span class="font-display text-navy font-semibold text-sm">{section.title}</span>
-                  </div>
-                  <div class="px-4 py-2 space-y-1">
+                <section class="notice-programme-section">
+                  <h3 class="notice-programme-heading">{section.title}</h3>
+                  <div class="notice-programme-duties">
                     {(section.duties??[]).map(duty=>(
-                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] gap-3 items-start font-body text-sm text-navy border-b border-navy/10 pb-1.5 last:border-0 last:pb-0">
+                      <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] notice-programme-row items-start font-body text-sm text-navy">
                         <span class="notice-duty-label min-w-0 break-words">{duty.role}</span>
                         <span class="min-w-0 text-navy text-left break-words">{duty.name}</span>
                       </div>
@@ -548,14 +546,28 @@ const highlightItems = normalizeHighlights(
 </BaseLayout>
 
 <style>
-  #notice-board .notice-period-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+  #notice-board .notice-board-tabs{display:flex;overflow-x:auto;border-bottom:1px solid rgba(15,31,61,.18);margin-bottom:12px;scrollbar-width:none}
+  #notice-board .notice-tab{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;flex:1 0 auto;padding:10px 12px;margin:0;border-bottom:2px solid transparent}
+  #notice-board .notice-tab.active{color:var(--navy);border-bottom-color:var(--gold)}
+  #notice-board .notice-tab:focus-visible{outline:2px solid var(--gold);outline-offset:-3px}
+  #notice-board .notice-programme-period{font:600 .85rem/1.5 Poppins,sans-serif;color:var(--navy);margin:0 0 8px}
+  #notice-board .notice-programme-board{background:white;border:1px solid rgba(15,31,61,.12);border-radius:8px;overflow:hidden;min-width:0}
+  #notice-board .notice-programme-section + .notice-programme-section{border-top:1px solid rgba(15,31,61,.14)}
+  #notice-board .notice-programme-heading{font:600 1.05rem/1.35 "EB Garamond",serif;color:var(--navy);background:var(--cream);padding:8px 14px;border-left:2px solid var(--gold);overflow-wrap:anywhere;margin:0}
+  #notice-board .notice-programme-duties{padding:2px 14px}
+  #notice-board .notice-programme-row{gap:12px;padding:7px 0;line-height:1.5;overflow-wrap:anywhere}
+  #notice-board .notice-programme-row + .notice-programme-row{border-top:1px solid rgba(15,31,61,.08)}
+  #notice-board .notice-duty-note{font-size:.8rem;font-weight:400;white-space:pre-wrap;overflow-wrap:anywhere}
+  @media(max-width:360px){#notice-board .notice-programme-row{grid-template-columns:minmax(0,1fr);gap:2px}#notice-board .notice-programme-heading{padding:7px 10px}#notice-board .notice-programme-duties{padding:2px 10px}}
+  #notice-board .notice-period-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+  #notice-board .notice-period-controls:not([data-notice-controls="weekly"]){grid-template-columns:repeat(2,minmax(0,1fr))}
   #notice-board .notice-period-controls label{display:grid;gap:5px;min-width:0;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;color:#172941}
-  #notice-board .notice-period-controls select{box-sizing:border-box;min-width:0;width:100%;height:40px;padding:7px 9px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font:inherit;font-weight:500}
+  #notice-board .notice-period-controls select{box-sizing:border-box;min-width:0;width:100%;height:38px;padding:6px 9px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font:inherit;font-weight:500}
   #notice-board .notice-period-controls select:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
   #notice-board .notice-period-record[hidden],#notice-board .notice-period-empty[hidden]{display:none!important}
   #notice-board .notice-duty-label{font-size:inherit;font-weight:600;color:#172941;overflow-wrap:anywhere}
-  #notice-board .notice-accordion-card{overflow:hidden}
-  #notice-board .notice-accordion-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:13px 15px;text-align:left;color:#172941;border:0;background:transparent;cursor:pointer}
+  #notice-board .notice-accordion-card{overflow:hidden;border-radius:8px;border-top:1px solid rgba(15,31,61,.1);border-right:1px solid rgba(15,31,61,.1);border-bottom:1px solid rgba(15,31,61,.1);margin-bottom:8px}
+  #notice-board .notice-accordion-toggle{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;padding:11px 14px;text-align:left;color:#172941;border:0;background:transparent;cursor:pointer}
   #notice-board .notice-accordion-toggle:focus-visible,#notice-board .notice-accordion-show-more:focus-visible{outline:2px solid #b8953f;outline-offset:-3px}
   #notice-board .notice-accordion-heading{display:flex;flex-direction:column;gap:5px;min-width:0;overflow-wrap:anywhere}
   #notice-board .notice-accordion-read-more{color:#98752e;font-weight:600}
