@@ -46,7 +46,7 @@ test('archived schedule detail exposes all structured duty fields', () => {
 test('homepage monthly and weekly duty rows use wrapping two-column layouts', () => {
   assert.match(home, /grid-cols-\[minmax\(0,0\.35fr\)_minmax\(0,0\.65fr\)\]/);
   assert.match(home, /break-words/);
-  assert.match(home, /bg-white border border-gold\/20 border-l-2 border-l-gold/);
+  assert.match(home, /notice-programme-board/);
   assert.doesNotMatch(home, /<div class="bg-navy border border-gold\/15 rounded overflow-hidden">/);
 });
 
@@ -99,4 +99,23 @@ test('all Notice Board tabs provide cascading, dynamically populated historical 
   assert.doesNotMatch(home,/View All →/);
   assert.match(home,/\.notice-duty-label\{font-size:inherit;font-weight:600;color:#172941/);
   assert.match(home,/@media\(max-width:480px\)/);
+});
+
+test('unified programme and roster preserve dynamic sections, duties and legacy values',()=>{
+  assert.match(home,/\(record.days\?\?\[\]\).map/);
+  assert.match(home,/\(record.sections\?\?\[\]\).map/);
+  assert.match(home,/\(day.duties\?\?\[\]\).map/);
+  assert.match(home,/\(section.duties\?\?\[\]\).map/);
+  assert.match(home,/<h3 class="notice-programme-heading">\{day.day\}<\/h3>/);
+  assert.match(home,/<h3 class="notice-programme-heading">\{section.title\}<\/h3>/);
+  assert.match(home,/duty.role\|\|duty.title/);
+  assert.match(home,/duty.name\|\|duty.person_responsible/);
+  for(const field of ['time','speaker','bible_text','notes']) assert.ok(home.includes('duty.'+field+' &&'));
+  assert.match(home,/@media\(max-width:360px\)[^\n]*grid-template-columns:minmax\(0,1fr\)/);
+  assert.match(home,/notice-board-tabs\{display:flex;overflow-x:auto/);
+  assert.match(home,/notice-programme-section \+ .notice-programme-section\{margin-top:14px\}/);
+  assert.match(home,/notice-programme-section\{background:white;border:1px solid rgba\(15,31,61,\.14\);border-radius:8px;overflow:hidden;min-width:0\}/);
+  assert.match(home,/notice-programme-board\{min-width:0\}/);
+  assert.match(home,/notice-programme-heading\{[^}]*background:var\(--cream\)[^}]*border-left:2px solid var\(--gold\)/);
+  for(const target of ['weekly','monthly','notices']) assert.ok(home.includes("'tab-"+target+"': '"+target+"'"));
 });
