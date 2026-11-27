@@ -1,0 +1,39 @@
+---
+import type { buildIssues } from '../lib/ktp-inleng';
+interface Props { issue: ReturnType<typeof buildIssues>[number] }
+const {issue}=Astro.props;
+---
+<section id="ktp-inleng" class="bg-ivory py-8 px-4" aria-labelledby="home-inleng-heading">
+ <div class="max-w-2xl mx-auto">
+  <div class="gold-divider"><h2 id="home-inleng-heading">KTP Inleng</h2></div>
+  <article class="inleng-card">
+   <div class="inleng-cover">
+    {issue.cover ? <img src={issue.cover} alt={`Cover of ${issue.name}`} width="144" height="192" loading="lazy" decoding="async"/> : <div class="inleng-fallback" aria-hidden="true"><span>KTP</span><strong>Inleng</strong><small>Weekly publication</small></div>}
+   </div>
+   <div class="inleng-copy">
+    <p class="inleng-eyebrow">Latest issue</p>
+    <h3 class="font-display text-navy">{issue.name}</h3>
+    <p class="font-body text-navy/70">{issue.label}</p>
+    <div class="inleng-actions">
+     {issue.url && <a class="inleng-read" href={issue.url} target="_blank" rel="noopener noreferrer" aria-label={`Read PDF: ${issue.name} (opens in new tab)`}>Read PDF ↗</a>}
+     <a class="inleng-archive" href="/ktp-inleng/">View Archive →</a>
+    </div>
+   </div>
+  </article>
+ </div>
+</section>
+<style>
+ .inleng-card{display:grid;grid-template-columns:minmax(0,104px) minmax(0,1fr);align-items:center;gap:14px;padding:14px;border:1px solid #e1d6bd;border-radius:8px;background:#fffdf8}
+ .inleng-cover{aspect-ratio:3/4;min-width:0}
+ .inleng-cover img{width:100%;height:100%;object-fit:contain}
+ .inleng-fallback{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:#172941;color:#e4c77e;border:4px double #b8953f}
+ .inleng-fallback strong{color:white;font-size:1.35rem}.inleng-fallback small{font-size:.65rem}
+ .inleng-copy{min-width:0;overflow-wrap:anywhere}.inleng-copy h3{font-size:1.1rem;font-weight:600;line-height:1.4;margin:4px 0}
+ .inleng-eyebrow{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:#806326}
+ .inleng-actions{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:8px}
+ .inleng-actions a{display:inline-flex;align-items:center;min-height:44px;font-size:.85rem;font-weight:600}
+ .inleng-read{background:#172941;color:white;padding:8px 14px;border-radius:5px}.inleng-archive{color:#172941;text-decoration:underline;text-underline-offset:3px}
+ .inleng-actions a:focus-visible{outline:2px solid #9b792f;outline-offset:3px}
+ @media(min-width:640px){.inleng-card{grid-template-columns:144px minmax(0,1fr);gap:24px;padding:20px}.inleng-copy h3{font-size:1.35rem}}
+ @media(max-width:360px){.inleng-card{grid-template-columns:84px minmax(0,1fr);gap:10px;padding:10px}}
+</style>
