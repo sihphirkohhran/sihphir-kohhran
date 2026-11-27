@@ -154,3 +154,43 @@ test('functional public file selection respects explicit source through source s
   delete state.document_source;
   assert.deepEqual(show([]),[external],'legacy source-less record may fall back to external');
 });
+
+test('publication metadata edits, clears and reopens through real sync and serialization',()=>{
+ const source=manager.split('const sync=form=>{')[1].split('const bindEditor=')[0];
+ const codec=new Function(manager.slice(manager.indexOf('  const unquote ='),manager.indexOf('  const extension ='))+'return {parse,serialize};')();
+ const FormData=class {
+  constructor(form){this.form=form}
+  get(key){return Object.hasOwn(this.form,key)?this.form[key]:null}
+  getAll(key){return this.form[key]??[]}
+ };
+ const selected={data:{name:'Issue',year:1985,month:2,date:'March 1985',cover_image:'/images/old.jpg',tags:['legacy'],custom:'keep',pdf_external:'https://example.org/pdf'},files:[{url:'/documents/old.pdf'}]};
+ const sync=new Function('selected','FormData','readDisplayLocations','return form=>{'+source)(selected,FormData,readDisplayLocations);
+ const save=fields=>{
+  sync({name:'Issue',yearType:'known',year:'1985',owners:['ktp'],category:'KTP Inleng',published:'on',document_source:'external',pdf_external:'https://example.org/pdf',...fields});
+  const saved=codec.serialize(selected.data,'Historical body');
+  const reopened=codec.parse(saved);
+  assert.equal(reopened.body,'Historical body');
+  selected.data=reopened.data;
+  return saved;
+ };
+ save({});
+ assert.equal(selected.data.date,'March 1985');
+ assert.equal(selected.data.month,2);
+ assert.equal(selected.data.cover_image,'/images/old.jpg');
+ const saved=save({date:'2026-11-22',month:'11',cover_image:'/images/new.jpg'});
+ assert.match(saved,/date: "2026-11-22"/);
+ assert.equal(selected.data.date,'2026-11-22');
+ assert.equal(selected.data.month,11);
+ assert.equal(selected.data.cover_image,'/images/new.jpg');
+ assert.equal(selected.data.year,1985);
+ save({date:'',month:'',cover_image:''});
+ for(const key of ['date','month','cover_image'])assert.ok(!Object.hasOwn(selected.data,key),key);
+ assert.deepEqual(selected.data.tags,['legacy']);
+ assert.equal(selected.data.custom,'keep');
+ assert.deepEqual(selected.data.owners,['ktp']);
+ assert.equal(selected.data.files[0].url,'/documents/old.pdf');
+ assert.equal(selected.data.pdf_external,'https://example.org/pdf');
+ save({date:'Circa 1985'});
+ save({date:''});
+ assert.ok(!Object.hasOwn(selected.data,'date'));
+});
