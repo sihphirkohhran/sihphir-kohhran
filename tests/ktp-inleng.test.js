@@ -27,3 +27,16 @@ test('archive and CMS reuse existing document metadata and direct links',()=>{
  assert.match(page,/href=\{i.url\}/);
  assert.doesNotMatch(page,/<iframe/);
 });
+
+test('exact publication date overrides conflicting historical year and month without mutating records',()=>{
+ const original=entry('conflict',{date:'2026-11-22',year:1985,month:2,yearType:'approximate'});
+ const snapshot=JSON.stringify(original);
+ const issues=buildIssues([original,entry('earlier',{date:'2026-11-15'}),entry('invalid',{date:'2026-02-30',year:2024,month:3})]);
+ assert.equal(issues[0].id,'conflict');
+ assert.equal(issues[0].year,2026);
+ assert.equal(issues[0].month,11);
+ assert.equal(matchesIssue(issues[0],'','1985','2'),false);
+ assert.equal(matchesIssue(issues[0],'','2026','11'),true);
+ assert.equal(issues[2].label,'March 2024');
+ assert.equal(JSON.stringify(original),snapshot);
+});
