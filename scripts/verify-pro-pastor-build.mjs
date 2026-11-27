@@ -39,3 +39,19 @@ if(current.length){
 }
 assert.ok(!text(archive).includes('The former archive remains available below.'));
 console.log('Verified Pro Pastor Current section has no empty placeholder.');
+
+for(const page of ['bialtu-pastor','probationary-pastor']){
+ const doc=parseFragment(read(page+'/index.html'));
+ const profiles=[...walk(doc)].filter(n=>hasClass(n,'profile-card'));
+ assert.ok(profiles.length,'Expected archive cards: '+page);
+ for(const card of profiles){
+  const body=card.childNodes.find(n=>n.tagName==='div');
+  assert.ok(body);
+  assert.ok(!body.childNodes.some(n=>n.tagName==='p'),'Redundant designation: '+page);
+  assert.ok(body.childNodes.some(n=>n.tagName==='h3'));
+  assert.ok(body.childNodes.some(n=>hasClass(n,'service-years')));
+  assert.ok(body.childNodes.some(n=>n.tagName==='a'));
+  assert.ok([...walk(card)].some(n=>n.tagName==='img'));
+ }
+}
+console.log('Verified Pastor and Pro Pastor generated cards omit designation and retain name, photo, service years and profile link.');
