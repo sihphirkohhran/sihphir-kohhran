@@ -1,5 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeKtpInleng from '../components/HomeKtpInleng.astro';
+import {buildIssues,selectHomeIssue} from '../lib/ktp-inleng';
 import QuickLinks from '../components/QuickLinks.astro';
 import Highlights from '../components/Highlights.astro';
 import ProfileImage from '../components/ProfileImage.astro';
@@ -45,7 +47,7 @@ const heroYoutubeUrl = String(home.youtubeButtonUrl || generalEntry?.data.youtub
 const contact = normalizeContact(generalEntry?.data);
 const visibility = {
   hero: true, highlights: true, notice_board: true, quick_access: true, prayer_topics: true,
-  featured_gallery: true, featured_documents: true, featured_committee: true,
+  featured_gallery: true, featured_documents: true, ktp_inleng: false, featured_committee: true,
   featured_fellowship: true, featured_ministries: true,
   ...(home.visibility ?? {}),
 };
@@ -91,6 +93,8 @@ const prayerTopics = (prayerSettings.topics ?? [])
 
 const docCategoryRegistry = await getEntry('settings', 'document-categories');
 const docCategoriesList = docCategoryRegistry?.data.categories ?? [];
+
+const homeIssue = selectHomeIssue(visibility.ktp_inleng === true ? buildIssues(await getCollection('documents'), docCategoriesList.find(c=>c.id==='ktp-inleng')?.name) : [], visibility);
 
 const ktpDocs = await getKtpInlengDocs();
 const otherDocs = await getOtherDocuments();
@@ -364,6 +368,7 @@ const highlightItems = normalizeHighlights(
   </section>
 
   <!-- ══════════════════════════════ DOCUMENTS ══════════════════════════════ -->
+  {homeIssue && <HomeKtpInleng issue={homeIssue} />}
   <section class="bg-cream py-8 px-4" id="documents" style={visibility.featured_documents === false ? 'display:none' : undefined}>
     <div class="max-w-2xl mx-auto">
       <div class="gold-divider reveal">
