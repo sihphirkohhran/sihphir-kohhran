@@ -75,3 +75,13 @@ test('Pro Pastor detail uses Pastor layout with explicit variant and responsive 
 });
 
  test('collection key matches CMS directory',()=>{assert.match(read('src/content/config.ts'), /'pro-pastoral': proPastoral/);});
+
+test('empty Current section is omitted only for Pro Pastor',()=>{
+ const component=read('src/components/MinistrySection.astro');
+ const condition=component.match(/\{\((activePage !== 'pro-pastor' \|\| currentProfiles\.length > 0)\) && <section class="profile-section current-section">/);
+ assert.ok(condition);
+ const show=new Function('activePage','currentProfiles','return '+condition[1]);
+ assert.equal(show('pro-pastor',[]),false);
+ assert.equal(show('pro-pastor',[{}]),true);
+ for(const page of ['bialtu-pastor','kohhran-upa','missionary'])assert.equal(show(page,[]),true);
+});
