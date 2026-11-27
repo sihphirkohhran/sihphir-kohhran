@@ -264,7 +264,7 @@ const organizationJsonLd = JSON.stringify({
     </div>
   </footer>
 
-  <div id="lightbox" role="dialog" aria-label="Image viewer" aria-modal="true">
+  <div id="lightbox" hidden role="dialog" aria-label="Image viewer" aria-modal="true">
     <button type="button" id="lightbox-prev" class="lightbox-nav lightbox-nav-prev" aria-label="Previous image">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
     </button>
@@ -421,17 +421,23 @@ const organizationJsonLd = JSON.stringify({
       if (!slides.length) return;
       const lb = document.getElementById('lightbox');
       showSlide(startIndex);
-      lb?.classList.add('open');
+      if (!lb) return;
+      lb.hidden = false;
+      lb.classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeLightbox() {
-      document.getElementById('lightbox')?.classList.remove('open');
+      const lb = document.getElementById('lightbox');
+      if (lb) {
+        lb.hidden = true;
+        lb.classList.remove('open');
+      }
       document.body.style.overflow = '';
     }
 
     function stepLightbox(delta: number) {
-      if (slides.length <= 1) return;
+      if (document.getElementById('lightbox')?.hidden !== false || slides.length <= 1) return;
       showSlide(currentIndex + delta);
     }
 
