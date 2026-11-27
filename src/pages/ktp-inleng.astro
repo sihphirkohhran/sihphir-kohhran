@@ -1,0 +1,52 @@
+---
+import {getCollection,getEntry} from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import {buildIssues,months} from '../lib/ktp-inleng';
+const registry=await getEntry('settings','document-categories');
+const issues=buildIssues(await getCollection('documents'),registry?.data.categories.find(c=>c.id==='ktp-inleng')?.name);
+const latest=issues.find(i=>i.url&&i.key);
+const years=[...new Set(issues.flatMap(i=>i.year?[i.year]:[]))].sort((a,b)=>b-a);
+const availableMonths=[...new Set(issues.flatMap(i=>i.month?[i.month]:[]))].sort((a,b)=>a-b);
+---
+<BaseLayout title="KTP Inleng — Sihphir Presbyterian Kohhran" activePage="document">
+ <PageHero title="KTP Inleng" subtitle="Weekly publication · Read and explore past issues"/>
+ <main class="inleng max-w-6xl mx-auto px-4 py-8">
+ {latest&&<section class="latest" aria-labelledby="latest-heading">
+ <div class="cover">{latest.cover?<img src={latest.cover} alt="" width="180" height="240"/>:<div class="cover-fallback" aria-hidden="true"><span>KTP</span><strong>Inleng</strong><small>Weekly publication</small></div>}</div>
+ <div><p class="eyebrow">Latest issue</p><h2 id="latest-heading">{latest.name}</h2><p>{latest.label}</p><a class="read" href={latest.url} target="_blank" rel="noopener noreferrer">Read PDF ↗</a></div>
+ </section>}
+ <section aria-labelledby="archive-heading"><h2 id="archive-heading">Issue Archive</h2>
+ {issues.length>0?<><div class="filters">
+ <label>Search issues<input id="issue-search" type="search" placeholder="Title or publication date"/></label>
+ <label>Year<select id="issue-year"><option value="all">All Years</option>{years.map(y=><option value={y}>{y}</option>)}</select></label>
+ <label>Month<select id="issue-month"><option value="all">All Months</option>{availableMonths.map(m=><option value={m}>{months[m-1]}</option>)}</select></label>
+ <label>Sort<select id="issue-sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option></select></label>
+ </div><p id="issue-count" role="status">{issues.length} issues</p>
+ <div id="issue-list">{issues.map(i=><article class="issue" data-issue data-search={i.search} data-year={i.year} data-month={i.month} data-key={i.key}>
+ <div><h3>{i.name}</h3><p>{i.label}</p></div>{i.url?<a class="read" href={i.url} target="_blank" rel="noopener noreferrer" aria-label={`Read PDF: ${i.name} (opens in new tab)`}>Read PDF ↗</a>:<span class="unavailable">PDF unavailable</span>}
+ </article>)}</div><p id="issue-empty" hidden>No issues match these filters.</p></>:<p>No published issues are available yet.</p>}
+ </section>
+ </main>
+</BaseLayout>
+<script>
+ import {matchesIssue} from '../lib/ktp-inleng';
+ const list=document.querySelector('#issue-list');
+ const search=document.querySelector<HTMLInputElement>('#issue-search');
+ const year=document.querySelector<HTMLSelectElement>('#issue-year');
+ const month=document.querySelector<HTMLSelectElement>('#issue-month');
+ const sort=document.querySelector<HTMLSelectElement>('#issue-sort');
+ const rows=Array.from(document.querySelectorAll<HTMLElement>('[data-issue]'));
+ function update(){
+ if(!list||!search||!year||!month||!sort)return;
+ let count=0;
+ const ordered=[...rows].sort((a,b)=>{const x=a.dataset.key||'',y=b.dataset.key||'';return !x&&y?1:x&&!y?-1:sort.value==='oldest'?x.localeCompare(y):y.localeCompare(x);});
+ for(const row of ordered){row.hidden=!matchesIssue({search:row.dataset.search||'',year:Number(row.dataset.year)||null,month:Number(row.dataset.month)||null},search.value,year.value,month.value);if(!row.hidden)count++;list.append(row);}
+ const status=document.querySelector('#issue-count');if(status)status.textContent=count+' '+(count===1?'issue':'issues');
+ const empty=document.querySelector<HTMLElement>('#issue-empty');if(empty)empty.hidden=count!==0;
+ }
+ search?.addEventListener('input',update);[year,month,sort].forEach(c=>c?.addEventListener('change',update));
+</script>
+<style>
+ .inleng{color:#172941}.inleng h2,.inleng h3{font-family:var(--font-display,inherit);font-weight:600}.inleng h2{font-size:1.55rem;margin:0 0 1rem}.latest{display:grid;grid-template-columns: minmax(100px,180px) 1fr;gap:24px;align-items:center;background:#fffdf8;border:1px solid #e1d6bd;border-radius:8px;padding:24px;margin-bottom:32px}.cover{aspect-ratio:3/4;position:relative}.cover img{width:100%;height:100%;object-fit:contain}.cover-fallback{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#172941;color:#e4c77e;border:5px double #b8953f;text-align:center}.cover-fallback strong{font-size:1.7rem;color:white}.cover-fallback small{font-size:.7rem}.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.1em;color:#806326}.read{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 16px;background:#172941;color:white;border-radius:5px;font-weight:600;text-decoration:none;white-space:nowrap}.latest .read{margin-top:16px}.filters{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:12px;margin-bottom:12px}.filters label{display:grid;gap:5px;font-size:.85rem;font-weight:600;min-width:0}.filters input,.filters select{width:100%;min-height:44px;border:1px solid #c9c3b5;border-radius:5px;background:white;padding:8px;font-size:16px}.issue{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 0;border-bottom:1px solid #e1d6bd}.issue h3{margin:0;font-size:1.05rem;overflow-wrap:anywhere}.issue p,#issue-count,.unavailable{color:#58616e;font-size:.9rem}.inleng [hidden]{display:none!important}.inleng :focus-visible{outline:2px solid #9b792f;outline-offset:3px}@media(max-width:640px){.filters{grid-template-columns:1fr 1fr}.filters label:first-child{grid-column:1/-1}.latest{padding:14px;gap:14px;grid-template-columns:100px 1fr}.latest h2{font-size:1.2rem}.issue .read{padding:8px 10px;font-size:.85rem}}
+</style>

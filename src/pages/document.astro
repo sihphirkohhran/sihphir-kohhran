@@ -139,6 +139,7 @@ const iconLabel = (ext: string) => ({ pdf: 'PDF', docx: 'DOCX', xlsx: 'XLSX', pp
   <PageHero title={page.hero_title} subtitle={page.hero_subtitle} image={page.hero_background_image} eyebrow={page.hero_caption} />
 
   <main class="documents-page max-w-6xl mx-auto px-4 py-8 sm:py-10" data-download-label={ui.download_button}>
+    <p class="mb-4"><a class="text-navy underline" href="/ktp-inleng/">KTP Inleng weekly publication archive →</a></p>
     {page.intro_text && <p class="page-intro reveal">{page.intro_text}</p>}
     <p id="document-unavailable" class="archive-unavailable" role="status" hidden>This document is not available in the Kohhran archive. Fellowship-owned documents are displayed on their respective <a href="/fellowship">Fellowship pages</a>.</p>
     <section class="document-toolbar reveal" aria-label="Document search and filters">
