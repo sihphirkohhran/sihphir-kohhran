@@ -90,7 +90,8 @@ test('all Notice Board tabs provide cascading, dynamically populated historical 
   assert.match(home,/record\.dataset\.recordId/);
   assert.match(home,/sort\(\(a,b\)=>\(b\.dataset\.weekStart/);
   assert.match(home,/isoDate\(record\.week_start\)/);
-  assert.match(home,/indianDate\(record\.week_start\)/);
+  assert.doesNotMatch(home,/indianDate\(record\.week_start\)/);
+  assert.match(home,/indian\(record.dataset.weekStart\|\|''\)\+' — '\+indian\(record.dataset.weekEnd\|\|''\)/);
   assert.match(home,/monthTitle\(record\.period\)/);
   assert.match(home,/noticeIsActive\(notice\)/);
   assert.match(home,/announcementEntries\.map\(notice=>/);
@@ -128,4 +129,16 @@ test('notice duty columns adapt and blank roles give details the full row',()=>{
   assert.ok(home.includes("hidden={!String(duty.role||'').trim()}"));
   assert.match(home,/@media\(max-width:600px\)[^\n]*label:last-child:nth-child\(3\)\{grid-column:1\/-1\}/);
   assert.match(home,/notice-period-controls\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(0,1.2fr\) minmax\(0,2fr\)/);
+});
+
+test('homepage boundaries apply only between visible major sections',()=>{
+  assert.match(home,/home-section-boundaries\{display:contents\}/);
+  assert.ok(home.includes('section:not([style*="display:none"])'));
+  assert.ok(home.includes('div:not([style*="display:none"]):has(> section)'));
+  assert.ok(home.includes('~ section:not([style*="display:none"])'));
+  assert.ok(home.includes('~ div:not([style*="display:none"]) > section'));
+  assert.ok(home.includes('border-top:1px solid rgba(184,149,63,.15)'));
+  assert.ok(home.includes('#highlights){border-bottom:0}'));
+  assert.match(home,/notice-programme-heading">\{day.day\}/);
+  assert.match(home,/notice-programme-period">\{monthTitle\(record.period\)\}/);
 });
