@@ -176,7 +176,7 @@ export function buildHomeDocumentSections(
       date: d.date,
     })),
     totalCount: ktpItems.length,
-    archiveLink: '/document#cat-ktp-inleng',
+    archiveLink: '/ktp-inleng/',
     latestSortKey: ktpItems[0]?.sortKey ?? '',
   };
 
