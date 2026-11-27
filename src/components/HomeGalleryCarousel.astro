@@ -7,14 +7,14 @@ const {albums}=Astro.props;
  <div class="gold-divider reveal"><h2>Gallery</h2></div>
  {albums.length ? (
  <div class="album-nav" role="group" aria-label="Gallery carousel navigation">
- <button type="button" data-album-prev aria-label="Previous albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
+ <button type="button" data-album-prev aria-label="Previous albums" disabled aria-hidden="true" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>
  <div class="album-track" data-album-track aria-label="Gallery albums">
  {albums.map(album=><a class="home-album" href={album.href} target={album.external?'_blank':undefined} rel={album.external?'noopener noreferrer':undefined}>
  <div class="album-cover"><img src={album.cover} alt="" loading="lazy" decoding="async" data-fallback={album.coverFallback} /></div>
  <div class="album-body"><h3>{album.title}</h3></div>
  </a>)}
  </div>
- <button type="button" data-album-next aria-label="Next albums" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+ <button type="button" data-album-next aria-label="Next albums" disabled aria-hidden="true" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
  </div>
  ) : <p class="text-center text-navy/65 py-6">No gallery albums are available yet.</p>}
  <div class="album-actions">
@@ -25,7 +25,7 @@ const {albums}=Astro.props;
  document.querySelectorAll<HTMLElement>('[data-home-albums]').forEach(root=>{
  const track=root.querySelector<HTMLElement>('[data-album-track]'),prev=root.querySelector<HTMLButtonElement>('[data-album-prev]'),next=root.querySelector<HTMLButtonElement>('[data-album-next]');
  if(!track||!prev||!next)return;
- const update=()=>{prev.disabled=track.scrollLeft<=2;next.disabled=track.scrollLeft>=Math.max(0,track.scrollWidth-track.clientWidth)-2;};
+ const update=()=>{prev.disabled=track.scrollLeft<=2;next.disabled=track.scrollLeft>=Math.max(0,track.scrollWidth-track.clientWidth)-2;for(const button of [prev,next]){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}};
  const move=(direction:number)=>{
  const card=track.querySelector<HTMLElement>('.home-album');if(!card)return;
  const gap=parseFloat(getComputedStyle(track).columnGap)||0;
@@ -36,7 +36,7 @@ const {albums}=Astro.props;
  track.scrollTo({left:target,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
  };
  prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
- track.addEventListener('scroll',update,{passive:true});const observer=new ResizeObserver(update);observer.observe(track);update();
+ track.addEventListener('scroll',update,{passive:true});if(typeof ResizeObserver!=="undefined"){const observer=new ResizeObserver(update);observer.observe(track);}window.addEventListener("resize",update);new MutationObserver(update).observe(track,{childList:true});update();
  root.querySelectorAll<HTMLImageElement>('img[data-fallback]').forEach(img=>{const fallback=()=>{if(img.dataset.fallback){const src=img.dataset.fallback;delete img.dataset.fallback;img.src=src;}else if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';};img.addEventListener('error',fallback);if(img.complete&&!img.naturalWidth&&img.currentSrc)fallback();});
  });
 </script>
@@ -57,14 +57,14 @@ const {albums}=Astro.props;
  .album-actions .album-link:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
  .album-nav{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px}
  @media(min-width:1140px){.album-nav{grid-template-columns:minmax(0,1fr);gap:0}.album-nav button{position:absolute;top:50%;transform:translateY(-50%)}.album-nav [data-album-prev]{right:calc(100% + 8px)}.album-nav [data-album-next]{left:calc(100% + 8px)}}
- .album-nav button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8}
- .album-nav button:disabled{opacity:.3;cursor:not-allowed}
- .album-nav button:hover:not(:disabled){background:#172941;color:white}
+ .album-nav button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8;transition:background-color .18s,border-color .18s}
+ .album-nav button:disabled{visibility:hidden;pointer-events:none}
+ .album-nav button:hover:not(:disabled){background:#172941;color:white;border-color:#172941}
  .album-nav button:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
  .album-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
  @media(max-width:900px){.home-album{flex-basis:calc((100% - 24px)/3)}}
  @media(max-width:720px){.home-album{flex-basis:calc((100% - 12px)/2)}}
  @media(max-width:600px){.home-album{flex-basis:43.5%;aspect-ratio:3/4}.album-nav{display:block}.album-nav button{display:none}.album-actions{justify-content:flex-end}.album-body{padding:10px 9px 12px}.album-body h3{font-size:.78rem;font-weight:600}}
  @media(max-width:340px){.home-album{flex-basis:44%}.album-body{padding:8px 7px 10px}.album-body h3{font-size:.75rem}}
- @media(prefers-reduced-motion:reduce){.home-album,.album-cover img,.album-body::before{transition:none}.home-album:hover,.home-album:hover .album-cover img{transform:none}}
+ @media(prefers-reduced-motion:reduce){.home-album,.album-cover img,.album-body::before,.album-nav button{transition:none}.home-album:hover,.home-album:hover .album-cover img{transform:none}}
 </style>
