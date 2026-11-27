@@ -6,7 +6,7 @@ const component=readFileSync('src/components/YouTubeGallery.astro','utf8');
 const homepage=readFileSync('src/pages/index.astro','utf8');
 
 test('homepage video heading matches neighbouring gold-divider and container conventions',()=>{
- assert.match(component,/home \? "max-w-2xl" : "max-w-6xl"/);
+ assert.match(component,/home \? "max-w-5xl" : "max-w-6xl"/);
  assert.match(component,/<div class="gold-divider"><h2>Kohhran Videos<\/h2><\/div>/);
  const heading=component.split('{home ? (')[1].split(') : (')[0];
  assert.doesNotMatch(heading,/WATCH &amp; LISTEN/);
@@ -31,10 +31,10 @@ test('responsive sizing, hidden scrollbar and focus affordances are scoped to ho
  assert.match(component,/\.yt-carousel::-webkit-scrollbar\{display:none\}/);
  assert.match(component,/scrollbar-width:none/);
  assert.match(component,/scroll-snap-type:x mandatory/);
- assert.match(component,/\.yt-home \.yt-carousel :global\(article\)\{flex-basis:calc\(\(100% - 36px\)\/4\)/);
+ assert.match(component,/\.yt-home \.yt-carousel :global\(article\)\{flex-basis:calc\(\(100% - 24px\)\/3\)/);
  assert.match(component,/@media\(max-width:900px\)/);
- assert.match(component,/@media\(max-width:720px\)/);
- assert.match(component,/@media\(max-width:600px\)/);
+ assert.match(component,/@media\(max-width:900px\)[^\n]*\.yt-home \.yt-carousel :global\(article\)\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
+ assert.match(component,/@media\(max-width:600px\)\{\.yt-home \.yt-home-nav\{display:none\}/);
  assert.match(component,/\.yt-home \.yt-carousel :global\(article\)\{flex-basis:78%\}/);
  assert.match(component,/-webkit-line-clamp:2/);
  assert.match(component,/aspect-ratio:16\/9/);
