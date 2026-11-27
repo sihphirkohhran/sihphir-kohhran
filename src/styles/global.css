@@ -523,7 +523,8 @@ body {
   align-items: center;
   justify-content: center;
 }
-#lightbox.open { display: flex; }
+#lightbox[hidden] { display: none !important; }
+#lightbox.open:not([hidden]) { display: flex; }
 .lightbox-content {
   max-width: 92vw;
   max-height: 88vh;
