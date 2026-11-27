@@ -1,0 +1,10 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHero from '../components/PageHero.astro';
+import YouTubeGallery from '../components/YouTubeGallery.astro';
+import general from '../content/settings/general.json';
+---
+<BaseLayout title="Kohhran Videos">
+ <PageHero title="Kohhran Videos" subtitle="Watch and listen to videos from our official YouTube channel"/>
+ <YouTubeGallery channel={general.youtube_url}/>
+</BaseLayout>
