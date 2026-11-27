@@ -1,0 +1,58 @@
+---
+interface Props {channel:string;home?:boolean}
+const {channel,home=false}=Astro.props;
+---
+<section class="yt-gallery bg-ivory py-8 px-4" data-youtube-gallery data-home={String(home)}>
+ <div class="max-w-6xl mx-auto">
+ <p class="yt-eyebrow">WATCH &amp; LISTEN</p>
+ <h2 class="font-display text-navy text-2xl font-bold">Kohhran Videos</h2>
+ <div class="yt-controls">
+ {home&&<><button type="button" data-prev aria-label="Previous videos">‹</button><button type="button" data-next aria-label="Next videos">›</button></>}
+ {home&&<a href="/videos/">View All Videos →</a>}
+ <a href={channel} target="_blank" rel="noopener noreferrer">Visit YouTube Channel ↗</a>
+ </div>
+ <p data-status role="status">Loading videos…</p>
+ <div class:list={['yt-list',home?'yt-carousel':'yt-grid']} data-list></div>
+ {!home&&<button type="button" data-more hidden>Load More</button>}
+ <noscript>Visit the official YouTube channel to watch videos.</noscript>
+ <dialog data-player aria-label="Video player"><button type="button" data-close autofocus aria-label="Close video">Close ×</button><div data-frame></div><a data-watch target="_blank" rel="noopener noreferrer">Open on YouTube ↗</a></dialog>
+ </div>
+</section>
+<script>
+ document.querySelectorAll<HTMLElement>('[data-youtube-gallery]').forEach(root=>{
+ const list=root.querySelector<HTMLElement>('[data-list]')!, status=root.querySelector<HTMLElement>('[data-status]')!, more=root.querySelector<HTMLButtonElement>('[data-more]'), dialog=root.querySelector<HTMLDialogElement>('[data-player]')!, frame=root.querySelector<HTMLElement>('[data-frame]')!, watch=root.querySelector<HTMLAnchorElement>('[data-watch]')!;
+ const home=root.dataset.home==='true';let page='',busy=false;let opener:HTMLButtonElement|null=null;const close=root.querySelector<HTMLButtonElement>('[data-close]')!;const cursors=new Set<string>();const seen=new Set<string>();
+ async function load(){
+ if(busy)return;busy=true;status.textContent='Loading videos…';if(more)more.disabled=true;
+ try{
+ const response=await fetch('/api/videos'+(page?'?page='+encodeURIComponent(page):''));if(!response.ok)throw Error();
+ const data=await response.json();const before=seen.size;cursors.add(page);
+ for(const video of (home?data.videos.slice(0,6):data.videos)){
+ if(!/^[A-Za-z0-9_-]{11}$/.test(video.id)||seen.has(video.id))continue;seen.add(video.id);
+ const card=document.createElement('article'), button=document.createElement('button'), image=document.createElement('img'), play=document.createElement('span'), title=document.createElement('h3');
+ button.type='button';button.className='yt-thumb';button.setAttribute('aria-label','Play '+video.title);
+ image.src='https://i.ytimg.com/vi/'+video.id+'/hqdefault.jpg';image.alt='';image.loading='lazy';image.onerror=()=>{image.hidden=true;};
+ play.className='yt-play';play.textContent='▶';button.append(image,play);title.textContent=video.title;
+ button.onclick=()=>{const url='https://www.youtube.com/watch?v='+video.id;if(!video.embeddable){window.open(url,'_blank','noopener,noreferrer');return;}const iframe=document.createElement('iframe');iframe.src='https://www.youtube-nocookie.com/embed/'+video.id+'?autoplay=1';iframe.title=video.title;iframe.allow='autoplay; encrypted-media; picture-in-picture';iframe.allowFullscreen=true;frame.replaceChildren(iframe);watch.href=url;opener=button;dialog.showModal();close.focus();};
+ card.append(button,title);
+ if(!home&&video.date){const date=document.createElement('p');const d=new Date(video.date);if(Number.isFinite(d.getTime())){date.textContent=d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});card.append(date);}}
+ list.append(card);
+ }
+ page=typeof data.nextPage==='string'&&!cursors.has(data.nextPage)?data.nextPage:'';if(more){more.hidden=!page;more.textContent='Load More';}status.textContent=seen.size===before?(page?'No additional public videos in this batch. Select Load More to continue.':seen.size?'All available videos loaded.':'No public videos available yet.'):'';if(home)status.textContent=seen.size?'':page?'More uploads may be available in the video gallery.':'No public videos available yet.';
+ }catch{status.textContent='Videos are temporarily unavailable. Please visit our YouTube channel.';if(more){more.hidden=false;more.textContent='Retry';}}finally{busy=false;if(more)more.disabled=false;}
+ }
+ more?.addEventListener('click',load);
+ root.querySelector('[data-prev]')?.addEventListener('click',()=>list.scrollBy({left:-list.clientWidth,behavior:'smooth'}));
+ root.querySelector('[data-next]')?.addEventListener('click',()=>list.scrollBy({left:list.clientWidth,behavior:'smooth'}));
+ close.addEventListener('click',()=>dialog.close());dialog.addEventListener('cancel',event=>{event.preventDefault();dialog.close();});dialog.addEventListener('close',()=>{frame.replaceChildren();opener?.focus();opener=null;});load();
+ });
+</script>
+<style>
+ .yt-eyebrow{color:#806326;letter-spacing:.12em;font-size:.75rem}.yt-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:12px 0;color:#172941}.yt-controls a{text-decoration:underline}.yt-controls button,[data-more],[data-close]{min-height:44px;padding:8px 16px;background:#172941;color:white;border-radius:5px}
+ .yt-list{gap:14px}.yt-carousel{display:flex;overflow-x:auto;scroll-snap-type:x mandatory}.yt-carousel :global(article){flex:0 0 calc((100% - 42px)/4);min-width:0;scroll-snap-align:start}.yt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+ .yt-list :global(.yt-thumb){position:relative;display:block;width:100%;aspect-ratio:16/9;background:#172941;border-radius:6px;overflow:hidden}.yt-list :global(img){width:100%;height:100%;object-fit:cover}.yt-list :global(.yt-play){position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#c90000;color:white;padding:8px 18px;border-radius:9px}.yt-list :global(h3){font-weight:600;color:#172941;margin:8px 0;overflow-wrap:anywhere}.yt-list :global(p){font-size:.85rem;color:#596474}
+ dialog{width:min(92vw,850px);padding:16px;background:#fffdf8;border-radius:8px;margin:auto}dialog::backdrop{background:#000b}[data-frame]{aspect-ratio:16/9;margin:10px 0}[data-frame] :global(iframe){width:100%;height:100%;border:0}
+ @media(max-width:900px){.yt-carousel :global(article){flex-basis:calc((100% - 28px)/3)}.yt-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+ @media(max-width:600px){.yt-carousel :global(article){flex-basis:75%}.yt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+ @media(max-width:360px){.yt-grid{grid-template-columns:1fr}}
+</style>
