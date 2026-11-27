@@ -34,7 +34,7 @@ test('responsive sizing, hidden scrollbar and focus affordances are scoped to ho
  assert.match(component,/\.yt-home \.yt-carousel :global\(article\)\{flex-basis:calc\(\(100% - 24px\)\/3\)/);
  assert.match(component,/@media\(max-width:900px\)/);
  assert.match(component,/@media\(max-width:900px\)[^\n]*\.yt-home \.yt-carousel :global\(article\)\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
- assert.match(component,/@media\(max-width:600px\)\{\.yt-home \.yt-home-nav\{display:none\}/);
+ assert.match(component,/@media\(max-width:600px\)\{\.yt-home \.yt-home-nav\{display:block\}\.yt-home-nav > button\{display:none\}/);
  assert.match(component,/\.yt-home \.yt-carousel :global\(article\)\{flex-basis:78%\}/);
  assert.match(component,/-webkit-line-clamp:2/);
  assert.match(component,/aspect-ratio:16\/9/);
@@ -46,14 +46,15 @@ test('carousel buttons follow scroll boundaries and remain disabled without over
  const match=component.match(/const updateNavigation=\(\)=>\{([\s\S]*?)\};/);
  assert.ok(match,'Navigation state updater must exist');
  const update=new Function('home','list','previous','next',match[1]);
- const previous={disabled:false},next={disabled:false},list={scrollLeft:0,scrollWidth:600,clientWidth:600};
+ const button=()=>({disabled:false,setAttribute(k,v){this[k]=v;}});const previous=button(),next=button(),list={scrollLeft:0,scrollWidth:600,clientWidth:600};
  update(true,list,previous,next);
  assert.equal(previous.disabled,true);
- assert.equal(next.disabled,true);
+ assert.equal(next.disabled,true);assert.equal(previous.tabIndex,-1);assert.equal(next['aria-hidden'],'true');
  list.scrollWidth=1000;
  update(true,list,previous,next);
  assert.equal(previous.disabled,true);
  assert.equal(next.disabled,false);
+ list.scrollLeft=4;update(true,list,previous,next);assert.equal(previous.disabled,true);
  list.scrollLeft=200;
  update(true,list,previous,next);
  assert.equal(previous.disabled,false);
@@ -93,12 +94,19 @@ test('homepage navigation follows cards and retains only the channel link',()=>{
  assert.ok(markup.indexOf('data-list')<markup.indexOf('class="yt-home-actions"'));
  assert.equal((markup.match(/data-prev/g)||[]).length,1);
  assert.equal((markup.match(/data-next/g)||[]).length,1);
- assert.match(row,/data-prev[\s\S]*data-next[\s\S]*class="yt-channel" href=\{channel\}/);
- assert.match(component,/\.yt-home-actions\{display:flex;align-items:center;justify-content:space-between/);
- assert.match(component,/\.yt-home \.yt-home-nav\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
+ assert.doesNotMatch(row,/data-prev|data-next/);assert.match(row,/class="yt-channel" href=\{channel\}/);assert.match(markup,/data-prev[\s\S]*data-list[\s\S]*data-next/);
+ assert.match(component,/\.yt-home-actions\{display:flex;align-items:center;justify-content:flex-end/);
+ assert.match(component,/\.yt-home \.yt-home-nav\{display:block\}\.yt-home-nav > button\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
  assert.match(component,/\.yt-home \[data-status\]:empty\{margin:0\}/);
  assert.match(component,/previous\?\.addEventListener\('click',\(\)=>list.scrollBy\(\{left:-list.clientWidth/);
  assert.match(component,/next\?\.addEventListener\('click',\(\)=>list.scrollBy\(\{left:list.clientWidth/);
  assert.match(component,/!home&&<button type="button" data-more hidden>Load More/);
  assert.match(readFileSync('src/pages/videos.astro','utf8'),/<YouTubeGallery channel=/);
+});
+
+test('hidden side controls retain their slots and are not keyboard targets',()=>{
+ assert.match(component,/disabled\{visibility:hidden!important;opacity:0!important;pointer-events:none\}/);
+ assert.match(component,/aria-hidden="true" tabindex="-1"/);
+ assert.match(component,/MutationObserver/);
+ assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px/);
 });
