@@ -1,6 +1,6 @@
 ---
 import {getCollection} from 'astro:content';import MinistrySection from '../../components/MinistrySection.astro';import {normalizeMinistryProfile} from '../../lib/ministry-profile';
-const dedicated=(await getCollection('proPastoral')).map(entry=>normalizeMinistryProfile(entry,'pro')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
+const dedicated=(await getCollection('pro-pastoral')).map(entry=>normalizeMinistryProfile(entry,'pro')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile));
 const legacy=(await getCollection('pastoral')).map(entry=>normalizeMinistryProfile(entry,'probationary')).filter((profile):profile is NonNullable<typeof profile>=>Boolean(profile)&&!dedicated.some(item=>item.id===profile?.id));
 const profiles=[...dedicated,...legacy];
 ---
