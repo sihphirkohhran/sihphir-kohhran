@@ -4,7 +4,7 @@ ordained_year: 1977
 record_status: "Former"
 designation: "Kohhran Upa"
 status: "Active"
-biography: ""
+biography: "<div>* Kum 1950 ah Sunday School zirtirtu ni in 4.8.1985 ah Diploma Cetificate hlan a ni.&nbsp;</div><div><br></div><div>\t</div><div>*Committee peng hrang hrangah OB nihna a chelh tawh.</div><div><br></div><div>* Bial Finance Comt. leh Standing Comt. member ah te a tang tawh.</div><div><br></div>"
 published: true
 display_order: 20
 date_of_birth_precision: "year_only"
