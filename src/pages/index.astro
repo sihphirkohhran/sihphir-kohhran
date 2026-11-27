@@ -407,7 +407,7 @@ const highlightItems = normalizeHighlights(
                   <div class="notice-programme-duties">
                     {(day.duties??[]).map(duty=>(
                       <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] notice-programme-row items-start font-body text-sm">
-                        <span class="notice-duty-label min-w-0 break-words">{duty.role||duty.title}</span>
+                        <span class="notice-duty-label min-w-0 break-words" hidden={!String(duty.role||duty.title||'').trim()}>{duty.role||duty.title}</span>
                         <div class="min-w-0 font-medium text-navy text-left break-words">{duty.name||duty.person_responsible}{duty.time && <div class="notice-duty-note">{duty.time}</div>}{duty.speaker && <div class="notice-duty-note">{duty.speaker}</div>}{duty.bible_text && <div class="notice-duty-note">{duty.bible_text}</div>}{duty.notes && <div class="notice-duty-note">{duty.notes}</div>}</div>
                       </div>
                     ))}
@@ -435,7 +435,7 @@ const highlightItems = normalizeHighlights(
                   <div class="notice-programme-duties">
                     {(section.duties??[]).map(duty=>(
                       <div class="grid grid-cols-[minmax(0,0.35fr)_minmax(0,0.65fr)] notice-programme-row items-start font-body text-sm text-navy">
-                        <span class="notice-duty-label min-w-0 break-words">{duty.role}</span>
+                        <span class="notice-duty-label min-w-0 break-words" hidden={!String(duty.role||'').trim()}>{duty.role}</span>
                         <span class="min-w-0 text-navy text-left break-words">{duty.name}</span>
                       </div>
                     ))}
@@ -556,11 +556,16 @@ const highlightItems = normalizeHighlights(
   #notice-board .notice-programme-section + .notice-programme-section{margin-top:14px}
   #notice-board .notice-programme-heading{font:600 1.05rem/1.35 "EB Garamond",serif;color:var(--navy);background:var(--cream);padding:8px 14px;border-left:2px solid var(--gold);border-bottom:1px solid rgba(15,31,61,.08);overflow-wrap:anywhere;margin:0}
   #notice-board .notice-programme-duties{padding:2px 14px}
-  #notice-board .notice-programme-row{gap:12px;padding:7px 0;line-height:1.5;overflow-wrap:anywhere}
+  #notice-board .notice-programme-row{grid-template-columns:minmax(0,35fr) minmax(0,65fr);gap:12px;padding:7px 0;line-height:1.5;overflow-wrap:anywhere}
+  #notice-board .notice-programme-row > *{min-width:0;overflow-wrap:anywhere}
+  #notice-board .notice-programme-row > .notice-duty-label[hidden]{display:none!important}
+  #notice-board .notice-programme-row > .notice-duty-label[hidden] + *{grid-column:1/-1}
   #notice-board .notice-programme-row + .notice-programme-row{border-top:1px solid rgba(15,31,61,.08)}
   #notice-board .notice-duty-note{font-size:.8rem;font-weight:400;white-space:pre-wrap;overflow-wrap:anywhere}
-  @media(max-width:360px){#notice-board .notice-programme-row{grid-template-columns:minmax(0,1fr);gap:2px}#notice-board .notice-programme-heading{padding:7px 10px}#notice-board .notice-programme-duties{padding:2px 10px}}
-  #notice-board .notice-period-controls{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 0 12px}
+  @media(max-width:600px){#notice-board .notice-programme-row{grid-template-columns:minmax(0,40fr) minmax(0,60fr);gap:10px}}
+  @media(max-width:390px){#notice-board .notice-programme-row{grid-template-columns:minmax(0,1fr);gap:2px}}
+  @media(max-width:360px){#notice-board .notice-programme-heading{padding:7px 10px}#notice-board .notice-programme-duties{padding:2px 10px}}
+  #notice-board .notice-period-controls{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr) minmax(0,2fr);gap:8px;margin:0 0 12px}
   #notice-board .notice-period-controls:not([data-notice-controls="weekly"]){grid-template-columns:repeat(2,minmax(0,1fr))}
   #notice-board .notice-period-controls label{display:grid;gap:5px;min-width:0;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;color:#172941}
   #notice-board .notice-period-controls select{box-sizing:border-box;min-width:0;width:100%;height:38px;padding:6px 9px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font:inherit;font-weight:500}
@@ -583,7 +588,8 @@ const highlightItems = normalizeHighlights(
   #notice-board .notice-accordion-show-more{display:block;margin:10px auto 14px;padding:9px 18px;border:1px solid rgba(23,41,65,.2);border-radius:6px;background:#fff;color:#172941;font-family:Poppins,sans-serif;font-size:12px;font-weight:600;cursor:pointer}
   @media(prefers-reduced-motion:reduce){#notice-board .notice-accordion-chevron{transition:none}}
   #notice-board .notice-period-empty{border:1px solid rgba(184,149,63,.2);border-radius:5px;background:#fff;padding:14px;color:#52627a;font-size:13px}
-  @media(max-width:480px){#notice-board .notice-period-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#notice-board .notice-period-controls label:last-child:nth-child(3){grid-column:1/-1}#notice-board .notice-period-record{min-width:0}#notice-board .notice-period-record .grid{gap:8px}}
+  @media(max-width:600px){#notice-board .notice-period-controls{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#notice-board .notice-period-controls label:last-child:nth-child(3){grid-column:1/-1}#notice-board .notice-period-record{min-width:0}}
+  @media(max-width:480px){#notice-board .notice-period-controls select[data-period="record"]{font-size:12px;padding-inline:8px}#notice-board .notice-programme-period{overflow-wrap:anywhere}}
 </style>
 
 <script>
