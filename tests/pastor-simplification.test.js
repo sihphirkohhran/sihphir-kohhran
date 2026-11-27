@@ -87,3 +87,19 @@ test('Pastor publication toggle saves Draft → Published and Published → Draf
   const unchangedPublished=run(true,true);
   assert.equal(unchangedPublished.published,true);
 });
+
+test('designation line is omitted only on Pastor and Pro Pastor archive cards',()=>{
+ const component=read('src/components/MinistrySection.astro');
+ const condition=component.match(/const showDesignation = ([^;]+);/);
+ assert.ok(condition);
+ const show=new Function('activePage','return '+condition[1]);
+ for(const page of ['bialtu-pastor','pro-pastor'])assert.equal(show(page),false);
+ for(const page of ['kohhran-upa','missionary','missionaries'])assert.equal(show(page),true);
+ for(const section of ['current-section','former-section']){
+  const markup=component.split('class="profile-section '+section+'"')[1].split('</section>')[0];
+  assert.match(markup,/<h3>\{profile.name\}<\/h3>\{showDesignation && <p>\{profile.designation\}<\/p>\}\{profile.period&&<span class="service-years">/);
+  assert.match(markup,/data-name=.*profile\.designation/);
+  assert.ok(markup.includes('profile.photo'));
+  assert.ok(markup.includes('ui.view_profile'));
+ }
+});
