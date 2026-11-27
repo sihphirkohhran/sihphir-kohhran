@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync,existsSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 import {transform} from 'esbuild';
+import {resolveFooter} from '../src/lib/footer-settings.js';
 const layout=readFileSync(new URL('../src/layouts/BaseLayout.astro',import.meta.url),'utf8');
 test('shared layout has no empty lightbox source and retains local image assets',()=>{
  assert.match(layout,/<div id="lightbox" hidden\b/);
@@ -10,7 +11,18 @@ test('shared layout has no empty lightbox source and retains local image assets'
  assert.match(css,/#lightbox\[hidden\]\s*\{\s*display:\s*none\s*!important;/);
  const image=layout.match(/<img id="lightbox-img"[^>]*>/)[0];
  assert.doesNotMatch(image,/\bsrc\s*=/);
- assert.doesNotMatch(layout.match(/<footer\b[\s\S]*?<\/footer>/)[0],/<img\b/);
+ const footer=layout.match(/<footer\b[\s\S]*?<\/footer>/)[0];
+ const images=footer.match(/<img\b[^>]*>/g)||[];
+ assert.equal(images.length,1);
+ assert.match(footer,/\{footer\.emblem\s*&&\s*<img\b/);
+ assert.match(images[0],/\bsrc=\{footer\.emblem\}/);
+ assert.match(images[0],/\balt="Presbyterian Church of India emblem"/);
+ assert.match(layout,/\.footer-emblem\{[^}]*object-fit:contain/);
+ for(const value of [undefined,'',' ','javascript:alert(1)','//evil.test/logo.png','http://example.org/logo.png']){
+   assert.equal(resolveFooter({footer:{emblem:value}}).emblem,'');
+ }
+ assert.equal(resolveFooter({}).emblem,'');
+ assert.equal(resolveFooter({footer:{emblem:'/images/emblem.png'}}).emblem,'/images/emblem.png');
  for(const path of ['pci-logo.png','images/profile-placeholder.svg'])assert.ok(existsSync(new URL('../public/'+path,import.meta.url)));
 });
 test('actual shared lightbox handlers reject empty sources and navigate valid slides',async()=>{
