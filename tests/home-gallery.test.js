@@ -41,10 +41,12 @@ test('homepage carousel retains CMS settings and responsive native navigation',(
  assert.match(component,/scroll-snap-type:x mandatory/);assert.match(component,/scrollbar-width:none/);
  assert.match(component,/aspect-ratio:4\/5/);assert.match(component,/View Full Gallery/);
  assert.match(component,/href=\{album.href\}/);assert.match(component,/target=\{album.external\?'_blank'/);
- const code=component.match(/const update=\(\)=>\{([^}]+)\}/)[1];
- const prev={},next={},track={scrollLeft:0,scrollWidth:900,clientWidth:300};
+ const code=component.split('const update=()=>{')[1].split('\n')[0].slice(0,-2);
+ const button=()=>({setAttribute(k,v){this[k]=v;}});const prev=button(),next=button(),track={scrollLeft:0,scrollWidth:900,clientWidth:300};
  const update=new Function('prev','next','track',code);
  update(prev,next,track);assert.equal(prev.disabled,true);assert.equal(next.disabled,false);
+ assert.equal(prev.tabIndex,-1);assert.equal(next.tabIndex,0);assert.equal(prev['aria-hidden'],'true');
+ track.scrollLeft=300;update(prev,next,track);assert.equal(prev.disabled,false);assert.equal(next.disabled,false);
  track.scrollLeft=600;update(prev,next,track);assert.equal(prev.disabled,false);assert.equal(next.disabled,true);
  track.scrollLeft=0;track.scrollWidth=300;update(prev,next,track);assert.equal(next.disabled,true);
  assert.match(component,/scrollTo/);assert.match(component,/ResizeObserver/);
@@ -64,7 +66,7 @@ test('portrait editorial title-only cards and matching homepage action links',()
  assert.match(component,/-webkit-line-clamp:2;overflow:hidden;max-height:2.8em/);
  assert.match(component,/data-album-prev[\s\S]*data-album-track[\s\S]*data-album-next[\s\S]*<div class="album-actions">[\s\S]*class="album-link" href="\/gallery"/);
  assert.match(component,/\.album-nav button\{display:none\}\.album-actions\{justify-content:flex-end\}/);
- assert.match(video,/\.yt-home \.yt-home-nav\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
+ assert.match(video,/\.yt-home \.yt-home-nav\{display:block\}\.yt-home-nav > button\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
  for(const rule of ["font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none","color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35)","border-bottom-color:var(--navy)"]){
   assert.ok(component.includes(rule));assert.ok(video.includes(rule));
  }
@@ -124,4 +126,11 @@ test('compact mobile cards retain a third-card preview and readable titles',()=>
   assert.ok(peek>0&&peek<card);
   assert.ok(card*4/3<width*.78*6/5);
  }
+});
+
+test('hidden side controls retain their slots and are not keyboard targets',()=>{
+ assert.match(component,/disabled\{visibility:hidden;pointer-events:none\}/);
+ assert.match(component,/aria-hidden="true" tabindex="-1"/);
+ assert.match(component,/MutationObserver/);
+ assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px/);
 });
