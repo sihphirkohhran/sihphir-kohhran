@@ -21,7 +21,7 @@ import { buildHomeDocumentSections } from '../lib/documents';
 import { normalizeContact } from '../lib/contact';
 import { getPageSettings } from '../lib/page-settings';
 import { normalizeNotice, noticeIsActive, sortNotices } from '../lib/notices';
-import { isoDate, indianDate, monthKey, monthTitle } from '../lib/notice-periods.js';
+import { isoDate, monthKey, monthTitle } from '../lib/notice-periods.js';
 import { scheduleIsPublic } from '../lib/schedule-publication.js';
 import { getHomepageStatistics } from '../lib/statistics.js';
 
@@ -142,6 +142,7 @@ const highlightItems = normalizeHighlights(
 ---
 
 <BaseLayout activePage="home">
+  <div class="home-section-boundaries">
 
   <!-- ══════════════════════════════ HERO ══════════════════════════════ -->
   <section class="relative h-[62vw] min-h-[240px] max-h-[480px] overflow-hidden bg-navy" id="hero-section" style={visibility.hero === false ? 'display:none' : undefined}>
@@ -399,7 +400,6 @@ const highlightItems = normalizeHighlights(
         </div>
         {weeklyBrowse.map(record=>(
           <div class="notice-period-record" data-record-id={record.id} data-period={record.period.slice(0,7)} data-week-start={record.period} data-week-end={record.end} hidden>
-            <div class="notice-programme-period">{indianDate(record.week_start)} — {indianDate(record.week_end)}</div>
             <div class="notice-programme-board">
               {(record.days??[]).map((day,i)=>(
                 <section class="notice-programme-section">
@@ -543,9 +543,16 @@ const highlightItems = normalizeHighlights(
     </div>
   </section>
 
+  </div>
 </BaseLayout>
 
 <style>
+  .home-section-boundaries{display:contents}
+  /* Match Quick Links gold/15; place boundaries only before a subsequent visible section. */
+  .home-section-boundaries > :global(div > #quick-links),
+  .home-section-boundaries > :global(div > #highlights){border-bottom:0}
+  .home-section-boundaries > :global(:is(section:not([style*="display:none"]), div:not([style*="display:none"]):has(> section)) ~ section:not([style*="display:none"])),
+  .home-section-boundaries > :global(:is(section:not([style*="display:none"]), div:not([style*="display:none"]):has(> section)) ~ div:not([style*="display:none"]) > section){border-top:1px solid rgba(184,149,63,.15)}
   #notice-board .notice-board-tabs{display:flex;overflow-x:auto;border-bottom:1px solid rgba(15,31,61,.18);margin-bottom:12px;scrollbar-width:none}
   #notice-board .notice-tab{font-family:Poppins,sans-serif;font-size:.78rem;font-weight:600;letter-spacing:0;text-transform:none;flex:1 0 auto;padding:10px 12px;margin:0;border-bottom:2px solid transparent}
   #notice-board .notice-tab.active{color:var(--navy);border-bottom-color:var(--gold)}
