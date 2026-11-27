@@ -1,5 +1,5 @@
 ---
-name: Issua No 1
+name: Issue No 1
 year: 2026
 yearType: known
 month: 11
