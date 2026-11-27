@@ -37,7 +37,7 @@ test('homepage carousel retains CMS settings and responsive native navigation',(
  assert.match(component,/max-w-5xl mx-auto/);
  assert.match(component,/flex:0 0 calc\(\(100% - 36px\)\/4\)/);
  assert.match(component,/@media\(max-width:720px\)\{.home-album\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
- assert.match(component,/@media\(max-width:600px\)\{.home-album\{flex-basis:78%\}.album-nav\{display:none\}/);
+ assert.match(component,/@media\(max-width:600px\)\{\.home-album\{flex-basis:78%;aspect-ratio:5\/6\}\.album-nav\{display:block\}\.album-nav button\{display:none\}/);
  assert.match(component,/scroll-snap-type:x mandatory/);assert.match(component,/scrollbar-width:none/);
  assert.match(component,/aspect-ratio:4\/5/);assert.match(component,/View Full Gallery/);
  assert.match(component,/href=\{album.href\}/);assert.match(component,/target=\{album.external\?'_blank'/);
