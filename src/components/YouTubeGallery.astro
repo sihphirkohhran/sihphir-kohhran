@@ -3,7 +3,7 @@ interface Props {channel:string;home?:boolean}
 const {channel,home=false}=Astro.props;
 ---
 <section class:list={["yt-gallery bg-ivory py-8 px-4", home && "yt-home"]} data-youtube-gallery data-home={String(home)} aria-label={home ? "Kohhran Videos" : undefined}>
- <div class:list={["mx-auto", home ? "max-w-2xl" : "max-w-6xl"]}>
+ <div class:list={["mx-auto", home ? "max-w-5xl" : "max-w-6xl"]}>
  {home ? (
  <div class="yt-home-head">
   <div class="gold-divider"><h2>Kohhran Videos</h2></div>
@@ -92,7 +92,7 @@ const {channel,home=false}=Astro.props;
  .yt-nav-buttons button:hover:not(:disabled){background:var(--navy);color:#fff;border-color:var(--navy)}
  .yt-nav-buttons button:disabled{opacity:.3;cursor:not-allowed}
  .yt-home .yt-carousel{gap:12px;padding:4px 4px 7px;margin:-4px -4px -7px}
- .yt-home .yt-carousel :global(article){flex-basis:calc((100% - 36px)/4)}
+ .yt-home .yt-carousel :global(article){flex-basis:calc((100% - 24px)/3)}
  .yt-home .yt-carousel :global(.yt-home-card){display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:8px;background:white;box-shadow:0 2px 8px rgba(23,38,59,.05);transition:border-color .18s ease,box-shadow .18s ease}
  .yt-home .yt-carousel :global(.yt-home-card:hover){border-color:rgba(184,149,63,.48);box-shadow:0 4px 12px rgba(23,38,59,.09)}
  .yt-home .yt-carousel :global(.yt-home-card:focus-within){outline:2px solid var(--gold);outline-offset:2px}
@@ -113,9 +113,8 @@ const {channel,home=false}=Astro.props;
  dialog::backdrop{background:#000b}
  [data-frame]{aspect-ratio:16/9;margin:10px 0}
  [data-frame] :global(iframe){width:100%;height:100%;border:0}
- @media(max-width:900px){.yt-carousel :global(article){flex-basis:calc((100% - 28px)/3)}.yt-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:calc((100% - 24px)/3)}}
- @media(max-width:720px){.yt-home .yt-carousel :global(article){flex-basis:calc((100% - 12px)/2)}}
- @media(max-width:600px){.yt-carousel :global(article){flex-basis:75%}.yt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:78%}}
+ @media(max-width:900px){.yt-carousel :global(article){flex-basis:calc((100% - 28px)/3)}.yt-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:calc((100% - 12px)/2)}}
+ @media(max-width:600px){.yt-home .yt-home-nav{display:none}.yt-carousel :global(article){flex-basis:75%}.yt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.yt-home .yt-carousel :global(article){flex-basis:78%}}
  @media(max-width:360px){.yt-grid{grid-template-columns:1fr}.yt-home .yt-carousel :global(article){flex-basis:82%}.yt-home-actions{align-items:flex-start;flex-direction:column;gap:2px}}
  @media(prefers-reduced-motion:reduce){.yt-home .yt-carousel :global(.yt-home-card),.yt-nav-buttons button{transition:none}}
 </style>
