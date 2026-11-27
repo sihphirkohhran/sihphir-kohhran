@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {build} from 'esbuild';
 import {readFileSync} from 'node:fs';
 const result=await build({entryPoints:['src/lib/ktp-inleng.ts'],bundle:true,write:false,platform:'node',format:'esm'});
-const {buildIssues,matchesIssue,selectHomeIssue,selectLatestIssue}=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
+const {buildIssues,matchesIssue,selectHomeIssue,selectLatestIssue,isKtpInlengEntry,isKtpInlengCategory}=await import('data:text/javascript;base64,'+Buffer.from(result.outputFiles[0].text).toString('base64'));
 const entry=(id,data={})=>({id,data:{name:id,category:'KTP Inleng',published:true,pdf_url:'/documents/'+id+'.pdf',...data}});
 test('weekly archive uses dates, combined filters, ownership and selected source',()=>{
  const issues=buildIssues([entry('first',{date:'2026-11-01'}),entry('second',{date:'2026-11-08',owners:['ktp','kohhran']}),entry('older',{date:'2025-11-20'}),entry('oct',{date:'2026-10-31'}),entry('draft',{published:false}),entry('archived',{status:'archived'}),entry('other',{category:'Other'}),entry('private',{owners:['kpp']}),entry('unknown'),entry('external',{date:'2026-09-01',document_source:'external',pdf_external:'https://example.org/issue'}),entry('upload',{document_source:'upload',pdf_url:'',pdf_external:'https://example.org/old'}),entry('partial',{year:2024,month:11})]);
@@ -93,4 +93,34 @@ test('homepage component is conditional and responsive with direct actions',()=>
  assert.match(card,/@media\(max-width:360px\)/);
  assert.match(card,/@media\(min-width:640px\)/);
  assert.doesNotMatch(card,/<iframe/);
+});
+
+test('publication CMS save/parse round trip feeds public selection without exposing drafts',()=>{
+ const manager=readFileSync('public/admin/document-manager.js','utf8');
+ const codec=new Function(manager.slice(manager.indexOf('  const unquote ='),manager.indexOf('  const extension ='))+'return {parse,serialize};')();
+ const selected={data:{custom:'preserve'},files:[{url:'/documents/weekly.pdf',filename:'weekly.pdf',type:'application/pdf',size:123}]};
+ const FormData=class{constructor(form){this.form=form}get(key){return this.form[key]??null}};
+ const sync=new Function('selected','FormData','readDisplayLocations','return form=>{'+manager.split('const sync=form=>{')[1].split('const bindEditor=')[0])(selected,FormData,()=>['kohhran','ktp']);
+ for(const state of ['Draft','Published','Archived','Published']){
+  sync({name:'Weekly issue',yearType:'known',year:'2026',month:'11',date:'2026-11-22',category:'KTP Inleng',issue_status:state,document_source:'upload'});
+  const reopened=codec.parse(codec.serialize(selected.data,'Historical body'));
+  const record={id:'other/weekly.md',data:reopened.data};
+  assert.equal(isKtpInlengEntry(record),true);
+  assert.equal(reopened.data.custom,'preserve');
+  assert.equal(reopened.data.pdf_url,'/documents/weekly.pdf');
+  const issues=buildIssues([record]);
+  assert.equal(issues.length,state==='Published'?1:0);
+  assert.equal(selectHomeIssue(issues,{ktp_inleng:true})?.url,state==='Published'?'/documents/weekly.pdf':undefined);
+  assert.equal(selectHomeIssue(issues,{ktp_inleng:false}),undefined);
+  selected.data=reopened.data;
+ }
+});
+test('general Documents excludes publication categories and legacy paths, not unrelated records',()=>{
+ for(const category of ['KTP Inleng',' ktp-inleng ','KTP INLENG','Renamed weekly'])assert.equal(isKtpInlengCategory(category,'Renamed weekly'),true);
+ assert.equal(isKtpInlengEntry({id:'ktp-inleng/legacy.md',data:{}}),true);
+ assert.equal(isKtpInlengEntry(entry('other',{category:'Year Book'})),false);
+ const page=readFileSync('src/pages/document.astro','utf8');
+ assert.match(page,/filter\(entry=>!isKtpInlengEntry/);
+ assert.match(page,/href="\/ktp-inleng\/"/);
+ assert.match(readFileSync('src/pages/index.astro','utf8'),/filter\(section=>section.id!=='ktp-inleng'/);
 });
