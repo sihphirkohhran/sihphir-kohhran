@@ -49,7 +49,7 @@ test('Pro Pastor status and publication changes preserve legacy fields and biogr
 
 test('Pro Pastor dedicated and legacy sources retain duplicate resolution and Pastor isolation',()=>{
   for(const page of [route,index]){
-    assert.match(page,/getCollection\('proPastoral'\)/);
+    assert.match(page,/getCollection\('pro-pastoral'\)/);
     assert.match(page,/getCollection\('pastoral'\)/);
     assert.match(page,/normalizeMinistryProfile\(entry,'pro'\)/);
     assert.match(page,/normalizeMinistryProfile\(entry,'probationary'\)/);
@@ -73,3 +73,5 @@ test('Pro Pastor detail uses Pastor layout with explicit variant and responsive 
   assert.match(detail,/@media\(max-width:440px\)/);
   assert.doesNotMatch(route,/MinistryDetail/);
 });
+
+ test('collection key matches CMS directory',()=>{assert.match(read('src/content/config.ts'), /'pro-pastoral': proPastoral/);});
