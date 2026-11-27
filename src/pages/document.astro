@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection, getEntry } from 'astro:content';
 import { resolveDocumentUrl } from '../lib/documents-url';
+import { isKtpInlengEntry, isKtpInlengCategory } from '../lib/ktp-inleng';
 import { ownedBy } from '../lib/content-ownership';
 import { parseMonthFromDate, parseYearFromDate, parseYearMonthFromId } from '../lib/archive';
 import { formatHistoricalYear, historicalYearFilterValue, resolveHistoricalYearType } from '../lib/historical-year';
@@ -13,8 +14,10 @@ const ui=await getPageSettings('documents',{hero_caption:'Sihphir Presbyterian K
 const pageEntry=await getEntry('settings','document-page');
 const page={...ui,...(pageEntry?.data as Record<string,string>|undefined)};
 const categoryRegistry = await getEntry('settings', 'document-categories');
-const registeredCategories = categoryRegistry?.data.categories ?? [];
-const entries = ownedBy(await getCollection('documents'), 'kohhran');
+const allCategories = categoryRegistry?.data.categories ?? [];
+const inlengCategory = allCategories.find(c=>c.id==='ktp-inleng')?.name;
+const registeredCategories = allCategories.filter(c=>c.id!=='ktp-inleng'&&!isKtpInlengCategory(c.name,inlengCategory));
+const entries = ownedBy(await getCollection('documents'), 'kohhran').filter(entry=>!isKtpInlengEntry(entry,inlengCategory));
 
 const fileExtension = (value: string) => {
   const clean = value.split(/[?#]/)[0];
