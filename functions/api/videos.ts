@@ -8,7 +8,7 @@ export async function onRequestGet({request,env}:Context){
  const key=new Request(url.origin+'/api/videos?channel='+encodeURIComponent(channel)+'&page='+encodeURIComponent(token));
  const cache=(caches as unknown as {default:Cache}).default;
  const cached=await cache.match(key);
- if(cached&&Date.now()-Number(cached.headers.get('X-Fetched-At'))<3600000)return cached;
+ if(cached&&Date.now()-Number(cached.headers.get('X-Fetched-At'))<3600000)return new Response(cached.body,{headers:{'Content-Type':'application/json','Cache-Control':'public, max-age=300'}});
  try{
   if(!env.YOUTUBE_API_KEY||!channel)throw Error('Configuration unavailable');
   const result=await fetchVideos(env.YOUTUBE_API_KEY,channel,token);
