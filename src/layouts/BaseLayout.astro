@@ -237,7 +237,7 @@ const organizationJsonLd = JSON.stringify({
           <p class="mt-1">{footer.location}</p>
         </div>
         {footer.groups.map(group=><nav aria-label={group.heading||'Footer navigation'}><h2 class="footer-heading">{group.heading}</h2><ul>{group.links.map(link=><li><a href={link.url}>{link.label}</a></li>)}</ul></nav>)}
-        <div><h2 class="footer-heading">FOLLOW US</h2><div class="footer-socials">
+        <div><h2 class="footer-heading">SOCIAL MEDIA</h2><div class="footer-socials">
           {footer.socials.map(social=><a href={social.url} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
             <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor">
               {social.key==='facebook_url'?<path d="M14 21v-8h3l.5-3H14V8c0-1 .3-2 2-2h2V3h-3c-3 0-5 2-5 5v2H7v3h3v8z"/>:social.key==='instagram_url'?<g fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".7"/></g>:social.key==='youtube_url'?<g><rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z" fill="#172941"/></g>:<text x="12" y="17" text-anchor="middle" font-size="16">{social.icon}</text>}
