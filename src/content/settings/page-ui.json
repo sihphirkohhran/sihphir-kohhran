@@ -54,5 +54,19 @@
     "filter_label": " ",
     "results_label": " ",
     "back_button": "Back"
+  },
+  "probationary-pastors": {
+    "hero_caption": "",
+    "hero_title": "",
+    "hero_subtitle": " ",
+    "current_title": "",
+    "former_title": "Pro Pastor lo awm tawh te",
+    "search_placeholder": "",
+    "view_profile": "",
+    "empty_message": "",
+    "sort_label": "",
+    "filter_label": "",
+    "results_label": "",
+    "back_button": ""
   }
 }
