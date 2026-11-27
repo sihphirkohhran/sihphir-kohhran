@@ -113,6 +113,9 @@ test('unified programme and roster preserve dynamic sections, duties and legacy 
   for(const field of ['time','speaker','bible_text','notes']) assert.ok(home.includes('duty.'+field+' &&'));
   assert.match(home,/@media\(max-width:360px\)[^\n]*grid-template-columns:minmax\(0,1fr\)/);
   assert.match(home,/notice-board-tabs\{display:flex;overflow-x:auto/);
-  assert.match(home,/notice-programme-section \+ .notice-programme-section/);
+  assert.match(home,/notice-programme-section \+ .notice-programme-section\{margin-top:14px\}/);
+  assert.match(home,/notice-programme-section\{background:white;border:1px solid rgba\(15,31,61,\.14\);border-radius:8px;overflow:hidden;min-width:0\}/);
+  assert.match(home,/notice-programme-board\{min-width:0\}/);
+  assert.match(home,/notice-programme-heading\{[^}]*background:var\(--cream\)[^}]*border-left:2px solid var\(--gold\)/);
   for(const target of ['weekly','monthly','notices']) assert.ok(home.includes("'tab-"+target+"': '"+target+"'"));
 });
