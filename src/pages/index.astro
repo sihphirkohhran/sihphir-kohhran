@@ -15,7 +15,8 @@ import {
 } from '../lib/cms';
 import { normalizeHighlights } from '../lib/highlights';
 import { renderMarkdown } from '../lib/markdown';
-import { loadGalleryPhotos, pickHomeGalleryPhotos } from '../lib/gallery';
+import { selectHomeAlbums } from '../lib/home-gallery-albums';
+import HomeGalleryCarousel from '../components/HomeGalleryCarousel.astro';
 import { buildHomeDocumentSections } from '../lib/documents';
 import { normalizeContact } from '../lib/contact';
 import { getPageSettings } from '../lib/page-settings';
@@ -57,22 +58,7 @@ const positiveCount = (value: unknown, fallback: number) => {
   return Number.isFinite(count) && count > 0 ? Math.floor(count) : fallback;
 };
 
-const allGalleryPhotos = await loadGalleryPhotos();
-const galleryCount = Math.min(6, positiveCount(home.galleryCount, 6));
-const galleryCategory = String(home.galleryCategory ?? '').trim();
-const gallerySeen = new Set<string>();
-const gallerySource = allGalleryPhotos.filter((photo) => {
-  if (!photo.src || (galleryCategory && photo.category !== galleryCategory) || gallerySeen.has(photo.src)) return false;
-  gallerySeen.add(photo.src);
-  return true;
-});
-const galleryPhotos = home.galleryOrder === 'oldest'
-  ? [...gallerySource]
-      .sort((a, b) => a.sortKey.localeCompare(b.sortKey) || a.order - b.order)
-      .slice(0, galleryCount)
-  : gallerySource.length > 0
-    ? pickHomeGalleryPhotos(gallerySource, galleryCount)
-    : [];
+const galleryAlbums = selectHomeAlbums(await getCollection('gallery'), Math.min(6, positiveCount(home.galleryCount, 6)), String(home.galleryCategory ?? '').trim(), String(home.galleryOrder ?? ''));
 
 // Historical records remain server-rendered; the homepage filters eligible records in place.
 const weeklyRecords = (await getWeeklySchedules()).filter(record => scheduleIsPublic(record));
@@ -326,47 +312,7 @@ const highlightItems = normalizeHighlights(
   <!-- ══════════════════════════════ GALLERY ══════════════════════════════ -->
   {visibility.kohhran_videos === true && <YouTubeGallery home channel={generalEntry?.data.youtube_url || heroYoutubeUrl}/>}
   <section class="bg-ivory py-8 px-4" id="gallery" style={visibility.featured_gallery === false ? 'display:none' : undefined}>
-    <div class="max-w-2xl lg:max-w-5xl mx-auto">
-      <div class="gold-divider reveal">
-        <h2>Gallery</h2>
-      </div>
-      {galleryPhotos.length > 0 ? (
-        <div class="home-gallery-grid mb-4">
-          {galleryPhotos.map((photo, i) => (
-            <div class={`home-gallery-item reveal reveal-delay-${(i % 3) + 1}`}>
-              <button
-                type="button"
-                class="home-gallery-photo block w-full"
-                data-lightbox
-                data-lightbox-src={photo.src}
-                data-lightbox-caption={photo.caption}
-                data-lightbox-alt={photo.alt}
-                aria-label={`View ${photo.alt}`}
-              >
-                <img
-                  src={photo.src}
-                  alt={photo.alt}
-                  class="w-full h-full object-cover"
-                  loading="lazy"
-                  decoding="async"
-                  onerror="this.closest('.home-gallery-item')?.remove()"
-                />
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p class="mb-4 border border-gold/15 bg-cream px-4 py-6 text-center font-body text-sm text-navy/65">
-          No gallery photographs are available yet.
-        </p>
-      )}
-      <div class="flex justify-center">
-        <a href="/gallery"
-          class="reveal inline-flex items-center justify-center rounded bg-navy px-5 py-2.5 font-body text-xs font-semibold tracking-wide text-gold-pale transition-colors hover:bg-navy-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold">
-          View Full Gallery →
-        </a>
-      </div>
-    </div>
+    <HomeGalleryCarousel albums={galleryAlbums} />
   </section>
 
   <!-- ══════════════════════════════ DOCUMENTS ══════════════════════════════ -->
