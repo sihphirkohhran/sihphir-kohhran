@@ -62,8 +62,8 @@ test('portrait editorial title-only cards and matching homepage action links',()
  assert.match(component,/object-fit:cover/);
  assert.match(component,/\.album-body\{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px 14px;background:linear-gradient/);
  assert.match(component,/-webkit-line-clamp:2;overflow:hidden;max-height:2.8em/);
- assert.match(component,/<div class="album-actions">[\s\S]*data-album-prev[\s\S]*data-album-next[\s\S]*class="album-link" href="\/gallery"/);
- assert.match(component,/\.album-nav\{display:none\}\.album-actions\{justify-content:flex-end\}/);
+ assert.match(component,/data-album-prev[\s\S]*data-album-track[\s\S]*data-album-next[\s\S]*<div class="album-actions">[\s\S]*class="album-link" href="\/gallery"/);
+ assert.match(component,/\.album-nav button\{display:none\}\.album-actions\{justify-content:flex-end\}/);
  assert.match(video,/\.yt-home \.yt-home-nav\{display:none\}\.yt-home-actions\{justify-content:flex-end\}/);
  for(const rule of ["font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none","color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35)","border-bottom-color:var(--navy)"]){
   assert.ok(component.includes(rule));assert.ok(video.includes(rule));
@@ -103,4 +103,15 @@ test('arrow movement reaches a partially filled final group without skipping car
  assert.equal(track.scrollLeft,742);
  move(-1,track,()=>({columnGap:'12px'}),()=>({matches:true}));
  assert.equal(track.scrollLeft,0);
+});
+
+test('side navigation reserves space only when needed and keeps mobile track visible',()=>{
+ assert.match(component,/grid-template-columns:40px minmax\(0,1fr\) 40px;align-items:center;gap:8px/);
+ assert.match(component,/@media\(min-width:1140px\)[^\n]*grid-template-columns:minmax\(0,1fr\)[^\n]*right:calc\(100% \+ 8px\)[^\n]*left:calc\(100% \+ 8px\)/);
+ assert.match(component,/top:50%;transform:translateY\(-50%\)/);
+ assert.match(component,/@media\(max-width:600px\)[^\n]*aspect-ratio:5\/6[^\n]*\.album-nav button\{display:none\}/);
+ const actions=component.split('<div class="album-actions">')[1].split('</div>')[0];
+ assert.doesNotMatch(actions,/data-album-(prev|next)/);
+ assert.match(actions,/View Full Gallery/);
+ assert.match(component,/\.album-nav button:focus-visible/);
 });
