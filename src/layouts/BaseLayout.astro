@@ -57,7 +57,7 @@ const organizationJsonLd = JSON.stringify({
   '@type': 'Church',
   name: contact.churchName,
   url: canonicalUrl,
-  logo: socialImageUrl,
+  logo: absoluteSiteUrl('/android-chrome-512x512.png'),
   description,
   address: {
     '@type': 'PostalAddress',
@@ -92,7 +92,11 @@ const organizationJsonLd = JSON.stringify({
   <meta name="twitter:url" content={canonicalUrl} />
   <meta name="twitter:image" content={socialImageUrl} />
   <script type="application/ld+json" set:html={organizationJsonLd}></script>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 </head>
