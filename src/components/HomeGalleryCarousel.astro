@@ -28,22 +28,31 @@ const {albums}=Astro.props;
  const track=root.querySelector<HTMLElement>('[data-album-track]'),prev=root.querySelector<HTMLButtonElement>('[data-album-prev]'),next=root.querySelector<HTMLButtonElement>('[data-album-next]');
  if(!track||!prev||!next)return;
  const update=()=>{prev.disabled=track.scrollLeft<=2;next.disabled=track.scrollLeft>=Math.max(0,track.scrollWidth-track.clientWidth)-2;};
- const move=(direction:number)=>track.scrollBy({left:direction*track.clientWidth,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+ const move=(direction:number)=>{
+ const card=track.querySelector<HTMLElement>('.home-album');if(!card)return;
+ const gap=parseFloat(getComputedStyle(track).columnGap)||0;
+ const step=card.offsetWidth+gap;
+ const count=Math.max(1,Math.floor((track.clientWidth+gap-8+1)/step));
+ const max=Math.max(0,track.scrollWidth-track.clientWidth);
+ const target=Math.max(0,Math.min(max,track.scrollLeft+direction*count*step));
+ track.scrollTo({left:target,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+ };
  prev.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
  track.addEventListener('scroll',update,{passive:true});const observer=new ResizeObserver(update);observer.observe(track);update();
- root.querySelectorAll<HTMLImageElement>('img[data-fallback]').forEach(img=>{const fallback=()=>{if(img.dataset.fallback){const src=img.dataset.fallback;delete img.dataset.fallback;img.src=src;}else if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';};img.addEventListener('error',fallback);if(img.complete&&!img.naturalWidth)fallback();});
+ root.querySelectorAll<HTMLImageElement>('img[data-fallback]').forEach(img=>{const fallback=()=>{if(img.dataset.fallback){const src=img.dataset.fallback;delete img.dataset.fallback;img.src=src;}else if(!img.src.endsWith('/images/profile-placeholder.svg'))img.src='/images/profile-placeholder.svg';};img.addEventListener('error',fallback);if(img.complete&&!img.naturalWidth&&img.currentSrc)fallback();});
  });
 </script>
 <style>
- .album-track{display:flex;gap:12px;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:4px;margin:-4px}
+ .album-track{display:flex;gap:12px;min-width:0;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;padding:7px 4px 4px;margin:-7px -4px -4px}
  .album-track::-webkit-scrollbar{display:none}
- .home-album{flex:0 0 calc((100% - 24px)/3);min-width:0;position:relative;display:flex;flex-direction:column;aspect-ratio:4/5;scroll-snap-align:start;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:8px;background:#172941;color:white;text-decoration:none;transition:border-color .18s,box-shadow .18s}
- .home-album:hover{border-color:rgba(184,149,63,.48);box-shadow:0 4px 12px rgba(23,38,59,.09)}
+ .home-album{flex:0 0 calc((100% - 36px)/4);min-width:0;position:relative;display:flex;flex-direction:column;aspect-ratio:4/5;scroll-snap-align:start;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:8px;background:#172941;color:white;text-decoration:none;transition:border-color .28s,box-shadow .28s,transform .28s}
+ @media(hover:hover) and (pointer:fine){.home-album:hover{transform:translateY(-3px);border-color:rgba(184,149,63,.65);box-shadow:0 4px 12px rgba(23,38,59,.09)}.home-album:hover .album-cover img{transform:scale(1.04)}.home-album:hover .album-body::before{opacity:1}}
  .home-album:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
  .album-cover{position:absolute;inset:0;overflow:hidden;background:#172941}
- .album-cover img{width:100%;height:100%;object-fit:cover;object-position:50% 40%}
+ .album-cover img{width:100%;height:100%;object-fit:cover;object-position:50% 40%;transition:transform .28s}
  .album-body{position:absolute;inset:0;display:flex;align-items:flex-end;padding:16px 14px;background:linear-gradient(to top,rgba(15,31,61,.96) 0%,rgba(15,31,61,.85) 18%,rgba(15,31,61,.32) 40%,transparent 65%)}
- .album-body h3{color:white;font:700 1rem/1.4 Poppins,sans-serif;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:2.8em;margin:0}
+ .album-body::before{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(15,31,61,.25),transparent 55%);opacity:0;transition:opacity .28s;pointer-events:none}
+ .album-body h3{position:relative;color:white;font:700 1rem/1.4 Poppins,sans-serif;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;max-height:2.8em;margin:0}
  .album-actions{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px 16px;margin-top:12px}
  .album-actions .album-link{display:inline-flex;align-items:center;gap:7px;font-family:'Poppins',sans-serif;font-size:.71rem;font-weight:600;min-height:44px;text-decoration:none;color:var(--navy);border-bottom:1px solid rgba(15,31,61,.35);margin-left:auto}
  .album-actions .album-link:hover{border-bottom-color:var(--navy)}
@@ -54,7 +63,8 @@ const {albums}=Astro.props;
  .album-nav button:hover:not(:disabled){background:#172941;color:white}
  .album-nav button:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
  .album-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
- @media(max-width:900px){.home-album{flex-basis:calc((100% - 12px)/2)}}
+ @media(max-width:900px){.home-album{flex-basis:calc((100% - 24px)/3)}}
+ @media(max-width:720px){.home-album{flex-basis:calc((100% - 12px)/2)}}
  @media(max-width:600px){.home-album{flex-basis:78%}.album-nav{display:none}.album-actions{justify-content:flex-end}}
- @media(prefers-reduced-motion:reduce){.home-album{transition:none}}
+ @media(prefers-reduced-motion:reduce){.home-album,.album-cover img,.album-body::before{transition:none}.home-album:hover,.home-album:hover .album-cover img{transform:none}}
 </style>
