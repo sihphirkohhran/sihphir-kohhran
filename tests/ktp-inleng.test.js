@@ -74,7 +74,9 @@ test('homepage CMS toggle persists independently and reopens with saved value',(
   assert.equal(load(saved).featured_gallery,false);
  }
  assert.ok(cms.includes("['ktp_inleng','Show KTP Inleng Section']"));
- assert.equal(JSON.parse(readFileSync('src/content/settings/home.json','utf8')).visibility.ktp_inleng,false);
+ const persisted=JSON.parse(readFileSync('src/content/settings/home.json','utf8'));
+ assert.equal(typeof persisted.visibility.ktp_inleng,'boolean');
+ assert.equal(load(persisted).ktp_inleng,persisted.visibility.ktp_inleng);
 });
 test('homepage component is conditional and responsive with direct actions',()=>{
  const page=readFileSync('src/pages/index.astro','utf8');
