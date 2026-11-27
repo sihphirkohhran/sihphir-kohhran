@@ -1,59 +1,59 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-
-const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
-const home = read('../src/pages/index.astro');
-const gallery = read('../src/lib/gallery.ts');
-const css = read('../src/styles/global.css');
-const layout = read('../src/layouts/BaseLayout.astro');
-const fullGallery = read('../src/pages/gallery.astro');
-
-test('homepage gallery uses real CMS photos only and never duplicates image sources', () => {
-  assert.match(home, /Math\.min\(6, positiveCount\(home\.galleryCount, 6\)\)/);
-  assert.match(home, /const gallerySeen = new Set<string>\(\)/);
-  assert.match(home, /gallerySeen\.has\(photo\.src\)/);
-  assert.match(home, /gallerySource\.length > 0\s*\?\s*pickHomeGalleryPhotos\(gallerySource, galleryCount\)\s*:\s*\[\]/);
-  assert.match(home, /galleryPhotos\.length > 0/);
-  assert.doesNotMatch(home, /getFallbackGalleryPhotos/);
+import {readFileSync} from 'node:fs';
+import {build} from 'esbuild';
+import {contentEntryIdMatches,resolveContentDeepLink} from '../src/lib/content-deep-links.js';
+const read=p=>readFileSync(new URL('../'+p,import.meta.url),'utf8');
+const home=read('src/pages/index.astro'),component=read('src/components/HomeGalleryCarousel.astro'),gallery=read('src/pages/gallery.astro'),layout=read('src/layouts/BaseLayout.astro');
+const bundle=await build({entryPoints:['src/lib/home-gallery-albums.ts'],bundle:true,write:false,platform:'node',format:'esm'});
+const {selectHomeAlbums}=await import('data:text/javascript;base64,'+Buffer.from(bundle.outputFiles[0].text).toString('base64'));
+const entry=(i,data={})=>({id:'archive/album-'+i+'.md',data:{caption:'Album '+i,category:'Church',year:2000+i,photo:'/photo-'+i+'.jpg',...data}});
+test('six distinct eligible albums with stable recent and historical selection',()=>{
+ const entries=Array.from({length:12},(_,i)=>entry(i));
+ entries.push(entry(20,{published:false}),entry(21,{status:'archived'}),entry(22,{owners:['ktp']}),entry(11));
+ const selected=selectHomeAlbums(entries);
+ assert.equal(selected.length,6);assert.equal(new Set(selected.map(a=>a.id)).size,6);
+ assert.deepEqual(selected.slice(0,3).map(a=>a.year),[2011,2010,2009]);
+ assert.deepEqual(selectHomeAlbums([...entries].reverse()),selected);
+ assert.ok(selected.every(a=>a.year<=2011));
+ assert.equal(selectHomeAlbums([],6).length,0);
+ assert.equal(selectHomeAlbums([entry(1),entry(2)]).length,2);
+ assert.equal(selectHomeAlbums(entries,2).length,2);
+ assert.equal(selectHomeAlbums(entries,6,'missing').length,0);
+ assert.equal(selectHomeAlbums(entries,6,'','oldest')[0].year,2000);
+ assert.equal(selectHomeAlbums([entry(1,{owners:['ktp','kohhran']})]).length,1);
 });
-
-test('homepage gallery photos all open the shared lightbox with CMS captions and alt text', () => {
-  assert.match(gallery, /alt: photoAlt\.trim\(\) \|\| data\.caption/);
-  assert.match(gallery, /caption: photoCaption\.trim\(\) \|\| data\.caption/);
-  assert.match(gallery, /albumUrl: data\.album_url/);
-  assert.match(home, /data-lightbox-src=\{photo\.src\}/);
-  assert.match(home, /data-lightbox-caption=\{photo\.caption\}/);
-  assert.match(home, /data-lightbox-alt=\{photo\.alt\}/);
-  assert.match(home, /aria-label=\{\`View \$\{photo\.alt\}\`\}/);
-  assert.doesNotMatch(home, /href=\{photo\.albumUrl\}/);
-  assert.match(layout, /alt: string/);
-  assert.match(layout, /data-lightbox-alt/);
-  assert.match(layout, /lbImg\.alt = slide\.alt/);
-  assert.match(layout, /stepLightbox\(-1\)/);
-  assert.match(layout, /stepLightbox\(1\)/);
-  assert.match(layout, /touchstart/);
-  assert.match(layout, /e\.key === 'Escape'/);
+test('CMS cover precedence and existing external navigation rules',()=>{
+ const external='https://photos.google.com/share/example';
+ const [a]=selectHomeAlbums([entry(1,{photo:'/cover.jpg',photos:[{src:'/other.jpg'}],album_url:external})]);
+ assert.equal(a.cover,'/cover.jpg');assert.equal(a.coverFallback,'/other.jpg');assert.equal(a.external,false);
+ assert.equal(a.href,'/gallery?album=archive%2Falbum-1');
+ assert.ok(contentEntryIdMatches('archive/album-1.md',resolveContentDeepLink(new URL(a.href,'https://example.org').search,'album')));
+ const [b]=selectHomeAlbums([entry(2,{photo:'',photos:[{src:'/first.jpg'}],album_url:external})]);
+ assert.equal(b.cover,'/first.jpg');assert.equal(b.href,external);assert.equal(b.external,true);
+ assert.equal(selectHomeAlbums([entry(3,{photo:'',album_url:external})])[0].external,true);
+ assert.equal(selectHomeAlbums([entry(4,{album_url:'javascript:alert(1)'})])[0].external,false);
 });
-
-test('homepage gallery stays three columns on desktop and two columns at tablet and narrow mobile widths', () => {
-  assert.match(css, /\.home-gallery-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3, minmax\(0, 1fr\)\)/);
-  assert.match(css, /@media \(max-width: 767px\)\s*\{\s*\.home-gallery-grid\s*\{\s*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
-  assert.doesNotMatch(css, /@media \(max-width: 480px\)\s*\{\s*\.home-gallery-grid\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\)/);
-  assert.match(css, /aspect-ratio:\s*4 \/ 3/);
-  assert.match(css, /object-fit:\s*cover/);
-  assert.match(css, /border-radius:\s*5px/);
-  assert.match(css, /\.home-gallery-photo:focus-visible/);
-  assert.match(home, /loading="lazy"/);
-  assert.match(home, /decoding="async"/);
-  assert.match(home, /href="\/gallery"/);
-  assert.match(home, /View Full Gallery →/);
-  assert.match(home, /No gallery photographs are available yet/);
+test('homepage carousel retains CMS settings and responsive native navigation',()=>{
+ assert.match(home,/selectHomeAlbums\(await getCollection\('gallery'\), Math.min\(6, positiveCount\(home.galleryCount, 6\)\)/);
+ assert.match(home,/<HomeGalleryCarousel albums=\{galleryAlbums\}/);
+ assert.match(component,/max-w-5xl mx-auto/);
+ assert.match(component,/flex:0 0 calc\(\(100% - 24px\)\/3\)/);
+ assert.match(component,/@media\(max-width:900px\)\{.home-album\{flex-basis:calc\(\(100% - 12px\)\/2\)/);
+ assert.match(component,/@media\(max-width:600px\)\{.home-album\{flex-basis:78%\}.album-nav\{display:none\}/);
+ assert.match(component,/scroll-snap-type:x mandatory/);assert.match(component,/scrollbar-width:none/);
+ assert.match(component,/aspect-ratio:4\/3/);assert.match(component,/View Full Gallery/);
+ assert.match(component,/href=\{album.href\}/);assert.match(component,/target=\{album.external\?'_blank'/);
+ const code=component.match(/const update=\(\)=>\{([^}]+)\}/)[1];
+ const prev={},next={},track={scrollLeft:0,scrollWidth:900,clientWidth:300};
+ const update=new Function('prev','next','track',code);
+ update(prev,next,track);assert.equal(prev.disabled,true);assert.equal(next.disabled,false);
+ track.scrollLeft=600;update(prev,next,track);assert.equal(prev.disabled,false);assert.equal(next.disabled,true);
+ track.scrollLeft=0;track.scrollWidth=300;update(prev,next,track);assert.equal(next.disabled,true);
+ assert.match(component,/scrollBy/);assert.match(component,/ResizeObserver/);
 });
-
-test('full Gallery page retains album destinations and its own photo viewer', () => {
-  assert.match(fullGallery, /albumUrl: String\(data\.album_url \|\| ''\)\.trim\(\)/);
-  assert.match(fullGallery, /href=\{album\.albumUrl\}/);
-  assert.match(fullGallery, /data-photo/);
-  assert.match(fullGallery, /data-lightbox-previous|data-lightbox-next/);
+test('dedicated gallery direct links, browser history and existing lightbox remain intact',()=>{
+ assert.match(gallery,/contentEntryIdMatches/);assert.match(gallery,/addEventListener\('popstate'/);
+ assert.match(gallery,/history.back\(\)/);assert.match(gallery,/data-photo/);
+ assert.match(layout,/data-lightbox-alt/);assert.match(layout,/stepLightbox\(-1\)/);
 });
