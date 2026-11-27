@@ -25,7 +25,7 @@ const {albums}=Astro.props;
  document.querySelectorAll<HTMLElement>('[data-home-albums]').forEach(root=>{
  const track=root.querySelector<HTMLElement>('[data-album-track]'),prev=root.querySelector<HTMLButtonElement>('[data-album-prev]'),next=root.querySelector<HTMLButtonElement>('[data-album-next]');
  if(!track||!prev||!next)return;
- const update=()=>{prev.disabled=track.scrollLeft<=2;next.disabled=track.scrollLeft>=Math.max(0,track.scrollWidth-track.clientWidth)-2;for(const button of [prev,next]){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}};
+ const update=()=>{prev.disabled=track.scrollLeft<=8;next.disabled=track.scrollLeft>=Math.max(0,track.scrollWidth-track.clientWidth)-8;for(const button of [prev,next]){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}};
  const move=(direction:number)=>{
  const card=track.querySelector<HTMLElement>('.home-album');if(!card)return;
  const gap=parseFloat(getComputedStyle(track).columnGap)||0;
@@ -58,7 +58,7 @@ const {albums}=Astro.props;
  .album-nav{position:relative;display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:8px}
  @media(min-width:1140px){.album-nav{grid-template-columns:minmax(0,1fr);gap:0}.album-nav button{position:absolute;top:50%;transform:translateY(-50%)}.album-nav [data-album-prev]{right:calc(100% + 8px)}.album-nav [data-album-next]{left:calc(100% + 8px)}}
  .album-nav button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8;transition:background-color .18s,border-color .18s}
- .album-nav button:disabled{visibility:hidden;pointer-events:none}
+ .album-nav button:disabled{visibility:hidden!important;opacity:0!important;pointer-events:none}
  .album-nav button:hover:not(:disabled){background:#172941;color:white;border-color:#172941}
  .album-nav button:focus-visible{outline:2px solid #b8953f;outline-offset:2px}
  .album-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
