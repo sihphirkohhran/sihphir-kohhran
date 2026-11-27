@@ -38,7 +38,7 @@ const {channel,home=false}=Astro.props;
  document.querySelectorAll<HTMLElement>('[data-youtube-gallery]').forEach(root=>{
  const list=root.querySelector<HTMLElement>('[data-list]')!, status=root.querySelector<HTMLElement>('[data-status]')!, more=root.querySelector<HTMLButtonElement>('[data-more]'), dialog=root.querySelector<HTMLDialogElement>('[data-player]')!, frame=root.querySelector<HTMLElement>('[data-frame]')!, watch=root.querySelector<HTMLAnchorElement>('[data-watch]')!;
  const home=root.dataset.home==='true';const previous=root.querySelector<HTMLButtonElement>('[data-prev]');const next=root.querySelector<HTMLButtonElement>('[data-next]');
- const updateNavigation=()=>{if(!home)return;const max=Math.max(0,list.scrollWidth-list.clientWidth);const atStart=list.scrollLeft<=2;const atEnd=list.scrollLeft>=max-2; if(previous)previous.disabled=atStart;if(next)next.disabled=atEnd;for(const button of [previous,next]){if(button){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}}};
+ const updateNavigation=()=>{if(!home)return;const max=Math.max(0,list.scrollWidth-list.clientWidth);const atStart=list.scrollLeft<=8;const atEnd=list.scrollLeft>=max-8; if(previous)previous.disabled=atStart;if(next)next.disabled=atEnd;for(const button of [previous,next]){if(button){button.setAttribute("aria-hidden",String(button.disabled));button.tabIndex=button.disabled?-1:0;}}};
  list.addEventListener('scroll',updateNavigation,{passive:true});if(home&&typeof ResizeObserver!=='undefined'){const observer=new ResizeObserver(updateNavigation);observer.observe(list);root.addEventListener('astro:before-swap',()=>observer.disconnect(),{once:true});}else if(home)window.addEventListener('resize',updateNavigation);
  if(home){new MutationObserver(updateNavigation).observe(list,{childList:true});window.addEventListener('resize',updateNavigation);updateNavigation();}
  let page='',busy=false;let opener:HTMLButtonElement|null=null;const close=root.querySelector<HTMLButtonElement>('[data-close]')!;const cursors=new Set<string>();const seen=new Set<string>();
@@ -92,7 +92,7 @@ const {channel,home=false}=Astro.props;
  .yt-home-nav > button{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(15,31,61,.18);border-radius:50%;color:#172941;background:#fffdf8;transition:background-color .18s,border-color .18s}
  .yt-home-nav > button svg{width:16px;height:16px}
  .yt-home-nav > button:hover:not(:disabled){background:#172941;color:white;border-color:#172941}
- .yt-home-nav > button:disabled{visibility:hidden;pointer-events:none}
+ .yt-home-nav > button:disabled{visibility:hidden!important;opacity:0!important;pointer-events:none}
  .yt-home .yt-carousel{gap:12px;padding:4px 4px 7px;margin:-4px -4px -7px}
  .yt-home .yt-carousel :global(article){flex-basis:calc((100% - 24px)/3)}
  .yt-home .yt-carousel :global(.yt-home-card){display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(18,35,59,.1);border-radius:8px;background:white;box-shadow:0 2px 8px rgba(23,38,59,.05);transition:border-color .18s ease,box-shadow .18s ease}
