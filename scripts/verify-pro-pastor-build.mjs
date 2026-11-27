@@ -23,3 +23,19 @@ for(const [id,name] of records){
  assert.ok([...walk(detail)].some(n=>n.tagName==='h1'&&text(n).includes(name)),'Missing detail heading: '+name);
 }
 console.log('Verified all four published Pro Pastor archive cards and generated detail pages.');
+
+// Verify the section is omitted when the generated archive has no current profiles.
+const sections=[...walk(archive)].filter(n=>n.tagName==='section');
+const hasClass=(n,c)=>(attr(n,'class')||'').split(/\s+/).includes(c);
+const current=sections.filter(n=>hasClass(n,'current-section'));
+const former=sections.find(n=>hasClass(n,'former-section'));
+assert.ok(former,'Former archive must remain present');
+if(current.length){
+ assert.equal(current.length,1);
+ assert.ok([...walk(current[0])].some(n=>attr(n,'data-profile')!==undefined),'Current section must contain profiles');
+}else{
+ const siblings=former.parentNode.childNodes.filter(n=>n.tagName);
+ assert.ok(hasClass(siblings[siblings.indexOf(former)-1],'archive-toolbar'),'Former archive must directly follow toolbar');
+}
+assert.ok(!text(archive).includes('The former archive remains available below.'));
+console.log('Verified Pro Pastor Current section has no empty placeholder.');
