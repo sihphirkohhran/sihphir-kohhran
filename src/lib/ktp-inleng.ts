@@ -7,10 +7,16 @@ export function issueDate(value: unknown): string {
  const d=new Date(s+'T00:00:00Z');
  return Number.isFinite(d.getTime())&&d.toISOString().slice(0,10)===s?s:'';
 }
+export function isKtpInlengCategory(category: unknown, categoryName='KTP Inleng') {
+ return [categoryName,'KTP Inleng','ktp-inleng'].some(c=>c.trim().toLowerCase()===String(category||'').trim().toLowerCase());
+}
+export function isKtpInlengEntry(entry: {id:string;data:{category?:string}}, categoryName='KTP Inleng') {
+ return isKtpInlengCategory(entry.data.category,categoryName)||(!entry.data.category&&entry.id.startsWith('ktp-inleng/'));
+}
 export function buildIssues(entries: any[], categoryName='KTP Inleng') {
  const visible=new Set([...ownedBy(entries,'kohhran'),...ownedBy(entries,'ktp')]);
  return [...visible].filter(({id,data})=>data.status!=='draft'&&!data.archived&&(
- [categoryName,'ktp-inleng'].some(c=>c.toLowerCase()===String(data.category||'').trim().toLowerCase())||(!data.category&&id.startsWith('ktp-inleng/'))
+ isKtpInlengEntry({id,data},categoryName)
  )).map(({id,data})=>{
  const date=issueDate(data.date);
  const year=date?Number(date.slice(0,4)):data.yearType==='unspecified'?null:Number.isInteger(data.year)&&data.year>0&&data.year<=9999?data.year:null;
